@@ -1,0 +1,330 @@
+import http from 'node:http'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { seedState } from './seed.mjs'
+import { conferenceSystemPrompt, traitsSystemPrompt } from './prompts.mjs'
+import { fallbackConference, fallbackTraits, isBegging } from './fallback.mjs'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DATA_FILE = path.join(__dirname, 'data.json')
+const ENV_FILE = path.join(__dirname, '..', '.env')
+
+// --- tiny .env loader (no deps) ---
+function loadEnv() {
+  try {
+    const txt = fs.readFileSync(ENV_FILE, 'utf8')
+    for (const line of txt.split('\n')) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+    }
+  } catch {}
+}
+loadEnv()
+
+const API_KEY = process.env.ANTHROPIC_API_KEY || ''
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5'
+const PORT = Number(process.env.PORT || 8787)
+const HAS_KEY = API_KEY.trim().length > 0
+const COIN_CAP = 150
+
+// --- state ---
+let state
+function load() {
+  try { state = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')) }
+  catch { state = seedState(); save() }
+}
+function save() { fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2)) }
+load()
+
+const QUICK_PROMPTS = [
+  'If you could add one new rule to your school, what would it be and why?',
+  'Should kids be allowed to have phones at school? Take a side.',
+  'Convince a friend to read your favorite book.',
+  'What is the best season of the year? Make your case.',
+  'Should homework be optional? Argue your opinion.',
+  'Is it better to be a leader or a helper? Why?',
+]
+// Poorly-written responses students revise. Not the student's own work → no
+// integrity issue; pure revision practice, framed as helping a robot writer.
+const PEER_TASKS = [
+  { id: 'pr_rex', author: 'Rex the Robot 🤖', genre: 'argument', type: 'Revision Challenge',
+    prompt: "Rex tried to write an argument about recess but it's weak! Revise Rex's response: add real reasons, fix the repetition, and make the words stronger.",
+    weakText: 'Recess should be longer. Recess is fun. I like recess. Recess is good. Everyone likes recess. So recess should be longer because it is fun.' },
+  { id: 'pr_nova', author: 'Nova the Robot 🤖', genre: 'narrative', type: 'Revision Challenge',
+    prompt: "Nova's story is super plain. Revise it to add details, feelings, and vivid words so we can picture it.",
+    weakText: 'The dog ran. It was a good dog. The dog was happy. Then the dog ate. It was a fun day. The end.' },
+  { id: 'pr_byte', author: 'Byte the Robot 🤖', genre: 'informational', type: 'Revision Challenge',
+    prompt: "Byte's explanation is too bare. Revise it to explain clearly with real details and examples.",
+    weakText: 'Deserts are hot. People live there. It is dry. They get water. Deserts are cool. That is about deserts.' },
+]
+const ME = 'stu_kscott'
+const now = () => new Date().toISOString()
+const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
+const findSub = (id) => state.submissions.find((s) => s.id === id)
+const findAsg = (id) => state.assignments.find((a) => a.id === id)
+const findStu = (id) => state.students.find((s) => s.id === id)
+const findDraft = (id) => {
+  for (const sub of state.submissions) { const d = sub.drafts.find((x) => x.id === id); if (d) return { sub, draft: d } }
+  return null
+}
+const words = (t) => (t || '').trim().split(/\s+/).filter(Boolean)
+
+// --- Claude call ---
+async function callClaude({ system, messages, maxTokens = 500 }) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages }),
+  })
+  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  return (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim()
+}
+
+// --- conference ---
+async function runConference(sub, draft, message) {
+  const asg = findAsg(sub.assignmentId)
+  const redirect = isBegging(message || '')
+  if (!HAS_KEY) return { ...fallbackConference({ history: draft.conference, message, draft: draft.content }), redirect }
+  const system = conferenceSystemPrompt({ gradeLevel: asg.gradeLevel, genre: asg.genre, prompt: asg.prompt })
+    + `\n\nCURRENT DRAFT (do NOT rewrite it):\n"""\n${draft.content || '(empty so far)'}\n"""`
+  const messages = [{ role: 'user', content: "Here's my draft so far. Can we talk about it?" }]
+  for (const m of draft.conference) messages.push({ role: m.role, content: m.text })
+  if (message) messages.push({ role: 'user', content: message })
+  const text = await callClaude({ system, messages, maxTokens: 350 })
+  return { text, source: 'claude', redirect }
+}
+
+async function runTraits(sub, draft) {
+  const asg = findAsg(sub.assignmentId)
+  if (!HAS_KEY) return fallbackTraits({ draft: draft.content })
+  const system = traitsSystemPrompt({ gradeLevel: asg.gradeLevel, genre: asg.genre, prompt: asg.prompt })
+  const messages = [{ role: 'user', content: `My draft:\n"""\n${draft.content}\n"""` }]
+  const raw = await callClaude({ system, messages, maxTokens: 900 })
+  try { return { ...JSON.parse(raw.replace(/```json?|```/g, '').trim()), source: 'claude' } }
+  catch { return { ...fallbackTraits({ draft: draft.content }), source: 'claude_parse_fallback' } }
+}
+
+// --- coin / milestone logic (reward the behavior, not the score) ---
+function traitSum(d) { return d?.traits?.traits ? d.traits.traits.reduce((a, t) => a + (t.level || 0), 0) : null }
+function meaningfulDiff(prev, cur) {
+  const pw = words(prev.content), cw = words(cur.content)
+  const added = Math.max(0, cw.length - pw.length)
+  const changed = Math.abs(cw.length - pw.length) / Math.max(1, pw.length)
+  return added >= 15 || changed >= 0.2 || cur.content.trim() !== prev.content.trim() && cw.length >= pw.length + 8
+}
+function evaluateMilestones(sub, prev, frozen) {
+  const spent = sub.milestones.reduce((a, m) => a + m.coins, 0)
+  let budget = COIN_CAP - spent
+  const out = []
+  const add = (type, label, coins) => {
+    if (budget <= 0) return
+    const c = Math.min(coins, budget); budget -= c
+    out.push({ id: uid('ms'), type, label, coins: c, ts: now() })
+  }
+  const already = new Set(sub.milestones.map((m) => m.type))
+  const diff = meaningfulDiff(prev, frozen)
+  if (diff && !already.has('first_revision')) add('first_revision', 'Revised after conferring', 25)
+  else if (diff) add('kept_revising', 'Kept revising', 10)
+  const ps = traitSum(prev), fs2 = traitSum(frozen)
+  if (ps != null && fs2 != null && fs2 > ps) add('trait_growth', `Traits grew +${fs2 - ps} across the rubric`, 15 * (fs2 - ps))
+  const heldPen = frozen.conference.some((m) => m.redirect)
+  if (diff && heldPen && !already.has('held_the_pen')) add('held_the_pen', 'Kept the pen when asked to be given the answer', 15)
+  return out
+}
+
+// --- HTTP ---
+function send(res, code, body) {
+  res.writeHead(code, { 'content-type': 'application/json', 'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS', 'access-control-allow-headers': 'content-type' })
+  res.end(JSON.stringify(body))
+}
+function readBody(req) {
+  return new Promise((resolve) => { let d = ''; req.on('data', (c) => (d += c)); req.on('end', () => { try { resolve(d ? JSON.parse(d) : {}) } catch { resolve({}) } }) })
+}
+
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') return send(res, 204, {})
+  const url = new URL(req.url, 'http://x')
+  const parts = url.pathname.split('/').filter(Boolean) // e.g. ['api','state']
+  try {
+    if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, hasKey: HAS_KEY, model: HAS_KEY ? MODEL : null })
+    if (req.method === 'GET' && url.pathname === '/api/state') return send(res, 200, state)
+
+    if (req.method === 'POST' && url.pathname === '/api/reset') { state = seedState(); save(); return send(res, 200, state) }
+
+    // PATCH /api/drafts/:id  { content }
+    if (req.method === 'PATCH' && parts[0] === 'api' && parts[1] === 'drafts' && parts[2]) {
+      const hit = findDraft(parts[2]); if (!hit) return send(res, 404, { error: 'no draft' })
+      const body = await readBody(req); hit.draft.content = body.content ?? hit.draft.content; save()
+      return send(res, 200, { ok: true })
+    }
+
+    // POST /api/drafts/:id/traits
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'drafts' && parts[2] && parts[3] === 'traits') {
+      const hit = findDraft(parts[2]); if (!hit) return send(res, 404, { error: 'no draft' })
+      const traits = await runTraits(hit.sub, hit.draft); hit.draft.traits = traits; save()
+      return send(res, 200, traits)
+    }
+
+    // POST /api/submissions/:id/conference  { message }
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'conference') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const draft = sub.drafts[sub.drafts.length - 1]
+      const body = await readBody(req)
+      const reply = await runConference(sub, draft, body.message || '')
+      if (body.message) draft.conference.push({ role: 'user', text: body.message, ts: now() })
+      draft.conference.push({ role: 'assistant', text: reply.text, ts: now(), source: reply.source, redirect: reply.redirect })
+      save()
+      return send(res, 200, reply)
+    }
+
+    // POST /api/submissions/:id/save-revision  -> freeze current draft, open next, award coins
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'save-revision') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const frozen = sub.drafts[sub.drafts.length - 1]
+      const prev = sub.drafts[sub.drafts.length - 2]
+      let newMilestones = []
+      if (prev) {
+        newMilestones = evaluateMilestones(sub, prev, frozen)
+        sub.milestones.push(...newMilestones)
+        for (const m of newMilestones) {
+          state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins: m.coins, ts: m.ts })
+          const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
+        }
+      }
+      const next = { id: uid('drf'), n: frozen.n + 1, content: frozen.content, createdAt: now(), conference: [], traits: null }
+      sub.drafts.push(next); save()
+      return send(res, 200, { newDraft: next, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
+    }
+
+    // POST /api/peerrevision -> spin up a revision challenge (weak draft pre-loaded)
+    if (req.method === 'POST' && url.pathname === '/api/peerrevision') {
+      const done = state.submissions.filter((s) => s.isPeerRevision).length
+      const task = PEER_TASKS[done % PEER_TASKS.length]
+      const asg = { id: uid('asg'), title: `Revision Challenge: help ${task.author}`, genre: task.genre, type: task.type,
+        format: null, isPeerRevision: true, gradeLevel: 6, teacher: { name: task.author, initials: '🤖' },
+        dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'revision', prompt: task.prompt, originalText: task.weakText }
+      const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
+        drafts: [
+          { id: uid('drf'), n: 1, content: task.weakText, createdAt: now(), conference: [], traits: null, isOriginal: true },
+          { id: uid('drf'), n: 2, content: task.weakText, createdAt: now(), conference: [], traits: null },
+        ], milestones: [] }
+      state.assignments.push(asg); state.submissions.push(sub); save()
+      return send(res, 200, { submissionId: sub.id })
+    }
+
+    // POST /api/share { submissionId } -> publish a finished piece to the Share Wall
+    if (req.method === 'POST' && url.pathname === '/api/share') {
+      const body = await readBody(req)
+      const sub = findSub(body.submissionId)
+      if (!sub) return send(res, 404, { error: 'no submission' })
+      if (state.shareWall.some((e) => e.submissionId === sub.id)) return send(res, 200, { already: true })
+      const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId)
+      const draft = sub.drafts[sub.drafts.length - 1]
+      const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar,
+        title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), kudos: 0 }
+      state.shareWall.unshift(entry); save()
+      return send(res, 200, entry)
+    }
+
+    // POST /api/share/:id/kudos
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'share' && parts[2] && parts[3] === 'kudos') {
+      const e = state.shareWall.find((x) => x.id === parts[2])
+      if (!e) return send(res, 404, { error: 'no entry' })
+      e.kudos = (e.kudos || 0) + 1; save()
+      return send(res, 200, { kudos: e.kudos })
+    }
+
+    // POST /api/shoutout { studentId, text, from } -> teacher pins encouragement
+    if (req.method === 'POST' && url.pathname === '/api/shoutout') {
+      const body = await readBody(req)
+      const stu = findStu(body.studentId)
+      if (!stu) return send(res, 404, { error: 'no student' })
+      stu.shoutOut = { from: body.from || 'Your teacher', initials: body.initials || 'T', text: (body.text || '').slice(0, 240), date: now().slice(0, 10) }
+      save()
+      return send(res, 200, stu.shoutOut)
+    }
+
+    // POST /api/goal { id, trait, text } -> set the student's focus goal
+    if (req.method === 'POST' && url.pathname === '/api/goal') {
+      const body = await readBody(req)
+      const stu = findStu(ME)
+      stu.goal = { id: body.id || uid('g'), trait: body.trait || null, text: (body.text || '').slice(0, 140), setOn: now() }
+      save()
+      return send(res, 200, stu.goal)
+    }
+
+    // POST /api/goal/achieve -> archive current goal, award coins
+    if (req.method === 'POST' && url.pathname === '/api/goal/achieve') {
+      const stu = findStu(ME)
+      if (!stu.goal) return send(res, 400, { error: 'no goal set' })
+      const coins = 30
+      stu.goalHistory = [...(stu.goalHistory || []), { ...stu.goal, achievedOn: now() }]
+      state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'goal_achieved', coins, ts: now() })
+      stu.coins += coins
+      stu.goal = null
+      save()
+      return send(res, 200, { coins })
+    }
+
+    // POST /api/submissions/start { assignmentId } -> create a submission if none exists
+    if (req.method === 'POST' && url.pathname === '/api/submissions/start') {
+      const body = await readBody(req)
+      const asg = findAsg(body.assignmentId)
+      if (!asg) return send(res, 404, { error: 'no assignment' })
+      let sub = state.submissions.find((s) => s.assignmentId === asg.id && s.studentId === ME)
+      if (!sub) {
+        sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null,
+          drafts: [{ id: uid('drf'), n: 1, content: '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+        state.submissions.push(sub); save()
+      }
+      return send(res, 200, { submissionId: sub.id })
+    }
+
+    // POST /api/quickwrite { mode: 'quick' | 'free' } -> spin up a fresh writing space
+    if (req.method === 'POST' && url.pathname === '/api/quickwrite') {
+      const body = await readBody(req)
+      const mode = body.mode === 'free' ? 'free' : 'quick'
+      const n = state.assignments.filter((a) => a.genre === mode).length + 1
+      const prompt = mode === 'free'
+        ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
+        : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)]
+      const asg = {
+        id: uid('asg'), title: mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`,
+        genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
+        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
+        scopeStage: 'sentence', prompt,
+      }
+      const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null,
+        drafts: [{ id: uid('drf'), n: 1, content: '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+      state.assignments.push(asg)
+      state.submissions.push(sub)
+      save()
+      return send(res, 200, { submissionId: sub.id })
+    }
+
+    // ---- static file serving (the built SPA) for any non-/api GET ----
+    if (req.method === 'GET' && !url.pathname.startsWith('/api')) {
+      const DIST = path.join(__dirname, '..', 'dist')
+      const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2' }
+      let rel = decodeURIComponent(url.pathname)
+      if (rel === '/' || !path.extname(rel)) rel = '/index.html' // SPA fallback
+      const file = path.join(DIST, rel)
+      if (file.startsWith(DIST) && fs.existsSync(file)) {
+        res.writeHead(200, { 'content-type': MIME[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' })
+        return res.end(fs.readFileSync(file))
+      }
+    }
+
+    return send(res, 404, { error: 'not found' })
+  } catch (e) {
+    console.error(e)
+    return send(res, 500, { error: String(e.message || e) })
+  }
+})
+
+server.listen(PORT, () => {
+  console.log(`LoneStar Studio API on :${PORT} — Claude ${HAS_KEY ? `LIVE (${MODEL})` : 'FALLBACK (no key; scripted conference)'}`)
+})
