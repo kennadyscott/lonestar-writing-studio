@@ -1,9 +1,12 @@
 const j = (r) => r.json()
 
-// In Vite dev (port 5173) requests are proxied via /api. When served as a
-// static production build (any other port), hit the API backend directly —
-// the backend sends Access-Control-Allow-Origin: *.
-const BASE = (typeof location !== 'undefined' && location.port === '5173') ? '' : 'http://localhost:8787'
+// Where the API lives, depending on how the app is served:
+//  - Vite dev (:5173)         -> '' (Vite proxies /api to the backend)
+//  - local static preview (:4200, python) -> the separate Node API on :8787
+//  - everything else (Node serving app+API on one port, or a deployed host / tunnel)
+//    -> same origin, relative
+const PORT = typeof location !== 'undefined' ? location.port : ''
+const BASE = PORT === '5173' ? '' : PORT === '4200' ? 'http://localhost:8787' : ''
 const u = (p) => BASE + p
 
 export const api = {
