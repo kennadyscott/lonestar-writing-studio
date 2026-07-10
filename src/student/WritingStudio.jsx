@@ -34,6 +34,7 @@ function CoinToast({ data, onClose }) {
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const isFree = asg.genre === 'free'
+  const published = !!sub.published
   const currentDraft = sub.drafts[sub.drafts.length - 1]
   const [selectedId, setSelectedId] = useState(currentDraft.id)
   const selected = sub.drafts.find((d) => d.id === selectedId) || currentDraft
@@ -42,6 +43,8 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const [tab, setTab] = useState('conference')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const [pub, setPub] = useState(null) // publish celebration
+  const [sharedNow, setSharedNow] = useState(false)
   const timer = useRef(null)
 
   // keep selection on the working draft as new versions appear
@@ -64,6 +67,22 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
     setSaving(false)
   }
 
+  // free write: publish the finished piece
+  async function publishWork() {
+    setSaving(true)
+    clearTimeout(timer.current)
+    await api.saveContent(currentDraft.id, content)
+    const r = await api.publish(sub.id)
+    setPub(r)
+    await onChange()
+    setSaving(false)
+  }
+  async function shareToWall() {
+    await api.share(sub.id)
+    setSharedNow(true)
+    onChange && onChange()
+  }
+
   // free write: save & close — finish or revise later from the Free Write chooser
   async function saveAndClose() {
     setSaving(true)
@@ -79,6 +98,30 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   return (
     <div>
       <CoinToast data={toast} onClose={() => setToast(null)} />
+
+      {pub && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }}>
+          <div className="card" style={{ padding: 30, width: 420, textAlign: 'center' }}>
+            <div style={{ fontSize: 48 }}>🌟</div>
+            <h2 style={{ margin: '4px 0' }}>Published!</h2>
+            <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14.5 }}>"{asg.title}" is a finished piece — drafted, revised, and done. That's real writing.</p>
+            {pub.coins > 0 && (
+              <div className="pill gold" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14, marginBottom: 12 }}>
+                🏅 Published a finished piece&nbsp;&nbsp;<span className="coin"><span className="disc" />+{pub.coins}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button className="btn" style={{ justifyContent: 'center', background: sharedNow ? 'var(--good)' : '#c2571f' }}
+                disabled={sharedNow} onClick={shareToWall}>
+                {sharedNow ? '✓ Shared to the Writing Wall!' : '💛 Share to the Writing Wall'}
+              </button>
+              <button className="btn ghost" style={{ justifyContent: 'center' }} onClick={() => { setPub(null); onBack && onBack() }}>
+                Back to my dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {onBack && <button className="backlink" onClick={onBack}>← Back to My Writing</button>}
 
@@ -114,26 +157,44 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         {/* editor */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <b style={{ fontSize: 15 }}>Draft {selected.n} {isCurrent ? '(working copy)' : ''}</b>
+            <b style={{ fontSize: 15 }}>
+              {published ? `🌟 ${asg.title} — Published` : isFree && isCurrent && selected.n > 1 ? `✏️ Revising Draft ${selected.n}` : `Draft ${selected.n} ${isCurrent ? '(working copy)' : ''}`}
+            </b>
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>{wc} words</span>
           </div>
-          {isCurrent ? (
+          {isCurrent && !published ? (
             <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder="Start writing your argument here…"
               style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           ) : (
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
           )}
-          {isCurrent && (
+          {isCurrent && published && (
+            <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'center' }}>
+              <span className="pill gold" style={{ padding: '8px 16px' }}>🌟 Published — find it anytime in your Writing Bank</span>
+            </div>
+          )}
+          {isCurrent && !published && (
             <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                 {isFree ? 'Autosaves as you type · completing a draft saves it to your Versions' : 'Autosaves as you type · saving a revision snapshots this version'}
               </span>
               {isFree ? (
-                <span style={{ display: 'inline-flex', gap: 8 }}>
+                <span style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>
                   <button className="btn ghost" disabled={saving} onClick={saveAndClose} title="Save and finish later">💾 Save Writing</button>
-                  <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>
-                    {saving ? 'Saving…' : `✅ ${currentDraft.n === 1 ? 'First Draft' : `Draft ${currentDraft.n}`} Complete`}
-                  </button>
+                  {currentDraft.n === 1 ? (
+                    <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>
+                      {saving ? 'Saving…' : '✅ First Draft Complete'}
+                    </button>
+                  ) : (
+                    <>
+                      <button className="btn ghost" disabled={saving || wc < 5} onClick={saveRevision} title="Snapshot this draft and keep revising">
+                        ✅ Draft {currentDraft.n} Complete
+                      </button>
+                      <button className="btn gold" disabled={saving || wc < 5} onClick={publishWork}>
+                        {saving ? 'Saving…' : '🌟 Publish Work'}
+                      </button>
+                    </>
+                  )}
                 </span>
               ) : (
                 <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>{saving ? 'Saving…' : '💾 Save this revision'}</button>

@@ -171,6 +171,27 @@ export const localApi = {
     sub.completedAt = now(); sub.phase = 'done'
     return { traits, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) }
   },
+  publish: async (subId) => {
+    const sub = findSub(subId); if (!sub) return { error: 'no submission' }
+    if (sub.published) return { coins: 0, already: true }
+    sub.published = true
+    sub.completedAt = sub.completedAt || now()
+    const coins = 15
+    const m = { id: uid('ms'), type: 'published_piece', label: 'Published a finished piece', coins, ts: now() }
+    sub.milestones.push(m)
+    state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins, ts: m.ts })
+    const stu = findStu(sub.studentId); if (stu) stu.coins += coins
+    return { coins }
+  },
+  discard: async (subId) => {
+    const sub = findSub(subId); if (!sub) return { error: 'no submission' }
+    const asg = findAsg(sub.assignmentId)
+    if (!asg || !['free', 'quick'].includes(asg.genre)) return { error: 'only self-started writing can be discarded' }
+    state.submissions = state.submissions.filter((x) => x.id !== sub.id)
+    state.assignments = state.assignments.filter((x) => x.id !== asg.id)
+    state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
+    return { ok: true }
+  },
   share: async (submissionId) => {
     const sub = findSub(submissionId); if (!sub) return { error: 'no submission' }
     if (state.shareWall.some((e) => e.submissionId === sub.id)) return { already: true }

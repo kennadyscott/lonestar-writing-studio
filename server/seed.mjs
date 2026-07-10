@@ -106,6 +106,20 @@ export function seedState() {
       ] },
   }
 
+  // ---- seeded free write: drafted, revised, published (Writing Bank demo) ----
+  const fwAsg = { id: 'asg_fw1', title: 'The Door in the Fog', genre: 'free', type: 'Free Write', format: null, questions: 1, gradeLevel: 6,
+    teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: '2026-07-06', dueDate: null, scopeStage: 'sentence',
+    prompt: 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory.' }
+  assignments.push(fwAsg)
+  const fwSub = { id: 'sub_kscott_fw1', studentId: 'stu_kscott', assignmentId: 'asg_fw1', completedAt: '2026-07-07T16:00:00.000Z', published: true,
+    drafts: [
+      { id: 'drf_fw1', n: 1, createdAt: '2026-07-06T15:00:00.000Z', conference: [], traits: null,
+        content: 'There was a door in the fog. I went in it. It was weird inside. There was a garden.' },
+      { id: 'drf_fw2', n: 2, createdAt: '2026-07-07T15:40:00.000Z', conference: [], traits: null,
+        content: 'The fog rolled in at exactly noon, and with it came the door. It stood alone in the middle of the soccer field, tall and green, with a brass handle shaped like a fox. I knew I should get a teacher. Instead, I turned the handle. On the other side was a garden where the flowers hummed — actually hummed — and a path of white stones led toward a light I could not explain. I stepped through, and the door clicked shut behind me.' },
+    ],
+    milestones: [{ id: 'ms_fw1', type: 'published_piece', label: 'Published a finished piece', coins: 15, ts: '2026-07-07T16:00:00.000Z' }] }
+
   const submissions = [
     { id: 'sub_kscott_recess', studentId: 'stu_kscott', assignmentId: 'asg_recess', drafts: [draft1, draft2], completedAt: null,
       milestones: [
@@ -115,6 +129,7 @@ export function seedState() {
       ] },
     { id: 'sub_kscott_kindness', studentId: 'stu_kscott', assignmentId: 'asg_kindness', drafts: [kDraft1, kDraft2], completedAt: '2026-06-24T13:30:00.000Z',
       milestones: [ { id: 'ms_k1', type: 'first_revision', label: 'Revised after conferring', coins: 25, ts: '2026-06-24T13:20:00.000Z' } ] },
+    fwSub,
   ]
 
   return {

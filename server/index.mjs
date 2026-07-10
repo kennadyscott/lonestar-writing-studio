@@ -312,6 +312,33 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { submissionId: sub.id })
     }
 
+    // POST /api/submissions/:id/publish -> finalize a self-started piece
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'publish') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      if (sub.published) return send(res, 200, { coins: 0, already: true })
+      sub.published = true
+      sub.completedAt = sub.completedAt || now()
+      const coins = 15
+      const m = { id: uid('ms'), type: 'published_piece', label: 'Published a finished piece', coins, ts: now() }
+      sub.milestones.push(m)
+      state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins, ts: m.ts })
+      const stu = findStu(sub.studentId); if (stu) stu.coins += coins
+      save()
+      return send(res, 200, { coins })
+    }
+
+    // POST /api/submissions/:id/discard -> delete a self-started piece
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'discard') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const asg = findAsg(sub.assignmentId)
+      if (!asg || !['free', 'quick'].includes(asg.genre)) return send(res, 400, { error: 'only self-started writing can be discarded' })
+      state.submissions = state.submissions.filter((x) => x.id !== sub.id)
+      state.assignments = state.assignments.filter((x) => x.id !== asg.id)
+      state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
+      save()
+      return send(res, 200, { ok: true })
+    }
+
     // POST /api/quickwrite { mode, title?, prompt?, content?, complete? }
     if (req.method === 'POST' && url.pathname === '/api/quickwrite') {
       const body = await readBody(req)
@@ -365,6 +392,33 @@ const server = http.createServer(async (req, res) => {
         state.submissions.push(sub); save()
       }
       return send(res, 200, { submissionId: sub.id })
+    }
+
+    // POST /api/submissions/:id/publish -> finalize a self-started piece
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'publish') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      if (sub.published) return send(res, 200, { coins: 0, already: true })
+      sub.published = true
+      sub.completedAt = sub.completedAt || now()
+      const coins = 15
+      const m = { id: uid('ms'), type: 'published_piece', label: 'Published a finished piece', coins, ts: now() }
+      sub.milestones.push(m)
+      state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins, ts: m.ts })
+      const stu = findStu(sub.studentId); if (stu) stu.coins += coins
+      save()
+      return send(res, 200, { coins })
+    }
+
+    // POST /api/submissions/:id/discard -> delete a self-started piece
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'discard') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const asg = findAsg(sub.assignmentId)
+      if (!asg || !['free', 'quick'].includes(asg.genre)) return send(res, 400, { error: 'only self-started writing can be discarded' })
+      state.submissions = state.submissions.filter((x) => x.id !== sub.id)
+      state.assignments = state.assignments.filter((x) => x.id !== asg.id)
+      state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
+      save()
+      return send(res, 200, { ok: true })
     }
 
     // POST /api/quickwrite { mode: 'quick' | 'free' } -> spin up a fresh writing space

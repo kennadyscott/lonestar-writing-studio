@@ -214,7 +214,7 @@ function GoalBanner({ me, onData }) {
 }
 
 /* ---- Free Write chooser: revise an unfinished story or start fresh ---- */
-function FreeWriteModal({ stories, onPick, onNew, onClose, busy }) {
+function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card" style={{ width: 500, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
@@ -245,6 +245,11 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, busy }) {
         <button className="btn" disabled={busy} onClick={onNew} style={{ width: '100%', justifyContent: 'center', padding: '11px 0' }}>
           ✨ Start new writing piece
         </button>
+        {onBank && (
+          <button onClick={onBank} style={{ width: '100%', marginTop: 10, color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>
+            🗂️ See everything in my Writing Bank →
+          </button>
+        )}
       </div>
     </div>
   )
@@ -404,7 +409,7 @@ function AssignmentsCard({ rows, busy, begin }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onChange }) {
+export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
@@ -461,7 +466,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
     <div>
       {game && <FluencyGame onClose={() => setGame(false)} />}
       {fwChooser && (
-        <FreeWriteModal stories={openStories} busy={busy}
+        <FreeWriteModal stories={openStories} busy={busy} onBank={() => { setFwChooser(false); onBank && onBank() }}
           onPick={(id) => { setFwChooser(false); onOpen(id) }}
           onNew={() => launch('free')}
           onClose={() => setFwChooser(false)} />
@@ -511,6 +516,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           <div className="card" style={{ padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <span style={{ fontSize: 17 }}>🖊️</span><b style={{ fontSize: 15 }}>Ways to Write</b>
+              <button onClick={onBank} style={{ marginLeft: 'auto', color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>🗂️ Writing Bank →</button>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
