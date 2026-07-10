@@ -74,41 +74,47 @@ function DataBar({ pct }) {
 
 function ScrPanel({ rows }) {
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
-      <div style={{ background: 'linear-gradient(120deg,#0a5b76,#035c78)', color: '#fff', padding: '10px 14px', fontWeight: 800, fontSize: 13.5 }}>
+    <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(120deg,#0a5b76,#035c78)', color: '#fff', padding: '8px 13px', fontWeight: 800, fontSize: 12.5 }}>
         SCR · Strategy Anchor Adherence
       </div>
-      <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((r) => (
-          <div key={r.k} title={`${r.k} = ${RACE_MEANING[r.k]}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--navy)', color: RACE_COLORS[r.k], display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 15 }}>{r.k}</span>
-            <span style={{ width: 42, fontSize: 12.5, fontWeight: 800, textAlign: 'right' }}>{r.pct}%</span>
+          <div key={r.k} title={`${r.k} = ${RACE_MEANING[r.k]}`} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 25, height: 25, borderRadius: 7, background: 'var(--navy)', color: RACE_COLORS[r.k], display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13 }}>{r.k}</span>
+            <span style={{ width: 38, fontSize: 12, fontWeight: 800, textAlign: 'right' }}>{r.pct}%</span>
             <DataBar pct={r.pct} />
-            <span style={{ width: 16, fontSize: 12, color: 'var(--muted)', fontWeight: 700, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
+            <span style={{ width: 14, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
           </div>
         ))}
-        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>R·A·C·E — Restate, Answer, Cite, Explain</div>
+        <div style={{ fontSize: 10.5, color: 'var(--muted)' }}>R·A·C·E — Restate, Answer, Cite, Explain</div>
       </div>
     </div>
   )
 }
 
-function EcrPanel({ title, rows }) {
-  const empty = rows.every((r) => r.pct === 0)
+function EcrCombined({ org, conv }) {
+  const section = (label, rows) => (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .5, textTransform: 'uppercase', color: 'var(--ecr)', margin: '2px 0 1px' }}>{label}</div>
+      {rows.map((r) => (
+        <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <span style={{ width: 122, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={r.label}>{r.label}</span>
+          <span style={{ width: 34, fontSize: 12, fontWeight: 800, textAlign: 'right', color: r.pct === 0 ? 'var(--muted)' : 'var(--ink)' }}>{r.pct}%</span>
+          <DataBar pct={r.pct} />
+        </div>
+      ))}
+    </>
+  )
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
-      <div style={{ background: 'linear-gradient(120deg,#14538c,#123b6d)', color: '#fff', padding: '10px 14px', fontWeight: 800, fontSize: 13.5 }}>
-        {title}
+    <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(120deg,#14538c,#123b6d)', color: '#fff', padding: '8px 13px', fontWeight: 800, fontSize: 12.5 }}>
+        ECR · Rubric Domains
       </div>
-      <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {rows.map((r) => (
-          <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 128, fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={r.label}>{r.label}</span>
-            <span style={{ width: 36, fontSize: 12.5, fontWeight: 800, textAlign: 'right', color: r.pct === 0 ? 'var(--muted)' : 'var(--ink)' }}>{r.pct}%</span>
-            <DataBar pct={r.pct} />
-          </div>
-        ))}
-        {empty && <div style={{ fontSize: 11, color: 'var(--muted)' }}>No extended responses assessed yet.</div>}
+      <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {section('Organization & Development', org)}
+        <div style={{ borderTop: '1px solid var(--line)', margin: '4px 0' }} />
+        {section('Conventions', conv)}
       </div>
     </div>
   )
@@ -123,52 +129,45 @@ function WritingDataCard({ writingData }) {
   const scrEmpty = d.scr.every((r) => r.pct === 0 && !r.n)
 
   const toggleStyle = (on) => ({
-    padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 800,
+    padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 800,
     background: on ? '#fff' : 'transparent', color: on ? 'var(--navy)' : 'var(--muted)',
     boxShadow: on ? 'var(--shadow)' : 'none',
   })
 
   return (
-    <div className="card" style={{ padding: 22, marginBottom: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <div>
-          <b style={{ fontSize: 17 }}>📊 My Writing Data</b>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>How your responses score against the rubric.</div>
-        </div>
-        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 10, padding: 3 }}>
+    <div className="card" style={{ padding: '16px 18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <b style={{ fontSize: 15 }}>📊 My Writing Data</b>
+        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
           {writingData.subjects.map((sub) => (
             <button key={sub} onClick={() => setSubject(sub)} style={toggleStyle(subject === sub)}>{sub}</button>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 12px' }}>
         {hasEcr ? (
-          <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 10, padding: 3 }}>
-            <button onClick={() => setFmt('SCR')} style={toggleStyle(view === 'SCR')}>SCR — Short Response</button>
-            <button onClick={() => setFmt('ECR')} style={toggleStyle(view === 'ECR')}>ECR — Extended Response</button>
+          <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
+            <button onClick={() => setFmt('SCR')} style={toggleStyle(view === 'SCR')}>SCR</button>
+            <button onClick={() => setFmt('ECR')} style={toggleStyle(view === 'ECR')}>ECR</button>
           </div>
         ) : (
-          <span className="pill" style={{ background: '#e2f2f3', color: 'var(--scr)' }}>✍️ {subject} collects SCR data only</span>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--scr)' }}>✍️ {subject} collects SCR data only</span>
         )}
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', marginLeft: 'auto' }}>vs. the grading rubric</span>
       </div>
 
-      <div style={{ marginTop: 14 }}>
-        {view === 'SCR' ? (
-          scrEmpty ? (
-            <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '30px 0 18px', fontSize: 14 }}>
-              🌵 No {subject} short responses assessed yet — data appears when Kayla answers {subject} prompts.
-            </div>
-          ) : (
-            <div style={{ maxWidth: 620 }}><ScrPanel rows={d.scr} /></div>
-          )
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <EcrPanel title="ECR · Organization & Development" rows={d.ecrOrg} />
-            <EcrPanel title="ECR · Conventions" rows={d.ecrConv} />
+      {view === 'SCR' ? (
+        scrEmpty ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--muted)' }}>
+            🌵 Nothing here yet — data appears when Kayla answers {subject} prompts.
           </div>
-        )}
-      </div>
+        ) : (
+          <ScrPanel rows={d.scr} />
+        )
+      ) : (
+        <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />
+      )}
     </div>
   )
 }
@@ -297,38 +296,38 @@ export function DataGoalsTab({ state, me, onChange }) {
         )}
       </div>
 
-      {/* writing data — the star of this tab */}
-      <WritingDataCard writingData={state.writingData} />
-
-      {/* compact monthly + habits */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
-        <div className="card" style={{ padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <b style={{ fontSize: 15 }}>📈 Monthly Progress <span style={{ fontWeight: 600, fontSize: 11.5, color: 'var(--muted)' }}>{mp.year} · avg score /4</span></b>
-            <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
-              <button onClick={() => setMpTab('scr')} style={mpToggle(mpTab === 'scr')}>SCR</button>
-              <button onClick={() => setMpTab('ecr')} style={mpToggle(mpTab === 'ecr')}>ECR</button>
-            </div>
-          </div>
-          {mpTab === 'scr'
-            ? <MonthChart label="SCR — Short Response" months={mp.months} data={mp.scr} color="var(--scr)" />
-            : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" />}
-        </div>
-
-        <div className="card" style={{ padding: '16px 18px' }}>
-          <b style={{ fontSize: 15 }}>🔥 My Writing Habits</b>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
-            {[
-              { k: 'Revisions made', v: revisions, sub: 'Every revision makes you stronger', icon: '📝' },
-              { k: 'Pieces finished', v: finished, sub: 'Start to polished', icon: '⭐' },
-              { k: 'Coins from growing', v: growthCoins.toLocaleString(), sub: 'Earned by how you write', icon: '🪙' },
-            ].map((s) => (
-              <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f9fc', borderRadius: 12, padding: '9px 14px' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, minWidth: 40 }}>{s.v}</div>
-                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{s.k}</div><div style={{ fontSize: 11.5, color: 'var(--muted)' }}>{s.sub}</div></div>
-                <div style={{ fontSize: 22 }}>{s.icon}</div>
+      {/* writing data + monthly/habits — one balanced row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
+        <WritingDataCard writingData={state.writingData} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div className="card" style={{ padding: '16px 18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <b style={{ fontSize: 15 }}>📈 Monthly Progress <span style={{ fontWeight: 600, fontSize: 11.5, color: 'var(--muted)' }}>{mp.year} · avg score /4</span></b>
+              <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
+                <button onClick={() => setMpTab('scr')} style={mpToggle(mpTab === 'scr')}>SCR</button>
+                <button onClick={() => setMpTab('ecr')} style={mpToggle(mpTab === 'ecr')}>ECR</button>
               </div>
-            ))}
+            </div>
+            {mpTab === 'scr'
+              ? <MonthChart label="SCR — Short Response" months={mp.months} data={mp.scr} color="var(--scr)" height={64} />
+              : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={64} />}
+          </div>
+
+          <div className="card" style={{ padding: '16px 18px' }}>
+            <b style={{ fontSize: 15 }}>🔥 My Writing Habits</b>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+              {[
+                { k: 'Revisions made', v: revisions, sub: 'Every revision makes you stronger', icon: '📝' },
+                { k: 'Pieces finished', v: finished, sub: 'Start to polished', icon: '⭐' },
+                { k: 'Coins from growing', v: growthCoins.toLocaleString(), sub: 'Earned by how you write', icon: '🪙' },
+              ].map((s) => (
+                <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f9fc', borderRadius: 12, padding: '8px 14px' }}>
+                  <div style={{ fontSize: 19, fontWeight: 800, minWidth: 38 }}>{s.v}</div>
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{s.k}</div><div style={{ fontSize: 11, color: 'var(--muted)' }}>{s.sub}</div></div>
+                  <div style={{ fontSize: 20 }}>{s.icon}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
