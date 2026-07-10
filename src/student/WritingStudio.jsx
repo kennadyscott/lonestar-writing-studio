@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import ConferencePanel from './ConferencePanel.jsx'
 import TraitPanel from './TraitPanel.jsx'
+import PromptsPanel from './PromptsPanel.jsx'
 
 function CoinToast({ data, onClose }) {
   if (!data) return null
@@ -122,18 +123,20 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         {/* coach + traits */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 480 }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-            {['conference', 'traits'].map((t) => (
+            {['conference', asg.genre === 'free' ? 'prompts' : 'traits'].map((t) => (
               <button key={t} onClick={() => setTab(t)}
                 style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: tab === t ? '#fff' : '#f6f8f9',
                   color: tab === t ? 'var(--navy-1)' : 'var(--muted)', borderBottom: tab === t ? '2px solid var(--navy-1)' : '2px solid transparent' }}>
-                {t === 'conference' ? '💬 Confer' : '🎯 Traits'}
+                {t === 'conference' ? '💬 Confer' : t === 'prompts' ? '🎲 Prompts' : '🎯 Traits'}
               </button>
             ))}
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             {tab === 'conference'
               ? <ConferencePanel sub={sub} draft={selected} readOnly={!isCurrent} health={health} onChange={onChange} />
-              : <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />}
+              : tab === 'prompts'
+                ? <PromptsPanel />
+                : <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />}
           </div>
         </div>
       </div>
