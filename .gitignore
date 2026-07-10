@@ -5,3 +5,4 @@ dist
 server/data.json
 
 *.log
+pages-dist
