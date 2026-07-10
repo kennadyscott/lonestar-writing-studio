@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { api, TRAIT_LABELS, LEVEL_NAMES, LEVEL_COLORS } from '../lib/api.js'
+import { BRAND } from '../lib/brand.js'
 
 const PRESET_GOALS = [
   { id: 'g_ideas', trait: 'ideas', icon: '💡', text: 'Back up my opinion with strong, specific reasons' },
@@ -27,18 +28,32 @@ function MonthChart({ label, months, data, color }) {
           {delta > 0 && <span style={{ color: 'var(--good)', fontWeight: 700 }}> ▲ +{delta}</span>}
         </span>
       </div>
-      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 96, borderBottom: '1px solid var(--line)' }}>
-        {months.map((m, i) => {
-          const v = data[i]
-          return (
-            <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }} title={v != null ? `${m}: ${v}/4` : `${m}: no data`}>
-              <div style={{ width: '78%', height: v != null ? `${(v / 4) * 100}%` : '2px', background: v != null ? color : '#e6e8ec', borderRadius: '4px 4px 0 0', transition: 'height .3s' }} />
+      <div style={{ display: 'flex', gap: 10 }}>
+        {/* y-axis */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 130, textAlign: 'right', paddingBottom: 0 }}>
+          {[4, 3, 2, 1, 0].map((t) => <span key={t} style={{ fontSize: 10, color: 'var(--muted)', lineHeight: 1 }}>{t}</span>)}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ position: 'relative', height: 130 }}>
+            {/* gridlines */}
+            {[0, 25, 50, 75].map((p) => (
+              <div key={p} style={{ position: 'absolute', top: `${p}%`, left: 0, right: 0, borderTop: '1px solid #edf2f6' }} />
+            ))}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 6, alignItems: 'flex-end', borderBottom: '1px solid var(--line)' }}>
+              {months.map((m, i) => {
+                const v = data[i]
+                return (
+                  <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }} title={v != null ? `${m}: ${v}/4` : `${m}: no data`}>
+                    <div style={{ width: '68%', height: v != null ? `${(v / 4) * 100}%` : '2px', background: v != null ? color : '#e6e8ec', borderRadius: '5px 5px 0 0', transition: 'height .3s' }} />
+                  </div>
+                )
+              })}
             </div>
-          )
-        })}
-      </div>
-      <div style={{ display: 'flex', gap: 4 }}>
-        {months.map((m) => <div key={m} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: 'var(--muted)', marginTop: 3 }}>{m}</div>)}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {months.map((m) => <div key={m} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: 'var(--muted)', marginTop: 5 }}>{m}</div>)}
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -59,7 +74,7 @@ function traitSnapshot(subs) {
   return { cur, grow, strongest, growing, keys }
 }
 
-export default function GrowthPage({ state, me, onChange }) {
+export default function GrowthPage({ state, me, onChange, onBack }) {
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
   const snap = traitSnapshot(subs)
@@ -99,9 +114,14 @@ export default function GrowthPage({ state, me, onChange }) {
         </div>
       )}
 
-      <div className="eyebrow">The Writing Studio</div>
-      <h1 className="page">My Growth 🌱</h1>
-      <p className="page-sub">Set a goal, watch your averages climb, and celebrate how far you've come.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
+          <h1 className="page">My Growth 🌱</h1>
+          <p className="page-sub">Set a goal, watch your averages climb, and celebrate how far you've come.</p>
+        </div>
+        <div className="logo-chip" style={{ margin: 0 }}><img src={BRAND.logo} alt="LoneStar CR" style={{ height: 40 }} /></div>
+      </div>
 
       {/* ===== NEXT-STEP NUDGE + TEACHER SHOUT-OUT ===== */}
       {(nextStep || me.shoutOut) && (
@@ -203,8 +223,8 @@ export default function GrowthPage({ state, me, onChange }) {
           ))}
         </div>
         {mpTab === 'scr'
-          ? <MonthChart label="SCR — Short Response" months={mp.months} data={mp.scr} color="#0b8a8f" />
-          : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="#375f9f" />}
+          ? <MonthChart label="SCR — Short Response" months={mp.months} data={mp.scr} color="var(--scr)" />
+          : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" />}
       </div>
 
       {/* ===== TRAIT SNAPSHOT + HABITS ===== */}
@@ -219,13 +239,20 @@ export default function GrowthPage({ state, me, onChange }) {
               </div>
               {snap.keys.map((k) => (
                 <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <span style={{ width: 130, fontSize: 13 }}>{TRAIT_LABELS[k]}</span>
+                  <span style={{ width: 130, fontSize: 13, fontWeight: 600 }}>{TRAIT_LABELS[k]}</span>
                   <div style={{ flex: 1, height: 10, background: '#eef0f2', borderRadius: 5 }}>
                     <div style={{ height: '100%', width: `${(snap.cur[k] / 4) * 100}%`, background: LEVEL_COLORS[snap.cur[k]], borderRadius: 5 }} />
                   </div>
-                  <span style={{ width: 78, fontSize: 11, fontWeight: 700, color: LEVEL_COLORS[snap.cur[k]] }}>{LEVEL_NAMES[snap.cur[k]]}</span>
+                  <span style={{ width: 78, fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>{LEVEL_NAMES[snap.cur[k]]}</span>
                 </div>
               ))}
+              <div style={{ display: 'flex', gap: 14, marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
+                {[1, 2, 3, 4].map((l) => (
+                  <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: 3, background: LEVEL_COLORS[l] }} />{LEVEL_NAMES[l]}
+                  </span>
+                ))}
+              </div>
             </>
           )}
         </div>
@@ -234,13 +261,14 @@ export default function GrowthPage({ state, me, onChange }) {
           <b style={{ fontSize: 17 }}>🔥 My Writing Habits</b>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 14 }}>
             {[
-              { k: 'Revisions made', v: revisions, sub: 'Every revision makes you stronger' },
-              { k: 'Pieces finished', v: finished, sub: 'Start to polished' },
-              { k: 'Coins from growing', v: growthCoins.toLocaleString(), sub: 'Earned by how you write' },
+              { k: 'Revisions made', v: revisions, sub: 'Every revision makes you stronger', icon: '📝' },
+              { k: 'Pieces finished', v: finished, sub: 'Start to polished', icon: '⭐' },
+              { k: 'Coins from growing', v: growthCoins.toLocaleString(), sub: 'Earned by how you write', icon: '🪙' },
             ].map((s) => (
-              <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f6f8f9', borderRadius: 12, padding: '12px 14px' }}>
+              <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f9fc', borderRadius: 12, padding: '12px 14px' }}>
                 <div style={{ fontSize: 24, fontWeight: 800, minWidth: 44 }}>{s.v}</div>
-                <div><div style={{ fontSize: 13, fontWeight: 600 }}>{s.k}</div><div style={{ fontSize: 12, color: 'var(--muted)' }}>{s.sub}</div></div>
+                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{s.k}</div><div style={{ fontSize: 12, color: 'var(--muted)' }}>{s.sub}</div></div>
+                <div style={{ fontSize: 26 }}>{s.icon}</div>
               </div>
             ))}
           </div>
@@ -276,8 +304,8 @@ export default function GrowthPage({ state, me, onChange }) {
       {/* ===== SHARE WALL ===== */}
       <div className="card" style={{ padding: 22, marginTop: 18 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <b style={{ fontSize: 17 }}>🌟 Share Wall</b>
-          <span style={{ fontSize: 12, color: 'var(--muted)' }}>Finished pieces the class is proud of</span>
+          <b style={{ fontSize: 17 }}>🌟 Share Wall <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>See what other students are writing!</span></b>
+          <span style={{ fontSize: 12, color: 'var(--link)', fontWeight: 800 }}>View all</span>
         </div>
 
         {shareable.length > 0 && (

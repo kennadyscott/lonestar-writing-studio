@@ -128,8 +128,7 @@ function ClassCadeRail({ state, subByStudent, onOpen }) {
     <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
       <div style={{ background: 'linear-gradient(120deg,#2f4f8f,#3f66a8)', color: '#fff', padding: '16px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontWeight: 800, letterSpacing: -.3, fontSize: 18 }}>Class<span style={{ color: 'var(--gold)' }}>Cade</span></span>
-          <span style={{ fontSize: 18 }}>🤖</span>
+          <img src="https://assets.cleark12.com/clearlearning/classcadelogo.png" alt="ClassCade" style={{ height: 28 }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
           <b style={{ fontSize: 18 }}>Quick Rewards</b>

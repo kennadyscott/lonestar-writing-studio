@@ -30,7 +30,7 @@ function CoinToast({ data, onClose }) {
   )
 }
 
-export default function WritingStudio({ state, sub, health, onChange }) {
+export default function WritingStudio({ state, sub, health, onChange, onBack }) {
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const currentDraft = sub.drafts[sub.drafts.length - 1]
   const [selectedId, setSelectedId] = useState(currentDraft.id)
@@ -67,6 +67,8 @@ export default function WritingStudio({ state, sub, health, onChange }) {
   return (
     <div>
       <CoinToast data={toast} onClose={() => setToast(null)} />
+
+      {onBack && <button className="backlink" onClick={onBack}>← Back to My Writing</button>}
 
       {/* prompt banner */}
       <div className="card" style={{ padding: '14px 18px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
@@ -105,7 +107,7 @@ export default function WritingStudio({ state, sub, health, onChange }) {
           </div>
           {isCurrent ? (
             <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder="Start writing your argument here…"
-              style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Inter, sans-serif', color: 'var(--ink)' }} />
+              style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           ) : (
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
           )}

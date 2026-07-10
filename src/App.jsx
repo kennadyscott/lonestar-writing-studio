@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { api } from './lib/api.js'
-import { Sidebar, TopBar, ClassCadeButton } from './components/Shell.jsx'
+import { TopBar, RoleSwitcher } from './components/Shell.jsx'
 import StudentHome from './student/StudentHome.jsx'
 import WritingStudio from './student/WritingStudio.jsx'
 import GrowthPage from './student/GrowthPage.jsx'
@@ -26,52 +26,50 @@ export default function App() {
   // "Begin" create the submission server-side and it must be in state first.
   const openSubmission = useCallback(async (id) => { setState(await api.state()); setOpenSub(id) }, [])
 
-  if (!state) return <div style={{ padding: 40, fontFamily: 'Inter' }}>Loading the Writing Studio…</div>
+  if (!state) return <div style={{ padding: 40, fontFamily: 'Manrope, sans-serif' }}>Loading the Writing Studio…</div>
 
   const me = state.students.find((s) => s.id === ME_STUDENT)
   const who = role === 'student'
-    ? { name: me.name, sub: 'Grade 6 Writer', av: me.avatar }
-    : { name: state.teacher.name, sub: state.teacher.school, av: 'N' }
+    ? { name: me.name, sub: state.teacher.school, initials: me.initials }
+    : { name: state.teacher.name, sub: state.teacher.school, initials: 'DN' }
 
-  let crumb, body
+  const goHome = () => { setView('home'); setOpenSub(null) }
+
+  let body
   if (role === 'student') {
     const sub = openSub ? state.submissions.find((s) => s.id === openSub) : null
     if (view === 'home' && sub) {
-      crumb = <span><a href="#" onClick={(e)=>{e.preventDefault();setOpenSub(null)}}>My Writing</a> › <b>{state.assignments.find(a=>a.id===sub.assignmentId).title}</b></span>
-      body = <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={() => setOpenSub(null)} />
+      body = <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
     } else if (view === 'home') {
-      crumb = <b>My Writing</b>
-      body = <StudentHome state={state} me={me} onOpen={openSubmission} />
+      body = <StudentHome state={state} me={me} onOpen={openSubmission} onGrowth={() => setView('growth')} />
     } else if (view === 'growth') {
-      crumb = <b>My Growth</b>; body = <GrowthPage state={state} me={me} onChange={refresh} />
+      body = <GrowthPage state={state} me={me} onChange={refresh} onBack={goHome} />
     } else {
-      crumb = <b>ClassCade Arcade</b>; body = <ArcadePage me={me} state={state} />
+      body = <ArcadePage me={me} state={state} onBack={goHome} />
     }
   } else {
     const sub = openSub ? state.submissions.find((s) => s.id === openSub) : null
     if (view === 'home' && sub) {
-      crumb = <span><a href="#" onClick={(e)=>{e.preventDefault();setOpenSub(null)}}>Class Overview</a> › <b>{state.students.find(s=>s.id===sub.studentId).name}</b></span>
-      body = <Portfolio state={state} sub={sub} onBack={() => setOpenSub(null)} />
+      body = <Portfolio state={state} sub={sub} onBack={goHome} />
     } else if (view === 'home') {
-      crumb = <b>Class Overview</b>; body = <TeacherHome state={state} onOpen={openSubmission} />
+      body = <TeacherHome state={state} onOpen={openSubmission} />
     } else if (view === 'trends') {
-      crumb = <b>Trait Trends</b>; body = <TraitTrends state={state} />
+      body = <TraitTrends state={state} />
     } else {
-      crumb = <b>SCR / ECR Module</b>; body = <ScrEcrModule />
+      body = <ScrEcrModule />
     }
   }
 
-  const action = role === 'student'
-    ? <ClassCadeButton coins={me.coins} onClick={() => { setView('arcade'); setOpenSub(null) }} />
-    : null
-
   return (
     <div className="app">
-      <Sidebar role={role} setRole={setRole} view={view} setView={(v) => { setView(v); setOpenSub(null) }} />
-      <div className="main">
-        <TopBar crumb={crumb} who={who} action={action} />
-        <div className="content">{body}</div>
-      </div>
+      <TopBar
+        role={role} view={view} who={who}
+        setView={(v) => { setView(v); setOpenSub(null) }}
+        onArcade={() => { setView('arcade'); setOpenSub(null) }}
+        onLogo={goHome}
+      />
+      <div className="content">{body}</div>
+      <RoleSwitcher role={role} setRole={(r) => { setRole(r); goHome() }} />
     </div>
   )
 }

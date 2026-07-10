@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { TRAIT_LABELS, LEVEL_NAMES, LEVEL_COLORS } from '../lib/api.js'
 import { TraitDots } from '../student/TraitPanel.jsx'
 
-export default function Portfolio({ state, sub }) {
+export default function Portfolio({ state, sub, onBack }) {
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const stu = state.students.find((s) => s.id === sub.studentId)
   const [sel, setSel] = useState(sub.drafts[sub.drafts.length - 1].id)
@@ -10,6 +10,7 @@ export default function Portfolio({ state, sub }) {
 
   return (
     <div>
+      {onBack && <button className="backlink" onClick={onBack}>← Back to Class Overview</button>}
       <div className="eyebrow">Student Portfolio</div>
       <h1 className="page">{stu.avatar} {stu.name}</h1>
       <p className="page-sub">{asg.title} · every draft and every conference, so you can see the thinking — not just the paper.</p>

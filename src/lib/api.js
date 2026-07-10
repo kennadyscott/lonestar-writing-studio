@@ -1,3 +1,5 @@
+import { localApi } from './localBackend.js'
+
 const j = (r) => r.json()
 
 // Where the API lives, depending on how the app is served:
@@ -9,7 +11,7 @@ const PORT = typeof location !== 'undefined' ? location.port : ''
 const BASE = PORT === '5173' ? '' : PORT === '4200' ? 'http://localhost:8787' : ''
 const u = (p) => BASE + p
 
-export const api = {
+const networkApi = {
   health: () => fetch(u('/api/health')).then(j),
   state: () => fetch(u('/api/state')).then(j),
   reset: () => fetch(u('/api/reset'), { method: 'POST' }).then(j),
@@ -29,9 +31,13 @@ export const api = {
   shoutOut: (payload) => fetch(u('/api/shoutout'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
 }
 
+// VITE_STATIC=1 builds (e.g. GitHub Pages) have no server — run everything in-browser.
+export const api = import.meta.env.VITE_STATIC === '1' ? localApi : networkApi
+
 export const TRAIT_LABELS = {
   ideas: 'Ideas', organization: 'Organization', voice: 'Voice',
   word_choice: 'Word Choice', sentence_fluency: 'Sentence Fluency', conventions: 'Conventions',
 }
 export const LEVEL_NAMES = { 1: 'Emerging', 2: 'Developing', 3: 'Proficient', 4: 'Strong' }
-export const LEVEL_COLORS = { 1: '#e08a2b', 2: '#e0b52b', 3: '#4aa96c', 4: '#2e9e6b' }
+// Sequential ramp — levels are ordered magnitude, one hue light→dark.
+export const LEVEL_COLORS = { 1: '#c5dccd', 2: '#8fcba4', 3: '#4aa96c', 4: '#1e7a4a' }

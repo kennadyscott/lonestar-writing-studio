@@ -8,10 +8,11 @@ const LABELS = {
   held_the_pen: 'Kept the pen (did your own thinking)',
 }
 
-export default function ArcadePage({ me, state }) {
+export default function ArcadePage({ me, state, onBack }) {
   const events = state.coinEvents.filter((e) => e.studentId === me.id).slice().reverse()
   return (
     <div>
+      {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
       <div className="eyebrow">Powered by ClassCade</div>
       <h1 className="page">Your Arcade Coins 🎮</h1>
       <p className="page-sub">You earn coins for <b>how you write</b> — showing up, conferring, and revising — never for your grade.</p>

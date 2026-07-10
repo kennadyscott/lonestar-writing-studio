@@ -135,6 +135,21 @@ export function seedState() {
       scr: [2.2, 2.4, 2.3, 2.6, 2.7, 2.9, 3.0, 3.1, 3.3, 3.4],
       ecr: [1.8, 2.0, 2.1, 2.2, 2.4, 2.5, 2.6, 2.8, 2.9, 3.0],
     },
+    // Home-page growth summary (percent scores, goal, streak, badges).
+    growthSummary: {
+      currentAverage: 82,
+      weeklyDelta: 6,
+      goalPercent: 85,
+      streakDays: 7,
+      badges: 12,
+      scoreOverTime: [
+        { label: 'Apr 14', pct: 68 },
+        { label: 'Apr 28', pct: 72 },
+        { label: 'May 12', pct: 76 },
+        { label: 'May 26', pct: 79 },
+        { label: 'Jun 9', pct: 82 },
+      ],
+    },
     // Luna's Writing Nook — the scope & sequence spine, condensed.
     modules: [
       { id: 'm1', label: 'Short Constructed Response', tier: 'Bronze', status: 'in_progress', progress: 0.6 },
