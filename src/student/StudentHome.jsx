@@ -213,6 +213,43 @@ function GoalBanner({ me, onData }) {
   )
 }
 
+/* ---- Free Write chooser: revise an unfinished story or start fresh ---- */
+function FreeWriteModal({ stories, onPick, onNew, onClose, busy }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
+      <div className="card" style={{ width: 500, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <span style={{ fontSize: 26 }}>🕊️</span>
+          <b style={{ fontSize: 18 }}>Free Write</b>
+          <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
+        </div>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>You have unfinished stories — pick one up where you left off, or start something brand new.</p>
+
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .5, color: 'var(--teal)', textTransform: 'uppercase', marginBottom: 8 }}>✏️ Revise stories</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 260, overflowY: 'auto', marginBottom: 16 }}>
+          {stories.map(({ sub, a, wcount, excerpt }) => (
+            <button key={sub.id} onClick={() => onPick(sub.id)} disabled={busy}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', border: '1px solid var(--line)', borderRadius: 12, padding: '11px 14px', background: '#fff' }}>
+              <span style={{ fontSize: 20 }}>📄</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>{a.title}</span>
+                <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {excerpt || 'Nothing written yet'} · {wcount} words · Draft {sub.drafts.length}
+                </span>
+              </span>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--link)', whiteSpace: 'nowrap' }}>Revise →</span>
+            </button>
+          ))}
+        </div>
+
+        <button className="btn" disabled={busy} onClick={onNew} style={{ width: '100%', justifyContent: 'center', padding: '11px 0' }}>
+          ✨ Start new writing piece
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ---- Assignments tab: companion-product sections ---- */
 function ClearSheetsCard({ sheets }) {
   return (
@@ -371,6 +408,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
+  const [fwChooser, setFwChooser] = useState(false)
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -388,7 +426,23 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
   async function launch(mode) {
     setBusy(true)
-    try { const r = await api.quickWrite(mode); onOpen(r.submissionId) } finally { setBusy(false) }
+    try { const r = await api.quickWrite(mode); setFwChooser(false); onOpen(r.submissionId) } finally { setBusy(false) }
+  }
+
+  // unfinished free-write stories (for the Free Write chooser)
+  const openStories = state.submissions
+    .filter((s) => s.studentId === me.id && !s.completedAt)
+    .map((s) => ({ sub: s, a: state.assignments.find((a) => a.id === s.assignmentId) }))
+    .filter(({ a }) => a && a.genre === 'free')
+    .map(({ sub, a }) => {
+      const last = sub.drafts[sub.drafts.length - 1]
+      const words = (last.content || '').trim().split(/\s+/).filter(Boolean)
+      return { sub, a, wcount: words.length, excerpt: words.slice(0, 9).join(' ') }
+    })
+
+  function freeWrite() {
+    if (openStories.length > 0) setFwChooser(true)
+    else launch('free')
   }
   async function peer() {
     setBusy(true)
@@ -406,6 +460,12 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   return (
     <div>
       {game && <FluencyGame onClose={() => setGame(false)} />}
+      {fwChooser && (
+        <FreeWriteModal stories={openStories} busy={busy}
+          onPick={(id) => { setFwChooser(false); onOpen(id) }}
+          onNew={() => launch('free')}
+          onClose={() => setFwChooser(false)} />
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         <h1 className="page" style={{ margin: 0, fontSize: 26 }}>Hi Kayla — ready to write today? 👋</h1>
@@ -454,7 +514,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
-              <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={() => launch('free')} />
+              <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={freeWrite} />
               <WayTile icon="🎯" title="Fluency Game" sub="Stretch sentences, fast" onClick={() => setGame(true)} />
             </div>
           </div>

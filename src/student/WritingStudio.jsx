@@ -33,6 +33,7 @@ function CoinToast({ data, onClose }) {
 
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
+  const isFree = asg.genre === 'free'
   const currentDraft = sub.drafts[sub.drafts.length - 1]
   const [selectedId, setSelectedId] = useState(currentDraft.id)
   const selected = sub.drafts.find((d) => d.id === selectedId) || currentDraft
@@ -61,6 +62,16 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
     setToast(res)
     await onChange()
     setSaving(false)
+  }
+
+  // free write: save & close — finish or revise later from the Free Write chooser
+  async function saveAndClose() {
+    setSaving(true)
+    clearTimeout(timer.current)
+    await api.saveContent(currentDraft.id, content)
+    await onChange()
+    setSaving(false)
+    onBack && onBack()
   }
 
   const wc = (content || '').split(/\s+/).filter(Boolean).length
@@ -113,9 +124,20 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
           )}
           {isCurrent && (
-            <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Autosaves as you type · saving a revision snapshots this version</span>
-              <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>{saving ? 'Saving…' : '💾 Save this revision'}</button>
+            <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                {isFree ? 'Autosaves as you type · completing a draft saves it to your Versions' : 'Autosaves as you type · saving a revision snapshots this version'}
+              </span>
+              {isFree ? (
+                <span style={{ display: 'inline-flex', gap: 8 }}>
+                  <button className="btn ghost" disabled={saving} onClick={saveAndClose} title="Save and finish later">💾 Save Writing</button>
+                  <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>
+                    {saving ? 'Saving…' : `✅ ${currentDraft.n === 1 ? 'First Draft' : `Draft ${currentDraft.n}`} Complete`}
+                  </button>
+                </span>
+              ) : (
+                <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>{saving ? 'Saving…' : '💾 Save this revision'}</button>
+              )}
             </div>
           )}
         </div>
