@@ -45,35 +45,36 @@ function WayTile({ icon, title, sub, onClick, busy }) {
 }
 
 function LunaNook({ modules, onLuna }) {
+  const current = modules.find((m) => m.status === 'in_progress') || modules[0]
+  const idx = modules.indexOf(current)
   return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+    <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'linear-gradient(120deg,#0d2f55,#02384d)', color: '#fff' }}>
         <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
         <b style={{ fontSize: 15 }}>Luna's Writing Nook</b>
         <button onClick={onLuna} style={{ marginLeft: 'auto', color: '#cfeefb', fontSize: 12, fontWeight: 700 }}>Your writing path →</button>
       </div>
-      <div style={{ padding: '13px 16px', display: 'flex', flexDirection: 'column', gap: 11 }}>
-        {modules.map((m, i) => {
-          const locked = m.status === 'not_started'
-          return (
-            <button key={m.id} onClick={onLuna} style={{ display: 'flex', alignItems: 'center', gap: 11, opacity: locked ? .8 : 1, textAlign: 'left', padding: 0 }}>
-              <ModuleBadge id={m.id} size={32} dim={locked} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ink)' }}>
-                  <span style={{ color: 'var(--muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>Module {i + 1}:</span>
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.label}</span>
-                  {locked && <span style={{ fontSize: 12 }}>🔒</span>}
-                </div>
-                <div style={{ height: 6, background: '#e6eef3', borderRadius: 5, marginTop: 4 }}>
-                  <div style={{ height: '100%', width: `${m.progress * 100}%`, background: m.status === 'completed' ? 'var(--good)' : 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
-                </div>
-              </div>
-              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .5, color: m.status === 'completed' ? 'var(--good)' : locked ? 'var(--muted)' : 'var(--link)', whiteSpace: 'nowrap' }}>
-                {m.status === 'in_progress' ? 'IN PROGRESS' : m.status === 'completed' ? 'COMPLETED' : 'LOCKED'}
+      <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <ModuleBadge id={current.id} size={44} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 800 }}>Module {idx + 1}: {current.label}</div>
+            <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, margin: '2px 0 5px' }}>4 of 6 activities completed</div>
+            <div style={{ height: 7, background: '#e6eef3', borderRadius: 5 }}>
+              <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 7 }}>
+            {modules.map((m) => (
+              <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .45 : 1 }}>
+                <ModuleBadge id={m.id} size={26} dim={m.status === 'not_started'} />
               </span>
-            </button>
-          )
-        })}
+            ))}
+          </div>
+          <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={onLuna}>Continue →</button>
+        </div>
       </div>
     </div>
   )
@@ -113,8 +114,14 @@ function ScoreLine({ points }) {
 
 function GrowthSummaryCard({ gs, onGrowth }) {
   const away = Math.max(0, gs.goalPercent - gs.currentAverage)
+  const stats = [
+    { k: 'Current Average', v: `${gs.currentAverage}% ↗`, sub: `↑ ${gs.weeklyDelta}% this week`, c: 'var(--good)' },
+    { k: 'Writing Streak', v: `${gs.streakDays} days 🔥`, sub: 'Keep it up!', c: 'var(--muted)' },
+    { k: 'Badges Earned', v: `${gs.badges} 🏅`, sub: 'See all badges', c: 'var(--muted)' },
+  ]
   return (
-    <div className="card" style={{ padding: '20px 22px', display: 'grid', gridTemplateColumns: '0.9fr 1.2fr 0.9fr', gap: 24, alignItems: 'center' }}>
+    <div className="card" style={{ padding: '18px 22px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.2fr 0.9fr', gap: 24, alignItems: 'center' }}>
       <div>
         <div style={{ fontSize: 19, fontWeight: 800 }}>My Data 📊</div>
         <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '6px 0 12px' }}>Your averages at a glance — dig deeper in Data & Goals.</p>
@@ -137,28 +144,13 @@ function GrowthSummaryCard({ gs, onGrowth }) {
           You're <b style={{ color: 'var(--cyan-bright)' }}>{away}%</b> away from your goal!
         </div>
       </div>
-    </div>
-  )
-}
-
-function GrowthStatsRail({ gs, onGrowth }) {
-  const tiles = [
-    { k: 'Current Average', v: `${gs.currentAverage}%`, sub: `↑ ${gs.weeklyDelta}% from last week`, subColor: 'var(--good)', vExtra: ' ↗' },
-    { k: 'Writing Streak', v: `${gs.streakDays} days 🔥`, sub: 'Keep it up!', subColor: 'var(--muted)' },
-    { k: 'Badges Earned', v: `${gs.badges} 🏅`, sub: 'See all badges', subColor: 'var(--muted)' },
-  ]
-  return (
-    <div className="card" style={{ padding: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <b style={{ fontSize: 15 }}>My Growth 🌱</b>
-        <button onClick={onGrowth} style={{ color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>View full report →</button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-        {tiles.map((t) => (
-          <div key={t.k} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '12px 10px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>{t.k}</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--teal)' }}>{t.v}{t.vExtra && <span style={{ color: 'var(--good)', fontSize: 14 }}>{t.vExtra}</span>}</div>
-            <div style={{ fontSize: 10.5, color: t.subColor, marginTop: 3, fontWeight: 600 }}>{t.sub}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 14, marginTop: 16 }}>
+        {stats.map((t) => (
+          <div key={t.k}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>{t.k}</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--teal)' }}>{t.v}</div>
+            <div style={{ fontSize: 10.5, color: t.c, fontWeight: 600 }}>{t.sub}</div>
           </div>
         ))}
       </div>
@@ -378,11 +370,10 @@ export default function StudentHome({ state, me, onOpen, onLuna, onChange }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'start', marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'stretch', marginBottom: 18 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <UpNextCard row={upNext} busy={busy} begin={begin} onAll={() => setHomeTab('assignments')} />
           {gs && <GrowthSummaryCard gs={gs} onGrowth={() => setHomeTab('data')} />}
-          {gs && <GrowthStatsRail gs={gs} onGrowth={() => setHomeTab('data')} />}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div className="card" style={{ padding: 16 }}>
