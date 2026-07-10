@@ -76,8 +76,8 @@ function ChecklistPanel({ asg, sub, phase, answers, setAnswers, fixed, setFixed,
   if (phase === 'evaluate') {
     return (
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, height: '100%', overflowY: 'auto' }}>
-        <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.5 }}>
-          Read {asg.teacher.name.split(' ')[0]}'s draft, then judge it: does it do each of these? <b>Be honest — this is the rubric a grader would use.</b>
+        <div style={{ background: '#eef6f9', borderRadius: 10, padding: '9px 12px', fontSize: 13, lineHeight: 1.5 }}>
+          <b>This is the rubric.</b> A grader would score {asg.teacher.name.split(' ')[0]}'s draft against these {(asg.checklist || []).length} criteria — you go first. Does the draft do each one?
         </div>
         {list.map((item, i) => (
           <div key={i} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '10px 12px' }}>
@@ -189,6 +189,15 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
 
       <Stepper phase={phase} />
 
+      {phase === 'evaluate' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff6e3', border: '1.5px solid #f0cf8a', borderRadius: 12, padding: '10px 16px', marginBottom: 14 }}>
+          <span style={{ fontSize: 22 }}>📋</span>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>
+            Step 1 — Grade it like a grader: read the draft on the left, then judge it item-by-item with the <b style={{ color: '#b97e10' }}>Rubric Checklist on the right</b> →
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(300px,1fr)', gap: 16, alignItems: 'stretch' }}>
         {/* ===== left: original + (in rewrite) the student's own box underneath ===== */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -221,10 +230,16 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
           )}
         </div>
 
-        {/* ===== right: checklist first, conference second ===== */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440 }}>
+        {/* ===== right: rubric checklist first, conference second ===== */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440,
+          border: phase === 'evaluate' ? '2px solid #f0cf8a' : '1px solid var(--line)' }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-            {[{ k: 'checklist', label: '✅ Revision Checklist' }, { k: 'confer', label: '💬 Confer' }].map((t) => (
+            {[
+              { k: 'checklist', label: phase === 'evaluate'
+                  ? `📋 Rubric Checklist (${Object.keys(answers).length}/${(asg.checklist || []).length})`
+                  : '✅ Revision Checklist' },
+              { k: 'confer', label: '💬 Confer' },
+            ].map((t) => (
               <button key={t.k} onClick={() => setTab(t.k)}
                 style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: tab === t.k ? '#fff' : '#f4f8fa',
                   color: tab === t.k ? 'var(--navy)' : 'var(--muted)', borderBottom: tab === t.k ? '2px solid var(--navy)' : '2px solid transparent' }}>
