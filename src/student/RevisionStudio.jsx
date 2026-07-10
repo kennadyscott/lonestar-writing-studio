@@ -3,16 +3,17 @@ import { api } from '../lib/api.js'
 import ConferencePanel from './ConferencePanel.jsx'
 
 /*
- * Daily Revision Challenge — a two-part process:
- *   Part 1 (evaluate): judge the robot's draft against a grade-leveled rubric checklist.
- *   Part 2 (rewrite):  the original stays visible on top; the student revises in
- *                      their own box directly underneath, then submits for feedback.
+ * Daily Revision Challenge — three parts:
+ *   1 (evaluate): score the robot's draft against the RUBRIC (focused layout, no tabs).
+ *   2 (rewrite):  revise directly beneath the original, working from the REVISION
+ *                 CHECKLIST (their rubric judgments) with the coach one tab away.
+ *   3 (done):     submit for feedback (coach headline + next steps + coins).
  */
 
 function Stepper({ phase }) {
   const steps = [
-    { k: 'evaluate', n: 1, label: 'Judge it against the rubric' },
-    { k: 'rewrite', n: 2, label: 'Rewrite it stronger' },
+    { k: 'evaluate', n: 1, label: 'Evaluate with the rubric' },
+    { k: 'rewrite', n: 2, label: 'Revise with your checklist' },
     { k: 'done', n: 3, label: 'Get feedback' },
   ]
   const idx = steps.findIndex((s) => s.k === phase)
@@ -68,44 +69,66 @@ function FeedbackModal({ result, onClose }) {
   )
 }
 
-function ChecklistPanel({ asg, sub, phase, answers, setAnswers, fixed, setFixed, onStartRewrite, busy }) {
+/* ---- Step 1: the rubric (compact rows, inline Yes/No) ---- */
+function RubricPanel({ asg, answers, setAnswers, onStartRewrite, busy }) {
   const list = asg.checklist || []
+  const judged = Object.keys(answers).length
   const allAnswered = list.every((_, i) => answers[i] === true || answers[i] === false)
-  const evaluation = sub.evaluation || answers
 
-  if (phase === 'evaluate') {
+  const seg = (i, v, label, color) => {
+    const on = answers[i] === v
     return (
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, height: '100%', overflowY: 'auto' }}>
-        <div style={{ background: '#eef6f9', borderRadius: 10, padding: '9px 12px', fontSize: 13, lineHeight: 1.5 }}>
-          <b>This is the rubric.</b> A grader would score {asg.teacher.name.split(' ')[0]}'s draft against these {(asg.checklist || []).length} criteria — you go first. Does the draft do each one?
-        </div>
-        {list.map((item, i) => (
-          <div key={i} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '10px 12px' }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 8 }}>{item}</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[{ v: true, label: '✓ Yes', on: '#e6f6ee', onC: 'var(--good)' }, { v: false, label: '✗ No', on: '#fdeeee', onC: '#d84a57' }].map((o) => (
-                <button key={String(o.v)} onClick={() => setAnswers({ ...answers, [i]: o.v })}
-                  style={{ flex: 1, padding: '7px 0', borderRadius: 9, fontWeight: 800, fontSize: 13,
-                    border: answers[i] === o.v ? `2px solid ${o.onC}` : '1px solid var(--line)',
-                    background: answers[i] === o.v ? o.on : '#fff', color: answers[i] === o.v ? o.onC : 'var(--muted)' }}>
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-        <button className="btn" disabled={!allAnswered || busy} onClick={onStartRewrite} style={{ justifyContent: 'center', marginTop: 4 }}>
-          {allAnswered ? 'Now rewrite it stronger →' : `Judge all ${list.length} to continue`}
-        </button>
-      </div>
+      <button onClick={() => setAnswers({ ...answers, [i]: v })}
+        style={{ padding: '6px 13px', borderRadius: 7, fontWeight: 800, fontSize: 12.5,
+          background: on ? color : 'transparent', color: on ? '#fff' : 'var(--muted)' }}>
+        {label}
+      </button>
     )
   }
 
-  // rewrite phase: the checklist becomes the fix-list
+  return (
+    <div className="card" style={{ border: '2px solid #f0cf8a', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 18px', background: 'linear-gradient(120deg,#fff6e3,#fff)', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 20 }}>📋</span>
+        <div style={{ flex: 1 }}>
+          <b style={{ fontSize: 15 }}>The Rubric</b>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Score {asg.teacher.name.split(' ')[0]}'s draft the way a grader would.</div>
+        </div>
+        <span className="pill" style={{ background: judged === list.length ? '#e6f6ee' : '#fdf1dc', color: judged === list.length ? 'var(--good)' : '#b97e10' }}>
+          {judged}/{list.length} scored
+        </span>
+      </div>
+
+      <div style={{ padding: '4px 18px 6px' }}>
+        {list.map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: i < list.length - 1 ? '1px solid var(--line)' : 'none' }}>
+            <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#eef3f6', color: 'var(--muted)', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, lineHeight: 1.35 }}>{item}</span>
+            <div style={{ display: 'inline-flex', background: '#eef3f6', borderRadius: 9, padding: 2, flexShrink: 0 }}>
+              {seg(i, true, '✓ Yes', 'var(--good)')}
+              {seg(i, false, '✗ No', '#d84a57')}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: '10px 18px 16px' }}>
+        <button className="btn" disabled={!allAnswered || busy} onClick={onStartRewrite} style={{ width: '100%', justifyContent: 'center' }}>
+          {allAnswered ? 'Done scoring — now revise it →' : `Score all ${list.length} criteria to continue`}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ---- Step 2: the revision checklist (their judgments become fix targets) ---- */
+function ChecklistPanel({ asg, sub, answers, fixed, setFixed }) {
+  const list = asg.checklist || []
+  const evaluation = sub.evaluation || answers
   return (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 9, height: '100%', overflowY: 'auto' }}>
-      <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.5 }}>
-        Your judgment of the original — <b style={{ color: '#d84a57' }}>fix the ✗ items</b> in your rewrite, and check them off as you go.
+      <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
+        Your rubric scores, now your checklist — <b style={{ color: '#d84a57' }}>fix the ✗ items</b> as you revise, and check them off as you go.
       </div>
       {list.map((item, i) => {
         const failed = evaluation[i] === false
@@ -119,7 +142,7 @@ function ChecklistPanel({ asg, sub, phase, answers, setAnswers, fixed, setFixed,
               background: done ? 'var(--good)' : '#fff', border: done ? 'none' : '1.5px solid #c8d6de', color: '#fff' }}>{done ? '✓' : ''}</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: done ? 'var(--good)' : 'var(--ink)', textDecoration: done ? 'line-through' : 'none' }}>
               {item}
-              {failed && !done && <span style={{ display: 'block', fontSize: 11, color: '#d84a57', fontWeight: 800, marginTop: 2 }}>✗ The original missed this — fix it!</span>}
+              {failed && !done && <span style={{ display: 'block', fontSize: 11, color: '#d84a57', fontWeight: 800, marginTop: 2 }}>✗ You scored this No — fix it!</span>}
             </span>
           </button>
         )
@@ -189,27 +212,32 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
 
       <Stepper phase={phase} />
 
+      {/* ============ STEP 1: read + score against the rubric ============ */}
       {phase === 'evaluate' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff6e3', border: '1.5px solid #f0cf8a', borderRadius: 12, padding: '10px 16px', marginBottom: 14 }}>
-          <span style={{ fontSize: 22 }}>📋</span>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>
-            Step 1 — Grade it like a grader: read the draft on the left, then judge it item-by-item with the <b style={{ color: '#b97e10' }}>Rubric Checklist on the right</b> →
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(340px,1fr)', gap: 16, alignItems: 'start' }}>
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
+              <b style={{ fontSize: 14 }}>🤖 {asg.teacher.name}'s draft</b>
+              <span className="pill" style={{ background: '#eef3f6', color: 'var(--muted)' }}>read only</span>
+            </div>
+            <div style={{ padding: '16px 18px', fontSize: 15, lineHeight: 1.7, color: '#3a4149', whiteSpace: 'pre-wrap' }}>{original.content}</div>
           </div>
+          <RubricPanel asg={asg} answers={answers} setAnswers={setAnswers} onStartRewrite={startRewrite} busy={busy} />
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(300px,1fr)', gap: 16, alignItems: 'stretch' }}>
-        {/* ===== left: original + (in rewrite) the student's own box underneath ===== */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div className="card" style={{ overflow: 'hidden' }}>
-            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
-              <b style={{ fontSize: 14 }}>🤖 {asg.teacher.name}'s original draft</b>
-              <span className="pill" style={{ background: '#eef3f6', color: 'var(--muted)' }}>read only</span>
+      {/* ============ STEP 2/3: revise beneath the original, checklist + coach beside ============ */}
+      {phase !== 'evaluate' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(300px,1fr)', gap: 16, alignItems: 'stretch' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="card" style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
+                <b style={{ fontSize: 14 }}>🤖 {asg.teacher.name}'s original draft</b>
+                <span className="pill" style={{ background: '#eef3f6', color: 'var(--muted)' }}>read only</span>
+              </div>
+              <div style={{ padding: 16, fontSize: 14, lineHeight: 1.6, color: '#3a4149', whiteSpace: 'pre-wrap' }}>{original.content}</div>
             </div>
-            <div style={{ padding: 16, fontSize: 15, lineHeight: 1.65, color: '#3a4149', whiteSpace: 'pre-wrap' }}>{original.content}</div>
-          </div>
 
-          {phase !== 'evaluate' && (
             <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1 }}>
               <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f2fafd' }}>
                 <b style={{ fontSize: 14 }}>✍️ Your revision</b>
@@ -217,7 +245,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
               </div>
               <textarea value={content} onChange={(e) => edit(e.target.value)} disabled={phase === 'done'}
                 placeholder="Rewrite it here — make it the response the robot WISHES it wrote…"
-                style={{ flex: 1, minHeight: 240, border: 'none', outline: 'none', resize: 'vertical', padding: 16, fontSize: 15.5, lineHeight: 1.65, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)', background: '#fff' }} />
+                style={{ flex: 1, minHeight: 260, border: 'none', outline: 'none', resize: 'vertical', padding: 16, fontSize: 15.5, lineHeight: 1.65, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)', background: '#fff' }} />
               <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 12, color: changed ? 'var(--good)' : 'var(--muted)', fontWeight: 600 }}>
                   {phase === 'done' ? '✓ Submitted' : changed ? '✓ You\'re changing it — keep going' : 'Start reshaping the original above'}
@@ -227,33 +255,26 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
                 )}
               </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* ===== right: rubric checklist first, conference second ===== */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440,
-          border: phase === 'evaluate' ? '2px solid #f0cf8a' : '1px solid var(--line)' }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-            {[
-              { k: 'checklist', label: phase === 'evaluate'
-                  ? `📋 Rubric Checklist (${Object.keys(answers).length}/${(asg.checklist || []).length})`
-                  : '✅ Revision Checklist' },
-              { k: 'confer', label: '💬 Confer' },
-            ].map((t) => (
-              <button key={t.k} onClick={() => setTab(t.k)}
-                style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: tab === t.k ? '#fff' : '#f4f8fa',
-                  color: tab === t.k ? 'var(--navy)' : 'var(--muted)', borderBottom: tab === t.k ? '2px solid var(--navy)' : '2px solid transparent' }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ flex: 1, minHeight: 0 }}>
-            {tab === 'checklist'
-              ? <ChecklistPanel asg={asg} sub={sub} phase={phase} answers={answers} setAnswers={setAnswers} fixed={fixed} setFixed={setFixed} onStartRewrite={startRewrite} busy={busy} />
-              : <ConferencePanel sub={sub} draft={working} readOnly={phase === 'done'} health={health} onChange={onChange} />}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440 }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
+              {[{ k: 'checklist', label: '✅ Revision Checklist' }, { k: 'confer', label: '💬 Confer' }].map((t) => (
+                <button key={t.k} onClick={() => setTab(t.k)}
+                  style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: tab === t.k ? '#fff' : '#f4f8fa',
+                    color: tab === t.k ? 'var(--navy)' : 'var(--muted)', borderBottom: tab === t.k ? '2px solid var(--navy)' : '2px solid transparent' }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+              {tab === 'checklist'
+                ? <ChecklistPanel asg={asg} sub={sub} answers={answers} fixed={fixed} setFixed={setFixed} />
+                : <ConferencePanel sub={sub} draft={working} readOnly={phase === 'done'} health={health} onChange={onChange} />}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
