@@ -150,12 +150,83 @@ export function seedState() {
         { label: 'Jun 9', pct: 82 },
       ],
     },
-    // Luna's Writing Nook — the scope & sequence spine, condensed.
+    // Luna's Writing Nook — the six real modules from the live product.
     modules: [
-      { id: 'm1', label: 'Short Constructed Response', tier: 'Bronze', status: 'in_progress', progress: 0.6 },
-      { id: 'm2', label: 'Extended Constructed Response', tier: 'Silver', status: 'not_started', progress: 0 },
-      { id: 'm3', label: 'Stellar Writers', tier: 'Gold', status: 'not_started', progress: 0 },
+      { id: 'm1', label: 'Short Constructed Response', status: 'completed', progress: 1 },
+      { id: 'm2', label: 'Extended Constructed Response', status: 'in_progress', progress: 0.45 },
+      { id: 'm3', label: 'Stellar Writers', status: 'not_started', progress: 0 },
+      { id: 'm4', label: 'The Writing Process', status: 'not_started', progress: 0 },
+      { id: 'm5', label: 'Revision', status: 'not_started', progress: 0 },
+      { id: 'm6', label: 'Editing', status: 'not_started', progress: 0 },
     ],
+    // Rubric-level writing data per subject (mirrors the live product's student
+    // data view). SCR = RACE Strategy Anchor Adherence; ECR = STAAR-style domains.
+    writingData: {
+      subjects: ['ELA', 'Science', 'Social Studies'],
+      ELA: {
+        scr: [
+          { k: 'R', label: 'Restate', pct: 100, n: 2 },
+          { k: 'A', label: 'Answer', pct: 100, n: 2 },
+          { k: 'C', label: 'Cite', pct: 50, n: 1 },
+          { k: 'E', label: 'Explain', pct: 50, n: 1 },
+        ],
+        ecrOrg: [
+          { label: 'Central Idea/Claim', pct: 75 },
+          { label: 'Organization', pct: 60 },
+          { label: 'Evidence', pct: 50 },
+          { label: 'Expression of Ideas', pct: 65 },
+        ],
+        ecrConv: [
+          { label: 'Sentence Structure', pct: 80 },
+          { label: 'Punctuation', pct: 70 },
+          { label: 'Capitalization', pct: 90 },
+          { label: 'Grammar', pct: 75 },
+          { label: 'Spelling', pct: 85 },
+        ],
+      },
+      Science: {
+        scr: [
+          { k: 'R', label: 'Restate', pct: 75, n: 2 },
+          { k: 'A', label: 'Answer', pct: 100, n: 2 },
+          { k: 'C', label: 'Cite', pct: 25, n: 1 },
+          { k: 'E', label: 'Explain', pct: 50, n: 1 },
+        ],
+        ecrOrg: [
+          { label: 'Central Idea/Claim', pct: 0 },
+          { label: 'Organization', pct: 0 },
+          { label: 'Evidence', pct: 0 },
+          { label: 'Expression of Ideas', pct: 0 },
+        ],
+        ecrConv: [
+          { label: 'Sentence Structure', pct: 0 },
+          { label: 'Punctuation', pct: 0 },
+          { label: 'Capitalization', pct: 0 },
+          { label: 'Grammar', pct: 0 },
+          { label: 'Spelling', pct: 0 },
+        ],
+      },
+      'Social Studies': {
+        scr: [
+          { k: 'R', label: 'Restate', pct: 0, n: 0 },
+          { k: 'A', label: 'Answer', pct: 0, n: 0 },
+          { k: 'C', label: 'Cite', pct: 0, n: 0 },
+          { k: 'E', label: 'Explain', pct: 0, n: 0 },
+        ],
+        ecrOrg: [
+          { label: 'Central Idea/Claim', pct: 0 },
+          { label: 'Organization', pct: 0 },
+          { label: 'Evidence', pct: 0 },
+          { label: 'Expression of Ideas', pct: 0 },
+        ],
+        ecrConv: [
+          { label: 'Sentence Structure', pct: 0 },
+          { label: 'Punctuation', pct: 0 },
+          { label: 'Capitalization', pct: 0 },
+          { label: 'Grammar', pct: 0 },
+          { label: 'Spelling', pct: 0 },
+        ],
+      },
+    },
     coinEvents: submissions.flatMap((sub) => sub.milestones.map((m) => ({
       id: 'ce_' + m.id, studentId: sub.studentId, submissionId: sub.id, type: m.type, coins: m.coins, ts: m.ts,
     }))),

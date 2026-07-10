@@ -5,6 +5,7 @@ import StudentHome from './student/StudentHome.jsx'
 import WritingStudio from './student/WritingStudio.jsx'
 import GrowthPage from './student/GrowthPage.jsx'
 import ArcadePage from './student/ArcadePage.jsx'
+import LunaPage from './student/LunaPage.jsx'
 import TeacherHome from './teacher/TeacherHome.jsx'
 import Portfolio from './teacher/Portfolio.jsx'
 import TraitTrends from './teacher/TraitTrends.jsx'
@@ -41,9 +42,11 @@ export default function App() {
     if (view === 'home' && sub) {
       body = <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
     } else if (view === 'home') {
-      body = <StudentHome state={state} me={me} onOpen={openSubmission} onGrowth={() => setView('growth')} />
+      body = <StudentHome state={state} me={me} onOpen={openSubmission} onGrowth={() => setView('growth')} onLuna={() => setView('luna')} />
     } else if (view === 'growth') {
       body = <GrowthPage state={state} me={me} onChange={refresh} onBack={goHome} />
+    } else if (view === 'luna') {
+      body = <LunaPage state={state} onBack={goHome} />
     } else {
       body = <ArcadePage me={me} state={state} onBack={goHome} />
     }

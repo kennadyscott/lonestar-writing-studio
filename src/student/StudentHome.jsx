@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { api } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
+import ModuleBadge from '../components/ModuleBadge.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
@@ -42,36 +43,34 @@ function WayTile({ icon, title, sub, onClick, busy }) {
   )
 }
 
-const MEDAL = ['#c0392b', '#8e6bbf', '#f5b400'] // module medals like the mockup
-
-function LunaNook({ modules, onGrowth }) {
+function LunaNook({ modules, onLuna }) {
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'linear-gradient(120deg,#0d2f55,#02384d)', color: '#fff' }}>
         <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
         <b style={{ fontSize: 15 }}>Luna's Writing Nook</b>
-        <button onClick={onGrowth} style={{ marginLeft: 'auto', color: '#cfeefb', fontSize: 12, fontWeight: 700 }}>Your writing path →</button>
+        <button onClick={onLuna} style={{ marginLeft: 'auto', color: '#cfeefb', fontSize: 12, fontWeight: 700 }}>Your writing path →</button>
       </div>
-      <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ padding: '13px 16px', display: 'flex', flexDirection: 'column', gap: 11 }}>
         {modules.map((m, i) => {
           const locked = m.status === 'not_started'
           return (
-            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: locked ? .75 : 1 }}>
-              <span style={{ width: 30, height: 30, borderRadius: '50%', background: MEDAL[i], color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13, boxShadow: 'inset 0 -2px 0 rgba(0,0,0,.25)' }}>{i + 1}</span>
+            <button key={m.id} onClick={onLuna} style={{ display: 'flex', alignItems: 'center', gap: 11, opacity: locked ? .8 : 1, textAlign: 'left', padding: 0 }}>
+              <ModuleBadge id={m.id} size={32} dim={locked} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ink)' }}>
                   <span style={{ color: 'var(--muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>Module {i + 1}:</span>
                   <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.label}</span>
                   {locked && <span style={{ fontSize: 12 }}>🔒</span>}
                 </div>
-                <div style={{ height: 7, background: '#e6eef3', borderRadius: 5, marginTop: 5 }}>
-                  <div style={{ height: '100%', width: `${m.progress * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
+                <div style={{ height: 6, background: '#e6eef3', borderRadius: 5, marginTop: 4 }}>
+                  <div style={{ height: '100%', width: `${m.progress * 100}%`, background: m.status === 'completed' ? 'var(--good)' : 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
                 </div>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .5, color: locked ? 'var(--muted)' : 'var(--link)' }}>
-                {m.status === 'in_progress' ? 'IN PROGRESS' : m.status === 'completed' ? 'DONE' : 'LOCKED'}
+              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .5, color: m.status === 'completed' ? 'var(--good)' : locked ? 'var(--muted)' : 'var(--link)', whiteSpace: 'nowrap' }}>
+                {m.status === 'in_progress' ? 'IN PROGRESS' : m.status === 'completed' ? 'COMPLETED' : 'LOCKED'}
               </span>
-            </div>
+            </button>
           )
         })}
       </div>
@@ -166,7 +165,7 @@ function GrowthStatsRail({ gs, onGrowth }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onGrowth }) {
+export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
   const [tab, setTab] = useState('active')
   const [sort, setSort] = useState('due')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -315,7 +314,7 @@ export default function StudentHome({ state, me, onOpen, onGrowth }) {
             </div>
           </div>
 
-          <LunaNook modules={state.modules} onGrowth={onGrowth} />
+          <LunaNook modules={state.modules} onLuna={onLuna} />
 
           {gs && <GrowthStatsRail gs={gs} onGrowth={onGrowth} />}
         </div>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { api, TRAIT_LABELS, LEVEL_NAMES, LEVEL_COLORS } from '../lib/api.js'
-import { BRAND } from '../lib/brand.js'
+import { api, TRAIT_LABELS } from '../lib/api.js'
 
 const PRESET_GOALS = [
   { id: 'g_ideas', trait: 'ideas', icon: '💡', text: 'Back up my opinion with strong, specific reasons' },
@@ -59,25 +58,99 @@ function MonthChart({ label, months, data, color }) {
   )
 }
 
-/* ---------- Trait snapshot ---------- */
-function traitSnapshot(subs) {
-  const drafts = subs.flatMap((s) => s.drafts).filter((d) => d.traits).sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-  if (drafts.length === 0) return null
-  const latest = drafts[drafts.length - 1].traits.traits
-  const earliest = drafts[0].traits.traits
-  const cur = {}, grow = {}
-  latest.forEach((t) => (cur[t.key] = t.level))
-  earliest.forEach((t) => (grow[t.key] = (cur[t.key] ?? t.level) - t.level))
-  const keys = Object.keys(cur)
-  const strongest = keys.reduce((a, b) => (cur[b] > cur[a] ? b : a))
-  const growing = keys.reduce((a, b) => (grow[b] > grow[a] ? b : a))
-  return { cur, grow, strongest, growing, keys }
+/* ---------- SCR / ECR writing data (rubric-level, per subject) ---------- */
+const RACE_COLORS = { R: '#e668c9', A: '#6db7f2', C: '#7fd483', E: '#f2b27e' }
+const RACE_MEANING = { R: 'Restate the question', A: 'Answer completely', C: 'Cite evidence', E: 'Explain your thinking' }
+
+function DataBar({ pct }) {
+  const fill = pct >= 80 ? 'var(--good)' : pct > 0 ? '#e8b33c' : 'transparent'
+  return (
+    <div style={{ flex: 1, height: 10, background: '#e9f0f5', borderRadius: 6 }}>
+      <div style={{ height: '100%', width: `${pct}%`, background: fill, borderRadius: 6, transition: 'width .3s' }} />
+    </div>
+  )
+}
+
+function ScrPanel({ rows }) {
+  return (
+    <div style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(120deg,#0a5b76,#035c78)', color: '#fff', padding: '10px 14px', fontWeight: 800, fontSize: 13.5 }}>
+        SCR · Strategy Anchor Adherence
+      </div>
+      <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {rows.map((r) => (
+          <div key={r.k} title={`${r.k} = ${RACE_MEANING[r.k]}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--navy)', color: RACE_COLORS[r.k], display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 15 }}>{r.k}</span>
+            <span style={{ width: 42, fontSize: 12.5, fontWeight: 800, textAlign: 'right' }}>{r.pct}%</span>
+            <DataBar pct={r.pct} />
+            <span style={{ width: 16, fontSize: 12, color: 'var(--muted)', fontWeight: 700, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
+          </div>
+        ))}
+        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>R·A·C·E — Restate, Answer, Cite, Explain</div>
+      </div>
+    </div>
+  )
+}
+
+function EcrPanel({ title, rows }) {
+  const empty = rows.every((r) => r.pct === 0)
+  return (
+    <div style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(120deg,#14538c,#123b6d)', color: '#fff', padding: '10px 14px', fontWeight: 800, fontSize: 13.5 }}>
+        {title}
+      </div>
+      <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {rows.map((r) => (
+          <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 128, fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={r.label}>{r.label}</span>
+            <span style={{ width: 36, fontSize: 12.5, fontWeight: 800, textAlign: 'right', color: r.pct === 0 ? 'var(--muted)' : 'var(--ink)' }}>{r.pct}%</span>
+            <DataBar pct={r.pct} />
+          </div>
+        ))}
+        {empty && <div style={{ fontSize: 11, color: 'var(--muted)' }}>No extended responses assessed yet.</div>}
+      </div>
+    </div>
+  )
+}
+
+function WritingDataCard({ writingData }) {
+  const [subject, setSubject] = useState('ELA')
+  const d = writingData[subject]
+  const noData = d.scr.every((r) => r.pct === 0 && !r.n) && d.ecrOrg.every((r) => r.pct === 0)
+  return (
+    <div className="card" style={{ padding: 22, marginBottom: 18 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <div>
+          <b style={{ fontSize: 17 }}>📊 My Writing Data</b>
+          <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>How your responses score against the rubric — short answers (SCR) and extended essays (ECR).</div>
+        </div>
+        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 10, padding: 3 }}>
+          {writingData.subjects.map((sub) => (
+            <button key={sub} onClick={() => setSubject(sub)}
+              style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                background: subject === sub ? '#fff' : 'transparent', color: subject === sub ? 'var(--navy)' : 'var(--muted)',
+                boxShadow: subject === sub ? 'var(--shadow)' : 'none' }}>{sub}</button>
+          ))}
+        </div>
+      </div>
+      {noData ? (
+        <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '34px 0 22px', fontSize: 14 }}>
+          🌵 No {subject} writing data yet — it will appear when Kayla responds to {subject} prompts.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginTop: 16 }}>
+          <ScrPanel rows={d.scr} />
+          <EcrPanel title="ECR · Organization & Development" rows={d.ecrOrg} />
+          <EcrPanel title="ECR · Conventions" rows={d.ecrConv} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function GrowthPage({ state, me, onChange, onBack }) {
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
-  const snap = traitSnapshot(subs)
   const [picking, setPicking] = useState(!me.goal)
   const [custom, setCustom] = useState('')
   const [toast, setToast] = useState(null)
@@ -114,14 +187,9 @@ export default function GrowthPage({ state, me, onChange, onBack }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
-          <h1 className="page">My Growth 🌱</h1>
-          <p className="page-sub">Set a goal, watch your averages climb, and celebrate how far you've come.</p>
-        </div>
-        <div className="logo-chip" style={{ margin: 0 }}><img src={BRAND.logo} alt="LoneStar CR" style={{ height: 40 }} /></div>
-      </div>
+      {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
+      <h1 className="page">My Growth 🌱</h1>
+      <p className="page-sub">Set a goal, watch your averages climb, and celebrate how far you've come.</p>
 
       {/* ===== NEXT-STEP NUDGE + TEACHER SHOUT-OUT ===== */}
       {(nextStep || me.shoutOut) && (
@@ -227,34 +295,36 @@ export default function GrowthPage({ state, me, onChange, onBack }) {
           : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" />}
       </div>
 
-      {/* ===== TRAIT SNAPSHOT + HABITS ===== */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginBottom: 18 }}>
-        <div className="card" style={{ padding: 22 }}>
-          <b style={{ fontSize: 17 }}>✨ My Traits Right Now</b>
-          {!snap ? <p style={{ color: 'var(--muted)' }}>Get trait feedback on a draft to see this.</p> : (
-            <>
-              <div style={{ display: 'flex', gap: 10, margin: '12px 0 16px', flexWrap: 'wrap' }}>
-                <span className="pill" style={{ background: '#e6f6ee', color: 'var(--good)', padding: '7px 12px' }}>💪 Superpower: {TRAIT_LABELS[snap.strongest]}</span>
-                {snap.grow[snap.growing] > 0 && <span className="pill blue" style={{ padding: '7px 12px' }}>🚀 Growing most: {TRAIT_LABELS[snap.growing]} (+{snap.grow[snap.growing]})</span>}
-              </div>
-              {snap.keys.map((k) => (
-                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <span style={{ width: 130, fontSize: 13, fontWeight: 600 }}>{TRAIT_LABELS[k]}</span>
-                  <div style={{ flex: 1, height: 10, background: '#eef0f2', borderRadius: 5 }}>
-                    <div style={{ height: '100%', width: `${(snap.cur[k] / 4) * 100}%`, background: LEVEL_COLORS[snap.cur[k]], borderRadius: 5 }} />
-                  </div>
-                  <span style={{ width: 78, fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>{LEVEL_NAMES[snap.cur[k]]}</span>
+      {/* ===== WRITING DATA (SCR / ECR by subject) ===== */}
+      <WritingDataCard writingData={state.writingData} />
+
+      {/* ===== GROWTH STORY + HABITS ===== */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1).map((sub) => {
+            const asg = state.assignments.find((a) => a.id === sub.assignmentId)
+            const withTraits = sub.drafts.filter((d) => d.traits)
+            const first = withTraits[0], last = withTraits[withTraits.length - 1]
+            return (
+              <div key={sub.id} className="card" style={{ padding: 22 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                  <b style={{ fontSize: 17 }}>📖 Growth Story — "{asg.title}"</b>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>Draft {first.n} → Draft {last.n}</span>
                 </div>
-              ))}
-              <div style={{ display: 'flex', gap: 14, marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
-                {[1, 2, 3, 4].map((l) => (
-                  <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>
-                    <span style={{ width: 10, height: 10, borderRadius: 3, background: LEVEL_COLORS[l] }} />{LEVEL_NAMES[l]}
-                  </span>
-                ))}
+                <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}>Look what revising did — same writer, {withTraits.length} drafts apart.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {[{ d: first, tag: 'First draft', bg: '#f6f8f9' }, { d: last, tag: 'Latest draft', bg: '#eef6f2' }].map((c) => (
+                    <div key={c.tag} style={{ background: c.bg, borderRadius: 12, padding: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{c.tag}</div>
+                      <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 6, maxHeight: 90, overflow: 'hidden', color: '#3a4149' }}>
+                        {c.d.content.slice(0, 180)}{c.d.content.length > 180 ? '…' : ''}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </>
-          )}
+            )
+          })}
         </div>
 
         <div className="card" style={{ padding: 22 }}>
@@ -274,32 +344,6 @@ export default function GrowthPage({ state, me, onChange, onBack }) {
           </div>
         </div>
       </div>
-
-      {/* ===== GROWTH STORY ===== */}
-      {subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1).map((sub) => {
-        const asg = state.assignments.find((a) => a.id === sub.assignmentId)
-        const withTraits = sub.drafts.filter((d) => d.traits)
-        const first = withTraits[0], last = withTraits[withTraits.length - 1]
-        return (
-          <div key={sub.id} className="card" style={{ padding: 22 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-              <b style={{ fontSize: 17 }}>📖 Growth Story — "{asg.title}"</b>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Draft {first.n} → Draft {last.n}</span>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}>Look what revising did — same writer, {withTraits.length} drafts apart.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {[{ d: first, tag: 'First draft', bg: '#f6f8f9' }, { d: last, tag: 'Latest draft', bg: '#eef6f2' }].map((c) => (
-                <div key={c.tag} style={{ background: c.bg, borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{c.tag}</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 6, maxHeight: 90, overflow: 'hidden', color: '#3a4149' }}>
-                    {c.d.content.slice(0, 180)}{c.d.content.length > 180 ? '…' : ''}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })}
 
       {/* ===== SHARE WALL ===== */}
       <div className="card" style={{ padding: 22, marginTop: 18 }}>
