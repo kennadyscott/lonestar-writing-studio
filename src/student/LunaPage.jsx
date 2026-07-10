@@ -86,6 +86,41 @@ function ProgressRing({ pct }) {
   )
 }
 
+function PathBar({ modules, currentId }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,.78)', borderRadius: 16, padding: '12px 18px 14px', marginBottom: 20, boxShadow: '0 2px 10px rgba(2,56,77,.08)' }}>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#4a6f8c', marginBottom: 8 }}>YOUR WRITING PATH</div>
+      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        {modules.map((m, i) => {
+          const locked = m.status === 'not_started'
+          const cur = m.id === currentId
+          const done = m.status === 'completed'
+          return (
+            <React.Fragment key={m.id}>
+              {i > 0 && <div style={{ flex: '0 0 auto', width: 24, borderTop: '3px dashed #8fcbe8', marginTop: 26 }} />}
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center',
+                background: cur ? '#fff' : 'transparent', borderRadius: 12, padding: '8px 6px',
+                boxShadow: cur ? '0 2px 8px rgba(2,56,77,.15)' : 'none', border: cur ? '1.5px solid #8fcbe8' : '1.5px solid transparent' }}>
+                <div style={{ position: 'relative' }}>
+                  <ModuleBadge id={m.id} size={40} dim={locked} />
+                  {done && <span style={{ position: 'absolute', top: -4, right: -7, width: 17, height: 17, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800 }}>✓</span>}
+                  {locked && <span style={{ position: 'absolute', top: -4, right: -7, fontSize: 12 }}>🔒</span>}
+                </div>
+                <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .4, color: done ? 'var(--good)' : cur ? 'var(--link)' : '#7d93a6' }}>
+                  {done ? 'COMPLETED' : cur ? 'IN PROGRESS' : 'LOCKED'}
+                </div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, lineHeight: 1.25, color: locked ? '#8aa0b2' : '#0d2f55' }}>
+                  Module {i + 1}: {m.label}
+                </div>
+              </div>
+            </React.Fragment>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function LunaPage({ state, onBack }) {
   const modules = state.modules
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
@@ -105,7 +140,6 @@ export default function LunaPage({ state, onBack }) {
       <span style={{ position: 'absolute', top: 90, left: '46%', color: '#f5c542', fontSize: 13 }}>✦</span>
       <span style={{ position: 'absolute', top: 46, right: '10%', color: '#fff', fontSize: 11 }}>✦</span>
       <span style={{ position: 'absolute', bottom: 140, left: '6%', color: '#f5c542', fontSize: 12 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 90, right: '22%', fontSize: 30, opacity: .5, transform: 'rotate(-20deg)' }}>🚀</span>
       <div style={{ position: 'absolute', bottom: -60, left: -40, width: 300, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.5)', filter: 'blur(6px)' }} />
       <div style={{ position: 'absolute', bottom: -80, right: -30, width: 380, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.45)', filter: 'blur(8px)' }} />
 
@@ -124,6 +158,8 @@ export default function LunaPage({ state, onBack }) {
             </button>
           )}
         </div>
+
+        <PathBar modules={modules} currentId={current.id} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 20, alignItems: 'start' }}>
           {/* ===== main column ===== */}
@@ -158,24 +194,8 @@ export default function LunaPage({ state, onBack }) {
                   <ActivityCard a={a} />
                 </React.Fragment>
               ))}
-              <div style={{ width: 160, display: 'grid', placeItems: 'center', fontSize: 40, opacity: .85 }}>🚀</div>
             </div>
 
-            {/* other modules strip */}
-            <div style={{ marginTop: 34, background: 'rgba(255,255,255,.65)', borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontSize: 12, fontWeight: 800, color: '#4a6f8c', whiteSpace: 'nowrap' }}>YOUR PATH:</span>
-              {modules.map((m, i) => {
-                const locked = m.status === 'not_started'
-                const isCur = m.id === current.id
-                return (
-                  <div key={m.id} title={`Module ${i + 1}: ${m.label}${locked ? ' (locked)' : ''}`}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, opacity: locked ? .55 : 1, padding: isCur ? '4px 8px' : 0, background: isCur ? '#fff' : 'transparent', borderRadius: 10, boxShadow: isCur ? '0 2px 6px rgba(2,56,77,.12)' : 'none' }}>
-                    <ModuleBadge id={m.id} size={34} dim={locked} />
-                    <span style={{ fontSize: 9, fontWeight: 800, color: '#4a6f8c' }}>{locked ? '🔒' : isCur ? 'NOW' : '✓'}</span>
-                  </div>
-                )
-              })}
-            </div>
           </div>
 
           {/* ===== progress sidebar ===== */}
