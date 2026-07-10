@@ -3,6 +3,7 @@ import { api } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
+import { DataGoalsTab, ShareWallTab } from './GrowthPage.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
@@ -165,7 +166,8 @@ function GrowthStatsRail({ gs, onGrowth }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
+export default function StudentHome({ state, me, onOpen, onLuna, onChange }) {
+  const [homeTab, setHomeTab] = useState('assignments')
   const [tab, setTab] = useState('active')
   const [sort, setSort] = useState('due')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -213,13 +215,26 @@ export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
   }
 
   const gs = state.growthSummary
+  const dc = state.dailyChallenge
 
   return (
     <div>
       {game && <FluencyGame onClose={() => setGame(false)} />}
 
-      <h1 className="page" style={{ marginBottom: 16, fontSize: 26 }}>Hi Kayla — ready to write today? 👋</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+        <h1 className="page" style={{ margin: 0, fontSize: 26 }}>Hi Kayla — ready to write today? 👋</h1>
+        <div style={{ display: 'inline-flex', background: '#dcebf3', borderRadius: 12, padding: 4 }}>
+          {[['assignments', '📋 Assignments'], ['data', '📊 Data & Goals'], ['share', '🌟 Share Wall']].map(([k, label]) => (
+            <button key={k} onClick={() => setHomeTab(k)}
+              style={{ padding: '9px 18px', borderRadius: 9, fontSize: 13.5, fontWeight: 800,
+                background: homeTab === k ? 'var(--teal-mid)' : 'transparent', color: homeTab === k ? '#fff' : 'var(--teal)' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {homeTab === 'assignments' && (<>
       {/* Daily Challenge banner */}
       <div className="hero-banner" style={{ marginBottom: 18 }}>
         <span className="spark" style={{ left: '38%', top: 12 }}>✦</span>
@@ -228,11 +243,17 @@ export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
         <span className="art">📓💻☕</span>
         <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', display: 'grid', placeItems: 'center', fontSize: 30, flexShrink: 0 }}>🤖</div>
         <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, opacity: .85, textTransform: 'uppercase' }}>Daily Challenge · Revision</div>
-          <div style={{ fontSize: 19, fontWeight: 800 }}>A robot wrote something rough — can you fix it up?</div>
-          <div style={{ fontSize: 13, opacity: .9, marginTop: 2 }}>Revise a weak response into strong writing. It's not yours, so revise boldly!</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, opacity: .85, textTransform: 'uppercase' }}>Daily Challenge · Revision{dc?.genre ? ` · ${dc.genre}` : ''}</div>
+          <div style={{ fontSize: 19, fontWeight: 800 }}>
+            {dc?.done ? "Today's challenge is done — nice work! ✓" : `${dc?.author || 'A robot'} wrote something rough — can you fix it up?`}
+          </div>
+          <div style={{ fontSize: 13, opacity: .9, marginTop: 2 }}>
+            {dc?.done ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.' : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"}
+          </div>
         </div>
-        <button className="btn white" disabled={busy} onClick={peer} style={{ whiteSpace: 'nowrap', position: 'relative' }}>Start Revising →</button>
+        <button className="btn white" disabled={busy} onClick={peer} style={{ whiteSpace: 'nowrap', position: 'relative' }}>
+          {dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
+        </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'start' }}>
@@ -298,7 +319,7 @@ export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
             </div>
           </div>
 
-          {gs && <GrowthSummaryCard gs={gs} onGrowth={onGrowth} />}
+          {gs && <GrowthSummaryCard gs={gs} onGrowth={() => setHomeTab('data')} />}
         </div>
 
         {/* ===== right column ===== */}
@@ -316,9 +337,13 @@ export default function StudentHome({ state, me, onOpen, onGrowth, onLuna }) {
 
           <LunaNook modules={state.modules} onLuna={onLuna} />
 
-          {gs && <GrowthStatsRail gs={gs} onGrowth={onGrowth} />}
+          {gs && <GrowthStatsRail gs={gs} onGrowth={() => setHomeTab('data')} />}
         </div>
       </div>
+      </>)}
+
+      {homeTab === 'data' && <DataGoalsTab state={state} me={me} onChange={onChange} />}
+      {homeTab === 'share' && <ShareWallTab state={state} me={me} onChange={onChange} />}
     </div>
   )
 }

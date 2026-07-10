@@ -31,7 +31,7 @@ export function seedState() {
   ]
 
   const students = [
-    { id: 'stu_kscott', name: 'Kayla Scott', initials: 'KS', avatar: '🦊', coins: 1050,
+    { id: 'stu_kscott', name: 'Kayla Scott', initials: 'KS', avatar: '🦊', coins: 1050, gradeLevel: 6,
       goal: { id: 'g_ideas', trait: 'ideas', text: 'Back up my opinion with strong, specific reasons', setOn: '2026-06-20' },
       goalHistory: [
         { trait: 'organization', text: 'Write a real conclusion instead of just stopping', achievedOn: '2026-05-28' },
@@ -39,10 +39,10 @@ export function seedState() {
       ],
       shoutOut: { from: 'Mr. Nowitski', initials: 'DN', date: '2026-06-30',
         text: 'Kayla — your recess argument blew me away. Taking on the other side is exactly what strong writers do. So proud of your growth!' } },
-    { id: 'stu_anicole', name: 'Ava Nicole', initials: 'AN', avatar: '🌻', coins: 2700, goal: null, goalHistory: [] },
-    { id: 'stu_knelson', name: 'Kai Nelson', initials: 'KN', avatar: '🐯', coins: 2275, goal: null, goalHistory: [] },
-    { id: 'stu_jdennis', name: 'Jordan Dennis', initials: 'JD', avatar: '🐲', coins: 2275, goal: null, goalHistory: [] },
-    { id: 'stu_kle', name: 'Kim Le', initials: 'KL', avatar: '🦔', coins: 1250, goal: null, goalHistory: [] },
+    { id: 'stu_anicole', name: 'Ava Nicole', gradeLevel: 6, initials: 'AN', avatar: '🌻', coins: 2700, goal: null, goalHistory: [] },
+    { id: 'stu_knelson', name: 'Kai Nelson', gradeLevel: 6, initials: 'KN', avatar: '🐯', coins: 2275, goal: null, goalHistory: [] },
+    { id: 'stu_jdennis', name: 'Jordan Dennis', gradeLevel: 6, initials: 'JD', avatar: '🐲', coins: 2275, goal: null, goalHistory: [] },
+    { id: 'stu_kle', name: 'Kim Le', gradeLevel: 6, initials: 'KL', avatar: '🦔', coins: 1250, goal: null, goalHistory: [] },
   ]
 
   const teacher = { id: 'tch_dirk', name: 'Dirk Nowitski', school: 'Dallas Mavs Elementary' }

@@ -45,19 +45,8 @@ const QUICK_PROMPTS = [
   'Should homework be optional? Argue your opinion.',
   'Is it better to be a leader or a helper? Why?',
 ]
-// Poorly-written responses students revise. Not the student's own work → no
-// integrity issue; pure revision practice, framed as helping a robot writer.
-const PEER_TASKS = [
-  { id: 'pr_rex', author: 'Rex the Robot 🤖', genre: 'argument', type: 'Revision Challenge',
-    prompt: "Rex tried to write an argument about recess but it's weak! Revise Rex's response: add real reasons, fix the repetition, and make the words stronger.",
-    weakText: 'Recess should be longer. Recess is fun. I like recess. Recess is good. Everyone likes recess. So recess should be longer because it is fun.' },
-  { id: 'pr_nova', author: 'Nova the Robot 🤖', genre: 'narrative', type: 'Revision Challenge',
-    prompt: "Nova's story is super plain. Revise it to add details, feelings, and vivid words so we can picture it.",
-    weakText: 'The dog ran. It was a good dog. The dog was happy. Then the dog ate. It was a fun day. The end.' },
-  { id: 'pr_byte', author: 'Byte the Robot 🤖', genre: 'informational', type: 'Revision Challenge',
-    prompt: "Byte's explanation is too bare. Revise it to explain clearly with real details and examples.",
-    weakText: 'Deserts are hot. People live there. It is dry. They get water. Deserts are cool. That is about deserts.' },
-]
+import { PEER_TASKS, bandFor, todaysTask } from './peerTasks.mjs'
+
 const ME = 'stu_kscott'
 const now = () => new Date().toISOString()
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
@@ -150,7 +139,13 @@ const server = http.createServer(async (req, res) => {
   const parts = url.pathname.split('/').filter(Boolean) // e.g. ['api','state']
   try {
     if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, hasKey: HAS_KEY, model: HAS_KEY ? MODEL : null })
-    if (req.method === 'GET' && url.pathname === '/api/state') return send(res, 200, state)
+    if (req.method === 'GET' && url.pathname === '/api/state') {
+      const task = todaysTask()
+      const stu = findStu(ME)
+      const band = bandFor(stu?.gradeLevel ?? 6)
+      const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
+      return send(res, 200, { ...state, dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } })
+    }
 
     if (req.method === 'POST' && url.pathname === '/api/reset') { state = seedState(); save(); return send(res, 200, state) }
 
@@ -199,20 +194,54 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { newDraft: next, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
     }
 
-    // POST /api/peerrevision -> spin up a revision challenge (weak draft pre-loaded)
+    // POST /api/peerrevision -> open today's revision challenge (grade-banded, two-phase)
     if (req.method === 'POST' && url.pathname === '/api/peerrevision') {
-      const done = state.submissions.filter((s) => s.isPeerRevision).length
-      const task = PEER_TASKS[done % PEER_TASKS.length]
-      const asg = { id: uid('asg'), title: `Revision Challenge: help ${task.author}`, genre: task.genre, type: task.type,
-        format: null, isPeerRevision: true, gradeLevel: 6, teacher: { name: task.author, initials: '🤖' },
-        dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'revision', prompt: task.prompt, originalText: task.weakText }
-      const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
-        drafts: [
-          { id: uid('drf'), n: 1, content: task.weakText, createdAt: now(), conference: [], traits: null, isOriginal: true },
-          { id: uid('drf'), n: 2, content: task.weakText, createdAt: now(), conference: [], traits: null },
-        ], milestones: [] }
-      state.assignments.push(asg); state.submissions.push(sub); save()
+      const task = todaysTask()
+      const today = new Date().toISOString().slice(0, 10)
+      let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
+      if (!sub) {
+        const stu = findStu(ME)
+        const band = bandFor(stu?.gradeLevel ?? 6)
+        const t = task.bands[band]
+        const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
+          format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },
+          dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: t.checklist }
+        sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
+          peerTaskId: task.id, peerDate: today, phase: 'evaluate', evaluation: null,
+          drafts: [
+            { id: uid('drf'), n: 1, content: t.weakText, createdAt: now(), conference: [], traits: null, isOriginal: true },
+            { id: uid('drf'), n: 2, content: t.weakText, createdAt: now(), conference: [], traits: null },
+          ], milestones: [] }
+        state.assignments.push(asg); state.submissions.push(sub); save()
+      }
       return send(res, 200, { submissionId: sub.id })
+    }
+
+    // POST /api/submissions/:id/evaluate { answers: [bool,...] } -> rubric judgment done, unlock rewrite
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'evaluate') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const body = await readBody(req)
+      sub.evaluation = Array.isArray(body.answers) ? body.answers : []
+      sub.phase = 'rewrite'; save()
+      return send(res, 200, { ok: true, phase: sub.phase })
+    }
+
+    // POST /api/submissions/:id/submit-revision -> finish challenge: feedback + coins
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'submit-revision') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const original = sub.drafts[0]
+      const revision = sub.drafts[sub.drafts.length - 1]
+      const traits = await runTraits(sub, revision)
+      revision.traits = traits
+      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 20, ts: now() },
+        ...evaluateMilestones(sub, original, revision)]
+      sub.milestones.push(...newMilestones)
+      for (const m of newMilestones) {
+        state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins: m.coins, ts: m.ts })
+        const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
+      }
+      sub.completedAt = now(); sub.phase = 'done'; save()
+      return send(res, 200, { traits, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
     }
 
     // POST /api/share { submissionId } -> publish a finished piece to the Share Wall

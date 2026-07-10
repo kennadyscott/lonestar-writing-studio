@@ -3,6 +3,7 @@
 // scripted (no-key) conference/traits logic as the real Node server.
 import { seedState } from '../../server/seed.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from '../../server/fallback.mjs'
+import { bandFor, todaysTask } from '../../server/peerTasks.mjs'
 
 const ME = 'stu_kscott'
 const COIN_CAP = 150
@@ -27,17 +28,6 @@ const QUICK_PROMPTS = [
   'What is the best season of the year? Make your case.',
   'Should homework be optional? Argue your opinion.',
   'Is it better to be a leader or a helper? Why?',
-]
-const PEER_TASKS = [
-  { id: 'pr_rex', author: 'Rex the Robot 🤖', genre: 'argument', type: 'Revision Challenge',
-    prompt: "Rex tried to write an argument about recess but it's weak! Revise Rex's response: add real reasons, fix the repetition, and make the words stronger.",
-    weakText: 'Recess should be longer. Recess is fun. I like recess. Recess is good. Everyone likes recess. So recess should be longer because it is fun.' },
-  { id: 'pr_nova', author: 'Nova the Robot 🤖', genre: 'narrative', type: 'Revision Challenge',
-    prompt: "Nova's story is super plain. Revise it to add details, feelings, and vivid words so we can picture it.",
-    weakText: 'The dog ran. It was a good dog. The dog was happy. Then the dog ate. It was a fun day. The end.' },
-  { id: 'pr_byte', author: 'Byte the Robot 🤖', genre: 'informational', type: 'Revision Challenge',
-    prompt: "Byte's explanation is too bare. Revise it to explain clearly with real details and examples.",
-    weakText: 'Deserts are hot. People live there. It is dry. They get water. Deserts are cool. That is about deserts.' },
 ]
 
 const traitSum = (d) => (d?.traits?.traits ? d.traits.traits.reduce((a, t) => a + (t.level || 0), 0) : null)
@@ -65,7 +55,13 @@ function evaluateMilestones(sub, prev, frozen) {
 
 export const localApi = {
   health: async () => ({ ok: true, hasKey: false, model: null }),
-  state: async () => clone(state),
+  state: async () => {
+    const task = todaysTask()
+    const stu = findStu(ME)
+    const band = bandFor(stu?.gradeLevel ?? 6)
+    const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
+    return { ...clone(state), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
+  },
   reset: async () => { state = seedState(); return clone(state) },
   saveContent: async (draftId, content) => { const h = findDraft(draftId); if (h) h.draft.content = content; return { ok: true } },
   traits: async (draftId) => { const h = findDraft(draftId); if (!h) return {}; const t = fallbackTraits({ draft: h.draft.content }); h.draft.traits = t; return t },
@@ -116,15 +112,46 @@ export const localApi = {
     return { coins }
   },
   peerRevision: async () => {
-    const done = state.submissions.filter((s) => s.isPeerRevision).length
-    const task = PEER_TASKS[done % PEER_TASKS.length]
-    const asg = { id: uid('asg'), title: `Revision Challenge: help ${task.author}`, genre: task.genre, type: task.type, format: null, isPeerRevision: true, gradeLevel: 6, teacher: { name: task.author, initials: '🤖' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'revision', prompt: task.prompt, originalText: task.weakText }
-    const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true, drafts: [
-      { id: uid('drf'), n: 1, content: task.weakText, createdAt: now(), conference: [], traits: null, isOriginal: true },
-      { id: uid('drf'), n: 2, content: task.weakText, createdAt: now(), conference: [], traits: null },
-    ], milestones: [] }
-    state.assignments.push(asg); state.submissions.push(sub)
+    const task = todaysTask()
+    const today = new Date().toISOString().slice(0, 10)
+    let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
+    if (!sub) {
+      const stu = findStu(ME)
+      const band = bandFor(stu?.gradeLevel ?? 6)
+      const t = task.bands[band]
+      const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
+        format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },
+        dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: t.checklist }
+      sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
+        peerTaskId: task.id, peerDate: today, phase: 'evaluate', evaluation: null,
+        drafts: [
+          { id: uid('drf'), n: 1, content: t.weakText, createdAt: now(), conference: [], traits: null, isOriginal: true },
+          { id: uid('drf'), n: 2, content: t.weakText, createdAt: now(), conference: [], traits: null },
+        ], milestones: [] }
+      state.assignments.push(asg); state.submissions.push(sub)
+    }
     return { submissionId: sub.id }
+  },
+  evaluate: async (subId, answers) => {
+    const sub = findSub(subId); if (!sub) return { error: 'no submission' }
+    sub.evaluation = answers; sub.phase = 'rewrite'
+    return { ok: true, phase: 'rewrite' }
+  },
+  submitRevision: async (subId) => {
+    const sub = findSub(subId); if (!sub) return { error: 'no submission' }
+    const original = sub.drafts[0]
+    const revision = sub.drafts[sub.drafts.length - 1]
+    const traits = fallbackTraits({ draft: revision.content })
+    revision.traits = traits
+    const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 20, ts: now() },
+      ...evaluateMilestones(sub, original, revision)]
+    sub.milestones.push(...newMilestones)
+    for (const m of newMilestones) {
+      state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins: m.coins, ts: m.ts })
+      const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
+    }
+    sub.completedAt = now(); sub.phase = 'done'
+    return { traits, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) }
   },
   share: async (submissionId) => {
     const sub = findSub(submissionId); if (!sub) return { error: 'no submission' }
