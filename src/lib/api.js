@@ -21,7 +21,7 @@ const networkApi = {
   confer: (subId, message) =>
     fetch(u(`/api/submissions/${subId}/conference`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message }) }).then(j),
   saveRevision: (subId) => fetch(u(`/api/submissions/${subId}/save-revision`), { method: 'POST' }).then(j),
-  quickWrite: (mode) => fetch(u('/api/quickwrite'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode }) }).then(j),
+  quickWrite: (mode, extra = {}) => fetch(u('/api/quickwrite'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode, ...extra }) }).then(j),
   start: (assignmentId) => fetch(u('/api/submissions/start'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assignmentId }) }).then(j),
   setGoal: (payload) => fetch(u('/api/goal'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
   achieveGoal: () => fetch(u('/api/goal/achieve'), { method: 'POST' }).then(j),

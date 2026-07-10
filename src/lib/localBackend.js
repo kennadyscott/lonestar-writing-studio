@@ -85,16 +85,24 @@ export const localApi = {
     sub.drafts.push(next)
     return { newDraft: next, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) }
   },
-  quickWrite: async (mode0) => {
+  quickWrite: async (mode0, extra = {}) => {
     const mode = mode0 === 'free' ? 'free' : 'quick'
     const n = state.assignments.filter((a) => a.genre === mode).length + 1
-    const prompt = mode === 'free'
+    const prompt = extra.prompt || (mode === 'free'
       ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
-      : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)]
-    const asg = { id: uid('asg'), title: mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`, genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
-    const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, drafts: [{ id: uid('drf'), n: 1, content: '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+      : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)])
+    const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
+    const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: extra.complete ? now() : null, drafts: [{ id: uid('drf'), n: 1, content: extra.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+    let coins = 0
+    if (extra.complete) {
+      coins = 10
+      const m = { id: uid('ms'), type: 'quick_write', label: 'Finished a timed Quick Write', coins, ts: now() }
+      sub.milestones.push(m)
+      state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
+      const stu = findStu(ME); if (stu) stu.coins += coins
+    }
     state.assignments.push(asg); state.submissions.push(sub)
-    return { submissionId: sub.id }
+    return { submissionId: sub.id, coins }
   },
   start: async (assignmentId) => {
     const asg = findAsg(assignmentId); if (!asg) return { error: 'no assignment' }

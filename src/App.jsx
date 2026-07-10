@@ -6,6 +6,7 @@ import WritingStudio from './student/WritingStudio.jsx'
 import RevisionStudio from './student/RevisionStudio.jsx'
 import ArcadePage from './student/ArcadePage.jsx'
 import LunaPage from './student/LunaPage.jsx'
+import QuickWritePage from './student/QuickWritePage.jsx'
 import TeacherHome from './teacher/TeacherHome.jsx'
 import Portfolio from './teacher/Portfolio.jsx'
 import TraitTrends from './teacher/TraitTrends.jsx'
@@ -44,9 +45,11 @@ export default function App() {
         ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
         : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
     } else if (view === 'home') {
-      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onChange={refresh} />
+      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onChange={refresh} />
     } else if (view === 'luna') {
       body = <LunaPage state={state} onBack={goHome} />
+    } else if (view === 'quickwrite') {
+      body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
     } else {
       body = <ArcadePage me={me} state={state} onBack={goHome} />
     }

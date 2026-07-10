@@ -312,6 +312,50 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { submissionId: sub.id })
     }
 
+    // POST /api/quickwrite { mode, title?, prompt?, content?, complete? }
+    if (req.method === 'POST' && url.pathname === '/api/quickwrite') {
+      const body = await readBody(req)
+      const mode = body.mode === 'free' ? 'free' : 'quick'
+      const n = state.assignments.filter((a) => a.genre === mode).length + 1
+      const prompt = body.prompt || (mode === 'free'
+        ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
+        : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)])
+      const asg = {
+        id: uid('asg'), title: body.title || (mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`),
+        genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
+        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
+        scopeStage: 'sentence', prompt,
+      }
+      const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: body.complete ? now() : null,
+        drafts: [{ id: uid('drf'), n: 1, content: body.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+      let coins = 0
+      if (body.complete) {
+        coins = 10
+        const m = { id: uid('ms'), type: 'quick_write', label: 'Finished a timed Quick Write', coins, ts: now() }
+        sub.milestones.push(m)
+        state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
+        const stu = findStu(ME); if (stu) stu.coins += coins
+      }
+      state.assignments.push(asg)
+      state.submissions.push(sub)
+      save()
+      return send(res, 200, { submissionId: sub.id, coins })
+    }
+
+    // POST /api/submissions/start { assignmentId } -> create a submission if none exists
+    if (req.method === 'POST' && url.pathname === '/api/submissions/start') {
+      const body = await readBody(req)
+      const asg = findAsg(body.assignmentId)
+      if (!asg) return send(res, 404, { error: 'no assignment' })
+      let sub = state.submissions.find((s) => s.assignmentId === asg.id && s.studentId === ME)
+      if (!sub) {
+        sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null,
+          drafts: [{ id: uid('drf'), n: 1, content: '', createdAt: now(), conference: [], traits: null }], milestones: [] }
+        state.submissions.push(sub); save()
+      }
+      return send(res, 200, { submissionId: sub.id })
+    }
+
     // POST /api/quickwrite { mode: 'quick' | 'free' } -> spin up a fresh writing space
     if (req.method === 'POST' && url.pathname === '/api/quickwrite') {
       const body = await readBody(req)

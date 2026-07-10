@@ -103,3 +103,6 @@ a { color: var(--link); }
 .hero-banner { position: relative; overflow: hidden; border-radius: var(--radius); background: linear-gradient(95deg, #077397 0%, #05506e 55%, #033d57 100%); color: #fff; padding: 20px 26px; display: flex; align-items: center; gap: 18px; box-shadow: var(--shadow); }
 .hero-banner .spark { position: absolute; color: rgba(255,255,255,.45); font-size: 13px; pointer-events: none; }
 .hero-banner .art { position: absolute; right: 200px; top: 50%; transform: translateY(-50%); font-size: 44px; opacity: .35; pointer-events: none; }
+
+/* contentEditable placeholder (Quick Write editor) */
+[contenteditable][data-placeholder]:empty::before { content: attr(data-placeholder); color: #9ab0bf; font-style: italic; pointer-events: none; }

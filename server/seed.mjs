@@ -135,6 +135,15 @@ export function seedState() {
       scr: [2.2, 2.4, 2.3, 2.6, 2.7, 2.9, 3.0, 3.1, 3.3, 3.4],
       ecr: [1.8, 2.0, 2.1, 2.2, 2.4, 2.5, 2.6, 2.8, 2.9, 3.0],
     },
+    // Quick Write — static prompt bank (title + prompt, like the live product).
+    quickPrompts: [
+      { title: 'Robot at School', prompt: 'A robot joins your class. What happens during the day?' },
+      { title: 'The New Rule', prompt: 'If you could add one new rule to your school, what would it be and why?' },
+      { title: 'Best Season', prompt: 'What is the best season of the year? Make your case.' },
+      { title: 'Phones in Class', prompt: 'Should kids be allowed to have phones at school? Take a side.' },
+      { title: 'The Secret Door', prompt: 'You find a door in the library that was never there before. What happens next?' },
+      { title: 'Homework Debate', prompt: 'Should homework be optional? Argue your opinion.' },
+    ],
     // ClearSheets — assigned worksheets (companion product).
     clearSheets: [
       { id: 'cs1', title: 'Context Clues Practice', subject: 'ELA', due: '2026-07-08', status: 'todo' },

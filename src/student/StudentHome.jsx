@@ -367,7 +367,7 @@ function AssignmentsCard({ rows, busy, begin }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onLuna, onChange }) {
+export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
@@ -453,7 +453,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onChange }) {
               <span style={{ fontSize: 17 }}>🖊️</span><b style={{ fontSize: 15 }}>Ways to Write</b>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <WayTile icon="⚡" title="Quick Write" sub="A fresh prompt to warm up" busy={busy} onClick={() => launch('quick')} />
+              <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
               <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={() => launch('free')} />
               <WayTile icon="🎯" title="Fluency Game" sub="Stretch sentences, fast" onClick={() => setGame(true)} />
             </div>
