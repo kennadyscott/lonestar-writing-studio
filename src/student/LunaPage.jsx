@@ -97,8 +97,9 @@ export default function LunaPage({ state, onBack }) {
   const streak = state.growthSummary?.streakDays ?? 7
 
   return (
-    <div style={{ margin: '-26px -34px -70px', padding: '26px 34px 70px', position: 'relative', overflow: 'hidden',
-      background: 'linear-gradient(180deg,#bfe2f5 0%,#dbeefa 40%,#eaf6fd 100%)' }}>
+    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '26px 0 70px', minHeight: 'calc(100vh - 76px)',
+      position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
+      background: 'linear-gradient(180deg,#bfe2f5 0%,#dbeefa 45%,#eaf6fd 100%)' }}>
       {/* sky decorations */}
       <span style={{ position: 'absolute', top: 30, left: '14%', color: '#fff', fontSize: 16 }}>✦</span>
       <span style={{ position: 'absolute', top: 90, left: '46%', color: '#f5c542', fontSize: 13 }}>✦</span>
@@ -108,7 +109,7 @@ export default function LunaPage({ state, onBack }) {
       <div style={{ position: 'absolute', bottom: -60, left: -40, width: 300, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.5)', filter: 'blur(6px)' }} />
       <div style={{ position: 'absolute', bottom: -80, right: -30, width: 380, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.45)', filter: 'blur(8px)' }} />
 
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', maxWidth: 1320, margin: '0 auto', padding: '0 34px' }}>
         {/* page header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
           <div>
