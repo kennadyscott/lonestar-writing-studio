@@ -135,6 +135,17 @@ export function seedState() {
       scr: [2.2, 2.4, 2.3, 2.6, 2.7, 2.9, 3.0, 3.1, 3.3, 3.4],
       ecr: [1.8, 2.0, 2.1, 2.2, 2.4, 2.5, 2.6, 2.8, 2.9, 3.0],
     },
+    // ClearSheets — assigned worksheets (companion product).
+    clearSheets: [
+      { id: 'cs1', title: 'Context Clues Practice', subject: 'ELA', due: '2026-07-08', status: 'todo' },
+      { id: 'cs2', title: 'Central Idea Check-In', subject: 'ELA', due: '2026-07-11', status: 'todo' },
+      { id: 'cs3', title: 'Water Cycle Vocabulary', subject: 'Science', due: null, status: 'done' },
+    ],
+    // Crystal Quest — independent learning paths (crystals = milestones).
+    crystalQuests: [
+      { id: 'cq1', title: 'Master the Counter-Argument', area: 'Argument Writing', progress: 0.5, crystals: '3 of 6 crystals' },
+      { id: 'cq2', title: 'Vivid Verbs Adventure', area: 'Word Choice', progress: 0.2, crystals: '1 of 5 crystals' },
+    ],
     // Home-page growth summary (percent scores, goal, streak, badges).
     growthSummary: {
       currentAverage: 82,

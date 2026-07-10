@@ -213,6 +213,63 @@ function GoalBanner({ me, onData }) {
   )
 }
 
+/* ---- Assignments tab: companion-product sections ---- */
+function ClearSheetsCard({ sheets }) {
+  return (
+    <div className="card" style={{ padding: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <span style={{ fontSize: 18 }}>🧾</span><b style={{ fontSize: 15 }}>ClearSheets</b>
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600 }}>· Worksheets</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {sheets.map((w) => (
+          <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700 }}>{w.title}</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 3 }}>
+                <span className="pill" style={{ fontSize: 10.5, padding: '2px 8px', background: '#e2f2f3', color: 'var(--scr)' }}>{w.subject}</span>
+                {w.status === 'done'
+                  ? <span style={{ fontSize: 11.5, color: 'var(--good)', fontWeight: 700 }}>✓ Done</span>
+                  : <DueChip dueDate={w.due} status="not_started" />}
+              </div>
+            </div>
+            <button className={w.status === 'done' ? 'btn ghost' : 'btn'} style={{ padding: '6px 14px', fontSize: 12.5 }} title="Opens in ClearSheets">
+              {w.status === 'done' ? 'Review' : 'Open'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CrystalQuestCard({ quests }) {
+  return (
+    <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 16px', background: 'linear-gradient(120deg,#3a2f6b,#5b4aa0)', color: '#fff' }}>
+        <span style={{ fontSize: 18 }}>💎</span><b style={{ fontSize: 15 }}>Crystal Quest</b>
+        <span style={{ fontSize: 11.5, opacity: .85, fontWeight: 600 }}>· Independent learning paths</span>
+      </div>
+      <div style={{ padding: '13px 16px', display: 'flex', flexDirection: 'column', gap: 13, flex: 1 }}>
+        {quests.map((q) => (
+          <div key={q.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ width: 38, height: 38, borderRadius: 10, background: '#f0ecfa', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>💎</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700 }}>{q.title}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, margin: '1px 0 5px' }}>{q.area} · {q.crystals}</div>
+              <div style={{ height: 6, background: '#eae6f5', borderRadius: 4 }}>
+                <div style={{ height: '100%', width: `${q.progress * 100}%`, background: 'linear-gradient(90deg,#8e6bbf,#5b4aa0)', borderRadius: 4 }} />
+              </div>
+            </div>
+            <button className="btn" style={{ padding: '6px 14px', fontSize: 12.5, background: '#5b4aa0' }} title="Opens in Crystal Quest">Continue</button>
+          </div>
+        ))}
+        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 'auto' }}>Earn crystals by finishing each step of a path — at your own pace.</div>
+      </div>
+    </div>
+  )
+}
+
 /* ---- Full assignments list (owns its filter state) ---- */
 function AssignmentsCard({ rows, busy, begin }) {
   const [tab, setTab] = useState('active')
@@ -236,7 +293,7 @@ function AssignmentsCard({ rows, busy, begin }) {
     })
 
   return (
-    <div className="card" style={{ overflow: 'hidden', marginBottom: 18 }}>
+    <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
       <div style={{ display: 'flex', gap: 8, padding: '14px 16px 12px' }}>
         {['active', 'completed'].map((t) => (
           <button key={t} onClick={() => setTab(t)}
@@ -396,7 +453,15 @@ export default function StudentHome({ state, me, onOpen, onLuna, onChange }) {
       {/* ================= ASSIGNMENTS ================= */}
       {homeTab === 'assignments' && (<>
         <GoalBanner me={me} onData={() => setHomeTab('data')} />
-        <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'stretch', marginBottom: 18 }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <ClearSheetsCard sheets={state.clearSheets || []} />
+            <CrystalQuestCard quests={state.crystalQuests || []} />
+          </div>
+        </div>
         {gs && <GrowthSummaryCard gs={gs} onGrowth={() => setHomeTab('data')} />}
       </>)}
 

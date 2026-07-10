@@ -135,7 +135,7 @@ function WritingDataCard({ writingData }) {
   })
 
   return (
-    <div className="card" style={{ padding: '16px 18px' }}>
+    <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <b style={{ fontSize: 15 }}>📊 My Writing Data</b>
         <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
@@ -297,7 +297,7 @@ export function DataGoalsTab({ state, me, onChange }) {
       </div>
 
       {/* writing data + monthly/habits — one balanced row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'stretch' }}>
         <WritingDataCard writingData={state.writingData} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div className="card" style={{ padding: '16px 18px' }}>
@@ -313,7 +313,7 @@ export function DataGoalsTab({ state, me, onChange }) {
               : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={64} />}
           </div>
 
-          <div className="card" style={{ padding: '16px 18px' }}>
+          <div className="card" style={{ padding: '16px 18px', flex: 1 }}>
             <b style={{ fontSize: 15 }}>🔥 My Writing Habits</b>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
               {[
