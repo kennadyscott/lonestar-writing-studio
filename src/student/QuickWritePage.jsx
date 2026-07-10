@@ -8,7 +8,6 @@ import { api } from '../lib/api.js'
  *   3. Timed writing screen with live countdown + editor -> submit for coins
  */
 
-const GOAL_SECONDS = 180
 
 function Digits({ seconds, light }) {
   const mm = String(Math.floor(Math.max(0, seconds) / 60)).padStart(2, '0')
@@ -29,6 +28,9 @@ function StopwatchArt({ size = 54 }) {
 }
 
 export default function QuickWritePage({ state, onBack, onChange }) {
+  // teacher-configured goal time (from their system)
+  const GOAL_SECONDS = state.settings?.quickWriteSeconds ?? 180
+  const setBy = state.settings?.quickWriteSetBy
   // rotate the static prompt bank daily
   const bank = state.quickPrompts || []
   const pick = bank.length ? bank[Math.floor(Date.now() / 86400000) % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
@@ -57,7 +59,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
     setBusy(true)
     try {
       const r = await api.quickWrite('quick', { title: pick.title, prompt: pick.prompt, content: text.trim(), complete: true })
-      setResult({ coins: r.coins, words: wc })
+      setResult({ coins: r.coins, words: wc, streakDays: r.streakDays, streakExtended: r.streakExtended })
       setStage('done')
       onChange && onChange()
     } finally { setBusy(false) }
@@ -112,6 +114,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                   <div style={{ fontSize: 30, fontWeight: 800, marginBottom: 6 }}>Are you ready?</div>
                   <div style={{ fontSize: 16, opacity: .9, marginBottom: 14 }}>Your goal is to write for</div>
                   <Digits seconds={GOAL_SECONDS} light />
+                  {setBy && <div style={{ fontSize: 12, opacity: .75, marginTop: 8 }}>⏱ Goal time set by {setBy}</div>}
                   <div style={{ marginTop: 22 }}>
                     <button onClick={() => setStage('writing')}
                       style={{ background: 'var(--cyan)', color: '#fff', fontWeight: 800, fontSize: 16, borderRadius: 12, padding: '12px 30px' }}>
@@ -185,6 +188,11 @@ export default function QuickWritePage({ state, onBack, onChange }) {
             {result.coins > 0 && (
               <div className="pill gold" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14 }}>
                 🏅 Finished a timed Quick Write&nbsp;&nbsp;<span className="coin"><span className="disc" />+{result.coins}</span>
+              </div>
+            )}
+            {result.streakDays > 0 && (
+              <div className="pill" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14, marginTop: 8, background: '#fdeee3', color: '#c2571f', width: '100%' }}>
+                🔥 Writing streak: <b>{result.streakDays} days</b>{result.streakExtended ? ' — extended today!' : ''}
               </div>
             )}
             <button className="btn" style={{ marginTop: 18, width: '100%', justifyContent: 'center' }} onClick={onBack}>Back to my dashboard</button>

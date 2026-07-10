@@ -94,15 +94,25 @@ export const localApi = {
     const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
     const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: extra.complete ? now() : null, drafts: [{ id: uid('drf'), n: 1, content: extra.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
     let coins = 0
+    let streakDays = state.growthSummary?.streakDays ?? 0
+    let streakExtended = false
     if (extra.complete) {
       coins = 10
       const m = { id: uid('ms'), type: 'quick_write', label: 'Finished a timed Quick Write', coins, ts: now() }
       sub.milestones.push(m)
       state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
       const stu = findStu(ME); if (stu) stu.coins += coins
+      const today = now().slice(0, 10)
+      const gsum = state.growthSummary
+      if (gsum && gsum.lastStreakDate !== today) {
+        gsum.streakDays += 1
+        gsum.lastStreakDate = today
+        streakExtended = true
+      }
+      streakDays = gsum?.streakDays ?? streakDays
     }
     state.assignments.push(asg); state.submissions.push(sub)
-    return { submissionId: sub.id, coins }
+    return { submissionId: sub.id, coins, streakDays, streakExtended }
   },
   start: async (assignmentId) => {
     const asg = findAsg(assignmentId); if (!asg) return { error: 'no assignment' }

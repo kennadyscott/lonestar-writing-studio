@@ -135,6 +135,8 @@ export function seedState() {
       scr: [2.2, 2.4, 2.3, 2.6, 2.7, 2.9, 3.0, 3.1, 3.3, 3.4],
       ecr: [1.8, 2.0, 2.1, 2.2, 2.4, 2.5, 2.6, 2.8, 2.9, 3.0],
     },
+    // Teacher-configured settings (from the teacher's system).
+    settings: { quickWriteSeconds: 180, quickWriteSetBy: 'Mr. Nowitski' },
     // Quick Write — static prompt bank (title + prompt, like the live product).
     quickPrompts: [
       { title: 'Robot at School', prompt: 'A robot joins your class. What happens during the day?' },
@@ -161,6 +163,7 @@ export function seedState() {
       weeklyDelta: 6,
       goalPercent: 85,
       streakDays: 7,
+      lastStreakDate: null, // set when an activity feeds the streak (once/day)
       badges: 12,
       scoreOverTime: [
         { label: 'Apr 14', pct: 68 },

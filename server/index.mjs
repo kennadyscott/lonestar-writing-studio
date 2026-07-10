@@ -329,17 +329,28 @@ const server = http.createServer(async (req, res) => {
       const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: body.complete ? now() : null,
         drafts: [{ id: uid('drf'), n: 1, content: body.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
       let coins = 0
+      let streakDays = state.growthSummary?.streakDays ?? 0
+      let streakExtended = false
       if (body.complete) {
         coins = 10
         const m = { id: uid('ms'), type: 'quick_write', label: 'Finished a timed Quick Write', coins, ts: now() }
         sub.milestones.push(m)
         state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
         const stu = findStu(ME); if (stu) stu.coins += coins
+        // feed the writing streak — at most once per day
+        const today = now().slice(0, 10)
+        const gsum = state.growthSummary
+        if (gsum && gsum.lastStreakDate !== today) {
+          gsum.streakDays += 1
+          gsum.lastStreakDate = today
+          streakExtended = true
+        }
+        streakDays = gsum?.streakDays ?? streakDays
       }
       state.assignments.push(asg)
       state.submissions.push(sub)
       save()
-      return send(res, 200, { submissionId: sub.id, coins })
+      return send(res, 200, { submissionId: sub.id, coins, streakDays, streakExtended })
     }
 
     // POST /api/submissions/start { assignmentId } -> create a submission if none exists
