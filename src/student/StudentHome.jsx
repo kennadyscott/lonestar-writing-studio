@@ -163,24 +163,28 @@ function UpNextCard({ row, busy, begin, onAll }) {
   if (!row) return null
   const s = STATUS_CHIP[row.status]
   return (
-    <div className="card" style={{ padding: '18px 20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span className="eyebrow">⭐ Up next for you</span>
-        <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>See all assignments →</button>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 17 }}>{row.a.title}</div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 7, flexWrap: 'wrap' }}>
-            <FormatBadge format={row.a.format} />
-            <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.name}</span>
-            <DueChip dueDate={row.a.dueDate} status={row.status} />
+    <div style={{ background: 'linear-gradient(115deg,var(--cyan-bright),var(--cyan) 45%,var(--teal))', borderRadius: 19, padding: 3, boxShadow: '0 8px 26px rgba(6,170,222,.35)', position: 'relative' }}>
+      <span style={{ position: 'absolute', top: -13, left: 18, background: 'linear-gradient(120deg,#f5b400,#e89a00)', color: '#3d2c00', fontSize: 11.5, fontWeight: 800, letterSpacing: .6, padding: '4px 14px', borderRadius: 999, boxShadow: '0 2px 8px rgba(180,120,0,.35)' }}>
+        ⭐ UP NEXT FOR YOU
+      </span>
+      <div style={{ background: 'linear-gradient(120deg,#f0faff,#ffffff 55%)', borderRadius: 16, padding: '20px 20px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: 20, color: '#0d2f55' }}>{row.a.title}</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
+              <FormatBadge format={row.a.format} />
+              <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
+              <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.name}</span>
+              <DueChip dueDate={row.a.dueDate} status={row.status} />
+            </div>
           </div>
+          <button className="btn" disabled={busy} onClick={() => begin(row)} style={{ padding: '12px 26px', fontSize: 15, boxShadow: '0 4px 14px rgba(2,56,77,.3)' }}>
+            {row.status === 'in_progress' ? 'Continue →' : 'Begin ▶'}
+          </button>
         </div>
-        <button className="btn" disabled={busy} onClick={() => begin(row)}>
-          {row.status === 'in_progress' ? 'Continue →' : 'Begin ▶'}
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+          <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>See all assignments →</button>
+        </div>
       </div>
     </div>
   )
@@ -209,6 +213,51 @@ function GoalBanner({ me, onData }) {
           <button className="btn" onClick={onData}>Set a goal →</button>
         </>
       )}
+    </div>
+  )
+}
+
+/* ---- Fluency game picker: the growing games library, by grade level ---- */
+function GamePickerModal({ games, grade, onPlayBuiltin, onClose }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
+      <div className="card" style={{ width: 520, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <span style={{ fontSize: 26 }}>🎯</span>
+          <b style={{ fontSize: 18 }}>Fluency Games</b>
+          <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
+        </div>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>
+          Quick games that build writing muscles. New games are added by grade level — you're in <b>Grade {grade}</b>.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {games.map((g) => {
+            const soon = g.kind === 'soon'
+            return (
+              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--line)', borderRadius: 12, padding: '11px 14px', opacity: soon ? .6 : 1 }}>
+                <span style={{ width: 42, height: 42, borderRadius: 11, background: '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{g.icon}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14.5 }}>{g.title}</div>
+                  <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginTop: 3 }}>
+                    <span className="pill" style={{ fontSize: 10.5, padding: '2px 8px', background: '#e2f2f3', color: 'var(--scr)' }}>{g.skill}</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--muted)' }}>Grades {g.grades}</span>
+                  </div>
+                </div>
+                {soon ? (
+                  <span style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>COMING SOON</span>
+                ) : g.kind === 'external' ? (
+                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={() => window.open(g.url, '_blank', 'noopener')}>Play ↗</button>
+                ) : (
+                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={onPlayBuiltin}>Play ▶</button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+        <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
+          🎮 The library grows all year — games publish straight from the ClearK12 games repo.
+        </p>
+      </div>
     </div>
   )
 }
@@ -414,6 +463,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
+  const [gamePicker, setGamePicker] = useState(false)
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -465,6 +515,11 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   return (
     <div>
       {game && <FluencyGame onClose={() => setGame(false)} />}
+      {gamePicker && (
+        <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6}
+          onPlayBuiltin={() => { setGamePicker(false); setGame(true) }}
+          onClose={() => setGamePicker(false)} />
+      )}
       {fwChooser && (
         <FreeWriteModal stories={openStories} busy={busy} onBank={() => { setFwChooser(false); onBank && onBank() }}
           onPick={(id) => { setFwChooser(false); onOpen(id) }}
@@ -521,7 +576,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
             <div style={{ display: 'flex', gap: 10 }}>
               <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
               <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={freeWrite} />
-              <WayTile icon="🎯" title="Fluency Game" sub="Stretch sentences, fast" onClick={() => setGame(true)} />
+              <WayTile icon="🎯" title="Fluency Games" sub="Play & build writing muscles" onClick={() => setGamePicker(true)} />
             </div>
           </div>
           <LunaNook modules={state.modules} onLuna={onLuna} />

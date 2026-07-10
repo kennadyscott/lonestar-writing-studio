@@ -150,6 +150,14 @@ export function seedState() {
       scr: [2.2, 2.4, 2.3, 2.6, 2.7, 2.9, 3.0, 3.1, 3.3, 3.4],
       ecr: [1.8, 2.0, 2.1, 2.2, 2.4, 2.5, 2.6, 2.8, 2.9, 3.0],
     },
+    // Fluency game registry — mirrors a games.json manifest in the games repo,
+    // so new games published by grade level appear here automatically.
+    fluencyGames: [
+      { id: 'fg_stretch', title: 'Sentence Stretch', icon: '🎯', skill: 'Sentence Fluency', grades: '3–8', kind: 'builtin' },
+      { id: 'fg_punct', title: 'Punctuation Quest', icon: '🐉', skill: 'Conventions', grades: '3–5', kind: 'external', url: 'https://kennadyscott.github.io/punctuation-quest/' },
+      { id: 'fg_word', title: 'Word Choice Sprint', icon: '🎨', skill: 'Word Choice', grades: '6–8', kind: 'soon' },
+      { id: 'fg_trans', title: 'Transition Trek', icon: '🧭', skill: 'Organization', grades: '6–8', kind: 'soon' },
+    ],
     // Teacher-configured settings (from the teacher's system).
     settings: { quickWriteSeconds: 180, quickWriteSetBy: 'Mr. Nowitski' },
     // Quick Write — static prompt bank (title + prompt, like the live product).
