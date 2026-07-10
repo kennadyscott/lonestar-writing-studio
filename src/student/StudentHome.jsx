@@ -243,25 +243,40 @@ function ClearSheetsCard({ sheets }) {
   )
 }
 
+// Crystal Instruction brand: magenta gem + pink wordmark.
+function CrystalGem({ size = 20 }) {
+  return (
+    <svg viewBox="0 0 100 130" width={size} height={size * 1.3} aria-hidden="true">
+      <polygon points="50,2 96,52 4,52" fill="#f27bea" />
+      <polygon points="50,2 96,52 50,52" fill="#ee3fe0" />
+      <polygon points="4,52 96,52 50,128" fill="#e62edf" />
+      <polygon points="50,52 96,52 50,128" fill="#c21fb5" />
+    </svg>
+  )
+}
+
 function CrystalQuestCard({ quests }) {
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 16px', background: 'linear-gradient(120deg,#3a2f6b,#5b4aa0)', color: '#fff' }}>
-        <span style={{ fontSize: 18 }}>💎</span><b style={{ fontSize: 15 }}>Crystal Quest</b>
-        <span style={{ fontSize: 11.5, opacity: .85, fontWeight: 600 }}>· Independent learning paths</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 16px', background: 'linear-gradient(120deg,#e62edf,#a916a5)', color: '#fff' }}>
+        <CrystalGem size={17} />
+        <b style={{ fontSize: 15 }}>Crystal Quest</b>
+        <span style={{ fontSize: 11.5, opacity: .9, fontWeight: 600 }}>· Independent learning paths</span>
       </div>
       <div style={{ padding: '13px 16px', display: 'flex', flexDirection: 'column', gap: 13, flex: 1 }}>
         {quests.map((q) => (
           <div key={q.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ width: 38, height: 38, borderRadius: 10, background: '#f0ecfa', display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>💎</span>
+            <span style={{ width: 38, height: 38, borderRadius: 10, background: '#fbe4f9', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <CrystalGem size={17} />
+            </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13.5, fontWeight: 700 }}>{q.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, margin: '1px 0 5px' }}>{q.area} · {q.crystals}</div>
-              <div style={{ height: 6, background: '#eae6f5', borderRadius: 4 }}>
-                <div style={{ height: '100%', width: `${q.progress * 100}%`, background: 'linear-gradient(90deg,#8e6bbf,#5b4aa0)', borderRadius: 4 }} />
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, margin: '1px 0 5px' }}>{q.area} · <span style={{ color: '#c21fb5', fontWeight: 800 }}>{q.crystals}</span></div>
+              <div style={{ height: 6, background: '#f7ddf5', borderRadius: 4 }}>
+                <div style={{ height: '100%', width: `${q.progress * 100}%`, background: 'linear-gradient(90deg,#f06ee6,#c21fb5)', borderRadius: 4 }} />
               </div>
             </div>
-            <button className="btn" style={{ padding: '6px 14px', fontSize: 12.5, background: '#5b4aa0' }} title="Opens in Crystal Quest">Continue</button>
+            <button className="btn" style={{ padding: '6px 14px', fontSize: 12.5, background: '#c21fb5' }} title="Opens in Crystal Quest">Continue</button>
           </div>
         ))}
         <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 'auto' }}>Earn crystals by finishing each step of a path — at your own pace.</div>
