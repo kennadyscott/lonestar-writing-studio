@@ -1,8 +1,13 @@
 import React, { useState } from 'react'
 
-// Free Write idea bank — 30 fun story sparks. Display-only: the student still
-// does all the writing; this just breaks the blank page.
-const PROMPTS = [
+/*
+ * Free Write idea bank — two randomizers:
+ *   🎲 Story sparks  — 30 fun situations to write about
+ *   ✏️ First lines   — 30 opening lines to steal and run with
+ * Display-only: the student still does all the writing.
+ */
+
+const SPARKS = [
   'Your pet suddenly starts talking — but only to complain.',
   'You find a backpack that packs itself with exactly what you will need tomorrow.',
   'The school vending machine starts giving out mysterious items instead of snacks.',
@@ -35,16 +40,57 @@ const PROMPTS = [
   'The world’s grumpiest wizard moves in next door.',
 ]
 
+const FIRST_LINES = [
+  'The door at the end of the hallway had never been there before — until today.',
+  'On my twelfth birthday, my grandmother finally told me the family secret.',
+  'The last thing I expected to find in my locker was a map.',
+  'Everyone in town knew the rule: never whistle after dark.',
+  'The new substitute teacher never blinked. Not once.',
+  "I found the note folded inside my library book: 'Don't trust the janitor.'",
+  'It started raining on a Tuesday and did not stop for forty days.',
+  'My little brother swears the goldfish spoke to him. Now I believe him.',
+  'The day the power went out, we discovered what was living in the basement.',
+  'Nobody ever won the summer talent show three years in a row. Until me.',
+  'The spaceship was small, about the size of a shoebox, and it was parked on my desk.',
+  'I was not supposed to open the box until my birthday. I opened it anyway.',
+  'The town clock struck thirteen, and everything went quiet.',
+  'My best friend moved away two years ago. Today she showed up at my door, soaking wet and out of breath.',
+  'There are three rules at Camp Widgeon. I broke all of them before lunch.',
+  'The elevator only has four buttons, but last night there were five.',
+  "Grandpa's old radio only plays stations from the past. Tonight, it played tomorrow.",
+  'When the tide went out, it took the whole ocean with it.',
+  'I traded my sandwich for a marble. Best trade of my life.',
+  'The wolf watched us from the tree line, patient as winter.',
+  'Every family photo has the same stranger in the background.',
+  "The message on the whiteboard was not there when class started: 'MEET ME AT NOON.'",
+  'My shoes were on the wrong feet, my backpack was gone, and I was pretty sure this was not my house.',
+  "The zoo called. They said my mom left something behind. We've never been to the zoo.",
+  'At exactly 3:03 every afternoon, the hallway smells like cookies. No one knows why.',
+  'I only meant to borrow the bike for an hour.',
+  'The first snow of the year arrived in July.',
+  'My name was on the trophy in the case — but I had never played a game in my life.',
+  'The whisper came from inside the backpack.',
+  'We were not lost. We just did not know where we were, which Dad said was different.',
+]
+
+const MODES = {
+  spark: { bank: SPARKS, tag: 'Story spark', hint: 'No rules — twist it, break it, or ignore it. Your page, your story.', empty: 'fun story ideas are waiting. Spin one!' },
+  line: { bank: FIRST_LINES, tag: 'First line', hint: 'Steal this line as your opener — then take the story anywhere.', empty: 'opening lines are ready. Spin one and keep it going!' },
+}
+
 export default function PromptsPanel() {
+  const [mode, setMode] = useState('spark')
   const [idx, setIdx] = useState(null)
   const [spins, setSpins] = useState(0)
+  const m = MODES[mode]
 
   function spin() {
-    let next = Math.floor(Math.random() * PROMPTS.length)
-    if (next === idx) next = (next + 1) % PROMPTS.length
+    let next = Math.floor(Math.random() * m.bank.length)
+    if (next === idx) next = (next + 1) % m.bank.length
     setIdx(next)
     setSpins((s) => s + 1)
   }
+  function switchMode(k) { setMode(k); setIdx(null) }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -52,31 +98,47 @@ export default function PromptsPanel() {
         <div style={{ fontSize: 22 }}>🎲</div>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Need an idea?</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Spin for a story spark — then write wherever it takes you.</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Spin for inspiration — then write wherever it takes you.</div>
+        </div>
+      </div>
+
+      {/* mode toggle */}
+      <div style={{ padding: '12px 16px 0' }}>
+        <div style={{ display: 'flex', background: '#eaf1f6', borderRadius: 10, padding: 3 }}>
+          {[['spark', '🎲 Story Sparks'], ['line', '✏️ First Lines']].map(([k, label]) => (
+            <button key={k} onClick={() => switchMode(k)}
+              style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 800,
+                background: mode === k ? '#fff' : 'transparent', color: mode === k ? 'var(--navy)' : 'var(--muted)',
+                boxShadow: mode === k ? 'var(--shadow)' : 'none' }}>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, textAlign: 'center' }}>
         {idx === null ? (
           <>
-            <div style={{ fontSize: 52 }}>🎲</div>
+            <div style={{ fontSize: 52 }}>{mode === 'spark' ? '🎲' : '✏️'}</div>
             <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 240, margin: 0 }}>
-              {PROMPTS.length} fun story ideas are waiting. Spin one!
+              {m.bank.length} {m.empty}
             </p>
-            <button className="btn" style={{ padding: '11px 26px', fontSize: 15 }} onClick={spin}>🎲 Spin a prompt</button>
+            <button className="btn" style={{ padding: '11px 26px', fontSize: 15 }} onClick={spin}>
+              {mode === 'spark' ? '🎲 Spin a prompt' : '✏️ Give me a first line'}
+            </button>
           </>
         ) : (
           <>
-            <div key={spins} style={{ background: 'linear-gradient(140deg,#eaf6fd,#d8eefa)', border: '1.5px solid #bfe0f2', borderRadius: 16, padding: '22px 20px', width: '100%', position: 'relative' }}>
+            <div key={mode + spins} style={{ background: 'linear-gradient(140deg,#eaf6fd,#d8eefa)', border: '1.5px solid #bfe0f2', borderRadius: 16, padding: '22px 20px', width: '100%', position: 'relative' }}>
               <span style={{ position: 'absolute', top: 10, left: 14, color: '#8fcbe8', fontSize: 13 }}>✦</span>
               <span style={{ position: 'absolute', bottom: 12, right: 16, color: '#f5c542', fontSize: 12 }}>✦</span>
-              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--link)', textTransform: 'uppercase', marginBottom: 8 }}>Story spark #{idx + 1}</div>
-              <div style={{ fontSize: 16.5, fontWeight: 700, lineHeight: 1.5, color: '#0d2f55' }}>{PROMPTS[idx]}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--link)', textTransform: 'uppercase', marginBottom: 8 }}>{m.tag} #{idx + 1}</div>
+              <div style={{ fontSize: 16.5, fontWeight: 700, lineHeight: 1.5, color: '#0d2f55', fontStyle: mode === 'line' ? 'italic' : 'normal' }}>
+                {mode === 'line' ? `“${m.bank[idx]}”` : m.bank[idx]}
+              </div>
             </div>
             <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={spin}>🎲 Another one!</button>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 250 }}>
-              No rules — twist it, break it, or ignore it. Your page, your story.
-            </p>
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 250 }}>{m.hint}</p>
           </>
         )}
       </div>
