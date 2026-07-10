@@ -2,75 +2,232 @@ import React from 'react'
 import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 
-const STATUS = {
-  completed: { label: 'COMPLETED', color: 'var(--good)', chipBg: '#e6f6ee' },
-  in_progress: { label: 'IN PROGRESS', color: 'var(--link)', chipBg: '#e2f2fb' },
-  not_started: { label: 'NOT STARTED', color: 'var(--muted)', chipBg: '#eef3f6' },
+/*
+ * Luna's Writing Nook — activity-path view per brand mockup:
+ * sky background, module header w/ activity count, numbered activity cards with
+ * stars + status on a dashed path, and a "Your Progress" sidebar.
+ */
+
+const RACE_TILES = [['R', '#e668c9'], ['A', '#6db7f2'], ['C', '#7fd483'], ['E', '#f2b27e']]
+
+// Module 1 activity path (prototype data — mirrors the live product's lessons).
+const M1_ACTIVITIES = [
+  { n: 1, title: 'Restate The Question', stars: 0, status: 'in_progress', art: '💬' },
+  { n: 2, title: 'Answer The Question', stars: 3, status: 'passed', art: '💡' },
+  { n: 3, title: 'Cite The Evidence', stars: 2, status: 'passed', art: '🔍' },
+  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: '🧠' },
+  { n: 5, title: 'RACE', stars: 3, status: 'passed', art: 'RACE' },
+  { n: 6, title: 'Module 1: Short Constructed Response Test', stars: 0, status: 'todo', art: '💻' },
+]
+
+function Stars({ n }) {
+  return (
+    <span style={{ fontSize: 17, letterSpacing: 2 }} aria-label={`${n} of 3 stars`}>
+      {[1, 2, 3].map((i) => <span key={i} style={{ color: i <= n ? '#f5b400' : '#d7dfe6' }}>★</span>)}
+    </span>
+  )
+}
+
+function ActivityCard({ a }) {
+  const passed = a.status === 'passed'
+  const inProgress = a.status === 'in_progress'
+  return (
+    <div style={{ position: 'relative', background: '#fff', borderRadius: 16, boxShadow: '0 2px 10px rgba(2,56,77,.10)', padding: 10, width: 220, flexShrink: 0 }}>
+      {/* number chip */}
+      <span style={{ position: 'absolute', top: -11, left: -11, width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(140deg,#06aade,#0a7dba)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 14, boxShadow: '0 2px 6px rgba(2,56,77,.3)', zIndex: 2 }}>{a.n}</span>
+      {passed && <span style={{ position: 'absolute', top: -10, right: -10, width: 27, height: 27, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800, boxShadow: '0 2px 6px rgba(2,56,77,.25)', zIndex: 2 }}>✓</span>}
+
+      {/* art block */}
+      <div style={{ position: 'relative', height: 104, borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <span style={{ position: 'absolute', top: 8, left: 12, color: 'rgba(255,255,255,.5)', fontSize: 10 }}>✦</span>
+        <span style={{ position: 'absolute', bottom: 10, right: 14, color: '#f5b400', fontSize: 11 }}>✦</span>
+        <span style={{ position: 'absolute', top: 14, right: 26, color: 'rgba(255,255,255,.35)', fontSize: 8 }}>✦</span>
+        <img src={BRAND.luna} alt="" style={{ height: 62 }} />
+        {a.art === 'RACE' ? (
+          <span style={{ display: 'inline-flex', gap: 3 }}>
+            {RACE_TILES.map(([l, c]) => (
+              <span key={l} style={{ width: 22, height: 22, borderRadius: 5, background: c, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13, transform: `rotate(${(l.charCodeAt(0) % 3 - 1) * 8}deg)` }}>{l}</span>
+            ))}
+          </span>
+        ) : (
+          <span style={{ fontSize: 34, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.4))' }}>{a.art}</span>
+        )}
+      </div>
+
+      <div style={{ padding: '10px 6px 6px' }}>
+        <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.25, minHeight: 36 }}>{a.title}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0 10px' }}>
+          <Stars n={a.stars} />
+          {passed && <span className="pill green" style={{ fontSize: 11 }}>PASSED ✓</span>}
+          {inProgress && <span className="pill" style={{ fontSize: 11, background: '#fdf1dc', color: '#b97e10' }}>IN PROGRESS</span>}
+          {a.status === 'todo' && <span className="pill" style={{ fontSize: 11, background: '#eef3f6', color: 'var(--muted)' }}>UP NEXT</span>}
+        </div>
+        <button title="Activity opens in the full product" style={{ width: '100%', padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 13, color: '#fff', background: passed ? 'linear-gradient(120deg,#41b9e3,#06aade)' : 'linear-gradient(120deg,#06aade,#0a7dba)' }}>
+          {passed ? '📊 View Summary' : '📖 Open Activity'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function Dash() {
+  return <div style={{ flex: 1, minWidth: 18, borderTop: '3px dashed #8fcbe8', alignSelf: 'center', margin: '0 2px', position: 'relative', top: -8 }} />
+}
+
+function ProgressRing({ pct }) {
+  const R = 26, C = 2 * Math.PI * R
+  return (
+    <svg width="68" height="68" viewBox="0 0 68 68">
+      <circle cx="34" cy="34" r={R} fill="none" stroke="#e2eef5" strokeWidth="8" />
+      <circle cx="34" cy="34" r={R} fill="none" stroke="#06aade" strokeWidth="8" strokeLinecap="round"
+        strokeDasharray={`${C * pct} ${C}`} transform="rotate(-90 34 34)" />
+      <text x="34" y="38" textAnchor="middle" fontSize="14" fontWeight="800" fill="#14344a">{Math.round(pct * 100)}%</text>
+    </svg>
+  )
 }
 
 export default function LunaPage({ state, onBack }) {
   const modules = state.modules
-  const done = modules.filter((m) => m.status === 'completed').length
-  const current = modules.find((m) => m.status === 'in_progress')
+  const current = modules.find((m) => m.status === 'in_progress') || modules[0]
+  const currentIdx = modules.indexOf(current)
+  const acts = M1_ACTIVITIES
+  const done = acts.filter((a) => a.status === 'passed').length
+  const starsEarned = acts.reduce((s, a) => s + a.stars, 0)
+  const starsMax = acts.length * 3
+  const streak = state.growthSummary?.streakDays ?? 7
 
   return (
-    <div>
-      {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
+    <div style={{ margin: '-26px -34px -70px', padding: '26px 34px 70px', position: 'relative', overflow: 'hidden',
+      background: 'linear-gradient(180deg,#bfe2f5 0%,#dbeefa 40%,#eaf6fd 100%)' }}>
+      {/* sky decorations */}
+      <span style={{ position: 'absolute', top: 30, left: '14%', color: '#fff', fontSize: 16 }}>✦</span>
+      <span style={{ position: 'absolute', top: 90, left: '46%', color: '#f5c542', fontSize: 13 }}>✦</span>
+      <span style={{ position: 'absolute', top: 46, right: '10%', color: '#fff', fontSize: 11 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 140, left: '6%', color: '#f5c542', fontSize: 12 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 90, right: '22%', fontSize: 30, opacity: .5, transform: 'rotate(-20deg)' }}>🚀</span>
+      <div style={{ position: 'absolute', bottom: -60, left: -40, width: 300, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.5)', filter: 'blur(6px)' }} />
+      <div style={{ position: 'absolute', bottom: -80, right: -30, width: 380, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.45)', filter: 'blur(8px)' }} />
 
-      {/* hero */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: 18, position: 'relative', background: 'linear-gradient(115deg,#0d2f55 0%,#02384d 70%,#01172d 100%)' }}>
-        <div style={{ position: 'absolute', right: -10, top: -34, fontSize: 150, fontWeight: 800, color: 'rgba(255,255,255,.05)', pointerEvents: 'none', fontFamily: 'Manrope' }}>Luna</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '20px 28px', color: '#fff' }}>
-          <img src={BRAND.luna} alt="Luna" style={{ height: 84 }} />
-          <div style={{ flex: 1 }}>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Luna's Writing Nook</h1>
-            <div style={{ fontSize: 14, opacity: .9, marginTop: 3 }}>Your writing path — six modules from short answers to polished pieces.</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, maxWidth: 420 }}>
-              <div style={{ flex: 1, height: 9, background: 'rgba(255,255,255,.18)', borderRadius: 6 }}>
-                <div style={{ height: '100%', width: `${(done / modules.length) * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 6 }} />
+      <div style={{ position: 'relative' }}>
+        {/* page header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 30, fontWeight: 800, color: '#0d2f55' }}>Luna's Writing Nook</h1>
+            <div style={{ fontSize: 15, color: '#4a6f8c', fontWeight: 600 }}>Think it. Write it. Shine! <span style={{ color: '#f5b400' }}>✦</span></div>
+          </div>
+          <img src={BRAND.luna} alt="Luna" style={{ height: 74, marginLeft: 8 }} />
+          <div style={{ flex: 1 }} />
+          {onBack && (
+            <button onClick={onBack} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 12, padding: '11px 20px', fontWeight: 800, fontSize: 14, color: '#0a5b76', boxShadow: '0 2px 8px rgba(2,56,77,.08)' }}>
+              ← Back to Previous Page
+            </button>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 20, alignItems: 'start' }}>
+          {/* ===== main column ===== */}
+          <div>
+            {/* module header */}
+            <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 10px rgba(2,56,77,.10)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, marginBottom: 30 }}>
+              <ModuleBadge id={current.id} size={52} />
+              <b style={{ fontSize: 19, whiteSpace: 'nowrap' }}>Module {currentIdx + 1}: {current.label}</b>
+              <span style={{ background: '#e2f2fb', color: '#0a7dba', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '6px 14px', whiteSpace: 'nowrap' }}>{done} of {acts.length} activities completed</span>
+              <div style={{ flex: 1, height: 10, background: '#e6eef3', borderRadius: 6, minWidth: 80 }}>
+                <div style={{ height: '100%', width: `${(done / acts.length) * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 6 }} />
               </div>
-              <span style={{ fontSize: 12.5, fontWeight: 800, whiteSpace: 'nowrap' }}>{done} of {modules.length} complete</span>
+              <span style={{ color: '#f5b400', fontSize: 18 }}>✦</span>
+            </div>
+
+            {/* activity path — row 1 */}
+            <div style={{ display: 'flex', alignItems: 'stretch', marginBottom: 34, paddingLeft: 12 }}>
+              {acts.slice(0, 4).map((a, i) => (
+                <React.Fragment key={a.n}>
+                  {i > 0 && <Dash />}
+                  <ActivityCard a={a} />
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* activity path — row 2 */}
+            <div style={{ display: 'flex', alignItems: 'stretch', paddingLeft: 12, justifyContent: 'center', gap: 0 }}>
+              <div style={{ width: 120 }} />
+              {acts.slice(4).map((a, i) => (
+                <React.Fragment key={a.n}>
+                  {i > 0 && <Dash />}
+                  <ActivityCard a={a} />
+                </React.Fragment>
+              ))}
+              <div style={{ width: 160, display: 'grid', placeItems: 'center', fontSize: 40, opacity: .85 }}>🚀</div>
+            </div>
+
+            {/* other modules strip */}
+            <div style={{ marginTop: 34, background: 'rgba(255,255,255,.65)', borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#4a6f8c', whiteSpace: 'nowrap' }}>YOUR PATH:</span>
+              {modules.map((m, i) => {
+                const locked = m.status === 'not_started'
+                const isCur = m.id === current.id
+                return (
+                  <div key={m.id} title={`Module ${i + 1}: ${m.label}${locked ? ' (locked)' : ''}`}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, opacity: locked ? .55 : 1, padding: isCur ? '4px 8px' : 0, background: isCur ? '#fff' : 'transparent', borderRadius: 10, boxShadow: isCur ? '0 2px 6px rgba(2,56,77,.12)' : 'none' }}>
+                    <ModuleBadge id={m.id} size={34} dim={locked} />
+                    <span style={{ fontSize: 9, fontWeight: 800, color: '#4a6f8c' }}>{locked ? '🔒' : isCur ? 'NOW' : '✓'}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* ===== progress sidebar ===== */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 10px rgba(2,56,77,.10)', overflow: 'hidden' }}>
+              <div style={{ background: 'linear-gradient(120deg,#0d2f55,#02384d)', color: '#fff', fontWeight: 800, fontSize: 15, padding: '11px 16px' }}>✨ Your Progress</div>
+
+              <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--line)' }}>
+                <span style={{ fontSize: 32 }}>⭐</span>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>Stars Earned</div>
+                  <div style={{ fontSize: 21, fontWeight: 800 }}>{starsEarned} <span style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700 }}>/ {starsMax}</span></div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)' }}>Keep shining! ✦</div>
+                </div>
+              </div>
+
+              <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--line)' }}>
+                <span style={{ fontSize: 32 }}>🔥</span>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>Current Streak</div>
+                  <div style={{ fontSize: 21, fontWeight: 800 }}>{streak} <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>days in a row!</span></div>
+                </div>
+                <span style={{ marginLeft: 'auto', fontSize: 22 }}>📅</span>
+              </div>
+
+              <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--line)' }}>
+                <ProgressRing pct={done / acts.length} />
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>Module Progress</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.4 }}>Great work! You're more than halfway there!</div>
+                </div>
+              </div>
+
+              <div style={{ padding: '14px 16px' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)', marginBottom: 8 }}>Badges Earned</div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <ModuleBadge id="m1" size={40} />
+                  <ModuleBadge id="m5" size={40} />
+                  <ModuleBadge id="m4" size={40} />
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)', marginLeft: 4 }}>3 of 5 badges</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 10px rgba(2,56,77,.10)', padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
+              <img src={BRAND.luna} alt="Luna" style={{ height: 58 }} />
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#0d2f55' }}>You're doing amazing, writer!</div>
+                <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>Keep up the great work and finish strong! <span style={{ color: '#f5b400' }}>✦</span></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* up next */}
-      {current && (
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px', marginBottom: 18, background: 'linear-gradient(120deg,#eef8fd,#fff)' }}>
-          <ModuleBadge id={current.id} size={46} />
-          <div style={{ flex: 1 }}>
-            <div className="eyebrow">Up next for you</div>
-            <b style={{ fontSize: 15 }}>{current.label}</b>
-            <span style={{ fontSize: 13, color: 'var(--muted)' }}> · {Math.round(current.progress * 100)}% through</span>
-          </div>
-          <button className="btn">Continue →</button>
-        </div>
-      )}
-
-      {/* module grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {modules.map((m, i) => {
-          const st = STATUS[m.status]
-          const locked = m.status === 'not_started'
-          return (
-            <div key={m.id} className="card" style={{ padding: '22px 18px 18px', textAlign: 'center', background: locked ? '#f4f7f9' : 'linear-gradient(180deg,#f2fafd,#ffffff)' }}>
-              <ModuleBadge id={m.id} size={74} dim={locked} />
-              <div style={{ fontWeight: 800, fontSize: 15.5, margin: '10px 0 2px', color: locked ? 'var(--muted)' : 'var(--ink)' }}>
-                Module {i + 1}: {m.label}
-              </div>
-              <span className="pill" style={{ background: st.chipBg, color: st.color, marginTop: 6 }}>{locked ? '🔒 ' : ''}{st.label}</span>
-              <div style={{ height: 8, background: '#e6eef3', borderRadius: 5, marginTop: 14 }}>
-                <div style={{ height: '100%', width: `${m.progress * 100}%`, background: m.status === 'completed' ? 'var(--good)' : 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
-              </div>
-              <div style={{ marginTop: 14 }}>
-                {m.status === 'completed' && <button className="btn ghost" style={{ padding: '7px 18px' }}>Review ✓</button>}
-                {m.status === 'in_progress' && <button className="btn" style={{ padding: '7px 18px' }}>Continue →</button>}
-                {locked && <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>Finish Module {i} to unlock</span>}
-              </div>
-            </div>
-          )
-        })}
       </div>
     </div>
   )

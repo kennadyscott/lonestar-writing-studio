@@ -152,8 +152,8 @@ export function seedState() {
     },
     // Luna's Writing Nook — the six real modules from the live product.
     modules: [
-      { id: 'm1', label: 'Short Constructed Response', status: 'completed', progress: 1 },
-      { id: 'm2', label: 'Extended Constructed Response', status: 'in_progress', progress: 0.45 },
+      { id: 'm1', label: 'Short Constructed Response', status: 'in_progress', progress: 0.67 },
+      { id: 'm2', label: 'Extended Constructed Response', status: 'not_started', progress: 0 },
       { id: 'm3', label: 'Stellar Writers', status: 'not_started', progress: 0 },
       { id: 'm4', label: 'The Writing Process', status: 'not_started', progress: 0 },
       { id: 'm5', label: 'Revision', status: 'not_started', progress: 0 },
