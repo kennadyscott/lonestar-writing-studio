@@ -215,31 +215,93 @@ function GoalBanner({ me, onData }) {
 }
 
 /* ---- Daily Challenge banner: navy space theme (mockup) ---- */
+function Spark({ x, y, c, s: size, glyph = '✦' }) {
+  return <span style={{ position: 'absolute', left: x, top: y, color: c, fontSize: size, pointerEvents: 'none', textShadow: `0 0 8px ${c}` }}>{glyph}</span>
+}
+
+function Comet({ x, y, c, rot = -18, w = 80 }) {
+  return <span style={{ position: 'absolute', left: x, top: y, width: w, height: 3, borderRadius: 3, background: `linear-gradient(90deg, transparent, ${c})`, transform: `rotate(${rot}deg)`, pointerEvents: 'none', boxShadow: `0 0 6px ${c}` }} />
+}
+
 function DailyBanner({ dc, busy, onGo }) {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 18, background: 'linear-gradient(110deg,#0b1e4b 0%,#13306b 55%,#0b1e4b 100%)', color: '#fff', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 20, boxShadow: '0 8px 24px rgba(11,30,75,.35)' }}>
-      <span style={{ position: 'absolute', top: 14, left: '34%', color: '#ffd76b', fontSize: 15 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 16, left: '46%', color: 'rgba(255,255,255,.6)', fontSize: 10 }}>✦</span>
-      <span style={{ position: 'absolute', top: 22, right: '30%', color: '#8fd8ff', fontSize: 13 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 10, right: '18%', fontSize: 30, opacity: .8 }}>💻</span>
-      <span style={{ position: 'absolute', bottom: 8, right: '13%', fontSize: 21, opacity: .8 }}>☕</span>
-      <div style={{ width: 78, height: 78, borderRadius: '50%', flexShrink: 0, background: 'radial-gradient(circle at 40% 35%, #4a7ff0, #1b3f8f 75%)', display: 'grid', placeItems: 'center', fontSize: 42, boxShadow: '0 0 26px rgba(90,150,255,.75)' }}>🤖</div>
-      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.2, color: '#9fc4ef', textTransform: 'uppercase' }}>
-          Daily Challenge · Revision{dc?.genre ? ` · ${dc.genre}` : ''}
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24,
+      background: 'radial-gradient(ellipse at 12% 15%, rgba(60,90,200,.45) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(40,70,160,.4) 0%, transparent 50%), linear-gradient(110deg,#0a1434 0%,#0e1d4a 55%,#0a1434 100%)',
+      boxShadow: '0 10px 30px rgba(8,16,50,.45)' }}>
+
+      {/* star field + comets */}
+      <Spark x="30%" y={12} c="#ffffff" s={9} />
+      <Spark x="44%" y="72%" c="#8fd8ff" s={13} />
+      <Spark x="56%" y={16} c="#ffd76b" s={11} glyph="⭐" />
+      <Spark x="63%" y="58%" c="#ffffff" s={7} />
+      <Spark x="71%" y={26} c="#5aa8ff" s={18} />
+      <Spark x="80%" y="70%" c="#ffd76b" s={9} />
+      <Spark x="90%" y={14} c="#ffd76b" s={14} glyph="⭐" />
+      <Spark x="95%" y="60%" c="#8fd8ff" s={8} />
+      <Comet x="47%" y="80%" c="#ff8fb0" rot={-14} w={70} />
+      <Comet x="58%" y="34%" c="#ffd76b" rot={-20} w={90} />
+      <Comet x="86%" y="42%" c="#5ad7ff" rot={-16} w={64} />
+
+      {/* robot in glowing ring orb */}
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div style={{ width: 108, height: 108, borderRadius: '50%', padding: 3.5,
+          background: 'conic-gradient(from 210deg, #8b5cf6, #38b6ff, #6ee7ff, #8b5cf6)',
+          boxShadow: '0 0 30px rgba(110,150,255,.7)' }}>
+          <div style={{ width: '100%', height: '100%', borderRadius: '50%', position: 'relative', overflow: 'hidden',
+            background: 'radial-gradient(circle at 35% 28%, #2b4bb8 0%, #14205a 55%, #0c1440 100%)',
+            display: 'grid', placeItems: 'center', fontSize: 52 }}>
+            <span style={{ position: 'absolute', top: 12, right: 16, color: '#fff', fontSize: 7 }}>✦</span>
+            <span style={{ position: 'absolute', bottom: 16, left: 14, color: '#8fd8ff', fontSize: 6 }}>✦</span>
+            🤖
+          </div>
         </div>
-        <div style={{ fontSize: 19.5, fontWeight: 800, margin: '3px 0 2px' }}>
+        <span style={{ position: 'absolute', bottom: -2, left: -10, fontSize: 24, filter: 'drop-shadow(0 0 6px rgba(255,200,60,.8))' }}>⭐</span>
+        <span style={{ position: 'absolute', top: -6, right: -4, fontSize: 14, filter: 'drop-shadow(0 0 5px rgba(255,200,60,.8))' }}>⭐</span>
+      </div>
+
+      {/* content */}
+      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+        <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span>Daily Challenge</span>
+          <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
+          <span>Revision</span>
+          {dc?.genre && (<><span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span><span>{dc.genre}</span></>)}
+        </div>
+        <div style={{ fontSize: 23, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 8px rgba(0,0,0,.4)' }}>
           {dc?.done ? "Today's challenge is done — nice work! ✓" : `${dc?.author || 'A robot'} wrote something rough — can you fix it up?`}
         </div>
-        <div style={{ fontSize: 13, color: '#c6d9f2', marginBottom: 9 }}>
+        <div style={{ fontSize: 14.5, color: '#c9dbf4', marginBottom: 13 }}>
           {dc?.done ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.' : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"}
         </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'linear-gradient(120deg,#7b5cd6,#5b3fb8)', borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 800 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '8px 20px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
+          background: 'linear-gradient(120deg,#8b5cf6,#6d3fd8)', border: '1.5px solid rgba(190,155,255,.65)', boxShadow: '0 0 16px rgba(139,92,246,.5)' }}>
           ⭐ EARN A BADGE!
         </span>
       </div>
+
+      {/* rubric laptop + charged mug vignette */}
+      <div aria-hidden style={{ position: 'relative', flexShrink: 0, alignSelf: 'flex-end', display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: -4 }}>
+        <div>
+          <div style={{ width: 84, height: 54, borderRadius: '7px 7px 0 0', border: '3px solid #c9955c', borderBottom: 'none', background: '#0d2438', padding: '5px 7px' }}>
+            <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: 1, color: '#7fd4a0' }}>RUBRIC</div>
+            {[0, 1].map((i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                <span style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(150,190,230,.45)' }} />
+                <span style={{ fontSize: 8, color: '#57d98a' }}>✔</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ width: 100, height: 8, background: 'linear-gradient(#d8a86b,#b07d43)', borderRadius: '2px 2px 8px 8px', margin: '0 auto' }} />
+        </div>
+        <span style={{ fontSize: 30, filter: 'hue-rotate(165deg) saturate(2) brightness(1.15)' }}>☕</span>
+        <span style={{ position: 'absolute', right: 6, bottom: 8, fontSize: 11 }}>⚡</span>
+      </div>
+
+      {/* glowing CTA */}
       <button disabled={busy} onClick={onGo}
-        style={{ position: 'relative', whiteSpace: 'nowrap', background: 'rgba(18,52,110,.7)', border: '2px solid #55d7ff', color: '#fff', fontWeight: 800, fontSize: 15, borderRadius: 999, padding: '12px 26px', boxShadow: '0 0 18px rgba(85,215,255,.55)' }}>
+        style={{ position: 'relative', flexShrink: 0, whiteSpace: 'nowrap', color: '#fff', fontWeight: 800, fontSize: 19, borderRadius: 20, padding: '20px 32px',
+          background: 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: '2.5px solid #55d7ff',
+          boxShadow: '0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22)' }}>
         {dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
       </button>
     </div>
