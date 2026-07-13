@@ -70,61 +70,70 @@ export default function QuickWritePage({ state, onBack, onChange }) {
     <div>
       {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
 
-      <div className="card" style={{ overflow: 'hidden', position: 'relative' }}>
-        {/* header */}
-        <div style={{ background: 'linear-gradient(95deg,#2fa7dd,#0a7dba)', color: '#fff', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <b style={{ fontSize: 21 }}>Quick Write</b>
-          <StopwatchArt />
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <h1 className="page" style={{ margin: 0, fontSize: 40, color: '#161342' }}>Quick Write</h1>
+          <span style={{ position: 'absolute', top: -6, right: -26, color: '#f5c542', fontSize: 16 }}>✦</span>
+          <span style={{ position: 'absolute', top: 14, right: -40, color: '#8b7cf5', fontSize: 11 }}>✦</span>
+          <div style={{ height: 5, width: '70%', borderRadius: 3, background: 'linear-gradient(90deg,#6455e0,transparent)', marginTop: 4 }} />
         </div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#efeafd', color: '#4a3fb0', fontWeight: 800, fontSize: 14.5, borderRadius: 999, padding: '10px 20px' }}>
+          🕐 About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
+        </span>
+      </div>
 
-        {/* ============ 1. intro ============ */}
+      <div className="card" style={{ overflow: 'hidden', position: 'relative' }}>
+
+
+        {/* ============ intro: one screen, one click ============ */}
         {stage === 'intro' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px,0.9fr) 1.3fr', gap: 30, padding: 28, alignItems: 'center' }}>
-            <div style={{ background: 'linear-gradient(160deg,#eaf6fd,#d8eefa)', border: '1px solid #cfe7f5', borderRadius: 16, height: 260, display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden' }}>
-              <span style={{ position: 'absolute', top: 18, left: 24, color: '#8fcbe8', fontSize: 16 }}>✦</span>
-              <span style={{ position: 'absolute', bottom: 22, right: 28, color: '#8fcbe8', fontSize: 12 }}>✦</span>
-              <span style={{ position: 'absolute', top: 30, right: 44, color: '#f5c542', fontSize: 13 }}>✦</span>
-              <span style={{ fontSize: 84 }}>💻</span>
-              <span style={{ position: 'absolute', bottom: 46, right: '30%', fontSize: 44, transform: 'rotate(-15deg)' }}>✍️</span>
-            </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>Title</div>
-              <div style={{ fontSize: 22, fontWeight: 800, margin: '2px 0 18px' }}>{pick.title}</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>Writing Prompt</div>
-              <div style={{ fontSize: 16.5, lineHeight: 1.55, margin: '2px 0 26px' }}>{pick.prompt}</div>
-              <div style={{ textAlign: 'right' }}>
-                <button className="btn" style={{ padding: '11px 34px', fontSize: 15 }} onClick={() => setStage('ready')}>Start</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ============ 2. are-you-ready modal over blurred card ============ */}
-        {stage === 'ready' && (
-          <div style={{ position: 'relative' }}>
-            <div style={{ filter: 'blur(5px)', pointerEvents: 'none', padding: 28, minHeight: 320 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)' }}>Title</div>
-              <div style={{ fontSize: 20, fontWeight: 800, margin: '2px 0 14px' }}>{pick.title}</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)' }}>Writing Prompt</div>
-              <div style={{ fontSize: 15 }}>{pick.prompt}</div>
-              <div style={{ marginTop: 16, height: 140, border: '1px solid var(--line)', borderRadius: 10 }} />
-            </div>
-            <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
-              <div style={{ background: 'linear-gradient(140deg,#0d2f55,#02384d)', borderRadius: 20, padding: '30px 38px', color: '#fff', display: 'flex', alignItems: 'center', gap: 30, boxShadow: '0 18px 50px rgba(2,23,45,.45)' }}>
-                <div>
-                  <div style={{ fontSize: 30, fontWeight: 800, marginBottom: 6 }}>Are you ready?</div>
-                  <div style={{ fontSize: 16, opacity: .9, marginBottom: 14 }}>Your goal is to write for</div>
-                  <Digits seconds={GOAL_SECONDS} light />
-                  {setBy && <div style={{ fontSize: 12, opacity: .75, marginTop: 8 }}>⏱ Goal time set by {setBy}</div>}
-                  <div style={{ marginTop: 22 }}>
-                    <button onClick={() => setStage('writing')}
-                      style={{ background: 'var(--cyan)', color: '#fff', fontWeight: 800, fontSize: 16, borderRadius: 12, padding: '12px 30px' }}>
-                      🚀 Begin
-                    </button>
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 34, padding: '26px 30px 22px', alignItems: 'center' }}>
+              <img src={`${import.meta.env.BASE_URL || '/'}qw-hero.jpg`} alt=""
+                style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,80,.25)' }} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#efeafd', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#6455e0', textTransform: 'uppercase' }}>Writing Topic</span>
+                </div>
+                <div style={{ fontSize: 42, fontWeight: 800, color: '#161342', lineHeight: 1.1, margin: '10px 0 12px' }}>{pick.title}</div>
+                <div style={{ height: 4, width: 300, maxWidth: '85%', borderRadius: 3, background: 'linear-gradient(90deg,#2c2478,#8b7cf5 70%,transparent)', marginBottom: 20 }} />
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#6455e0', textTransform: 'uppercase', marginBottom: 8 }}>Writing Prompt</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#1f1a4e', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#efeafd', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
+                  <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
+                  <div style={{ fontSize: 14, color: '#3c3670', lineHeight: 1.45 }}>
+                    <b style={{ color: '#6455e0' }}>Think about:</b> {pick.hint || 'What details and examples will make your idea clear to a reader?'}
                   </div>
                 </div>
-                <span style={{ fontSize: 92 }}>😊</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                  <button onClick={() => setStage('writing')}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#6455e0', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
+                      boxShadow: '0 8px 22px rgba(100,85,224,.45)', cursor: 'pointer' }}>
+                    ✏️ Start Writing
+                  </button>
+                  <span style={{ fontSize: 19, color: '#6455e0' }}>→</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>
+                    ⏱ The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
+                  </span>
+                </div>
               </div>
+            </div>
+            {/* benefits strip */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: '1px solid var(--line)' }}>
+              {[
+                ['⭐', '#2e9e6b', 'Share Your Ideas', 'Your voice matters. Big ideas can spark real change!'],
+                ['🚀', '#2f8ceb', 'Be Creative', 'There are no wrong answers — just your unique voice.'],
+                ['💜', '#8b5cf6', 'Make It Meaningful', 'Explain the why behind your idea and how it helps others.'],
+              ].map(([icon, c, title, blurb], i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '18px 22px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
+                  <span style={{ fontSize: 24, filter: `drop-shadow(0 1px 2px ${c}55)` }}>{icon}</span>
+                  <span>
+                    <b style={{ display: 'block', fontSize: 14.5, color: '#161342' }}>{title}</b>
+                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>{blurb}</span>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}

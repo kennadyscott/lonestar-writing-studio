@@ -178,12 +178,12 @@ export function seedState() {
     settings: { quickWriteSeconds: 180, quickWriteSetBy: 'Mr. Nowitski' },
     // Quick Write — static prompt bank (title + prompt, like the live product).
     quickPrompts: [
-      { title: 'Robot at School', prompt: 'A robot joins your class. What happens during the day?' },
-      { title: 'The New Rule', prompt: 'If you could add one new rule to your school, what would it be and why?' },
-      { title: 'Best Season', prompt: 'What is the best season of the year? Make your case.' },
-      { title: 'Phones in Class', prompt: 'Should kids be allowed to have phones at school? Take a side.' },
-      { title: 'The Secret Door', prompt: 'You find a door in the library that was never there before. What happens next?' },
-      { title: 'Homework Debate', prompt: 'Should homework be optional? Argue your opinion.' },
+      { title: 'Robot at School', prompt: 'A robot joins your class. What happens during the day?', hint: 'What could go wonderfully right — or hilariously wrong?' },
+      { title: 'The New Rule', prompt: 'If you could add one new rule to your school, what would it be and why?', hint: 'How your rule would help students, teachers, or the whole school.' },
+      { title: 'Best Season', prompt: 'What is the best season of the year? Make your case.', hint: 'Pick two or three reasons and back each one with a detail.' },
+      { title: 'Phones in Class', prompt: 'Should kids be allowed to have phones at school? Take a side.', hint: 'What would the other side say — and how would you answer them?' },
+      { title: 'The Secret Door', prompt: 'You find a door in the library that was never there before. What happens next?', hint: 'Use your five senses to pull the reader through the door with you.' },
+      { title: 'Homework Debate', prompt: 'Should homework be optional? Argue your opinion.', hint: 'Think about who homework helps, who it stresses, and what evidence you have.' },
     ],
     // ClearSheets — assigned worksheets (companion product).
     clearSheets: [
