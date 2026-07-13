@@ -48,33 +48,30 @@ function LunaNook({ modules, onLuna }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'linear-gradient(120deg,#0d2f55,#02384d)', color: '#fff' }}>
-        <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
-        <b style={{ fontSize: 15 }}>Luna's Writing Nook</b>
-        <button onClick={onLuna} style={{ marginLeft: 'auto', color: '#cfeefb', fontSize: 12, fontWeight: 700 }}>Your writing path →</button>
+    <div style={{ flex: 1, borderRadius: 18, background: 'linear-gradient(135deg,#0d2f55,#0a2342)', padding: 14, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 12, boxShadow: 'var(--shadow)' }}>
+      <span style={{ position: 'absolute', top: 12, right: 18, color: 'rgba(255,255,255,.5)', fontSize: 12 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 14, right: 40, color: '#f5c542', fontSize: 10 }}>✦</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+        <img src={BRAND.luna} alt="Luna" style={{ height: 44 }} />
+        <div>
+          <b style={{ fontSize: 16, color: '#fff' }}>Luna's Writing Nook</b>
+          <div style={{ fontSize: 12, color: '#bcdcf0', fontWeight: 600 }}>Your writing path</div>
+        </div>
       </div>
-      <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <ModuleBadge id={current.id} size={44} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 800 }}>Module {idx + 1}: {current.label}</div>
-            <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, margin: '2px 0 5px' }}>4 of 6 activities completed</div>
-            <div style={{ height: 7, background: '#e6eef3', borderRadius: 5 }}>
-              <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
-            </div>
-          </div>
+      <div style={{ background: '#fff', borderRadius: 14, padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <b style={{ fontSize: 14.5 }}>Module {idx + 1}: {current.label}</b>
+        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>4 of 6 activities completed</div>
+        <div style={{ height: 8, background: '#e6eef3', borderRadius: 5 }}>
+          <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 7 }}>
-            {modules.map((m) => (
-              <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .45 : 1 }}>
-                <ModuleBadge id={m.id} size={26} dim={m.status === 'not_started'} />
-              </span>
-            ))}
-          </div>
-          <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={onLuna}>Continue →</button>
+        <div style={{ display: 'flex', gap: 8, margin: '4px 0 6px' }}>
+          {modules.map((m) => (
+            <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
+              <ModuleBadge id={m.id} size={30} dim={m.status === 'not_started'} />
+            </span>
+          ))}
         </div>
+        <button className="btn" style={{ alignSelf: 'flex-start', padding: '9px 22px', fontSize: 13.5 }} onClick={onLuna}>Go to my path →</button>
       </div>
     </div>
   )
@@ -163,27 +160,27 @@ function UpNextCard({ row, busy, begin, onAll }) {
   if (!row) return null
   const s = STATUS_CHIP[row.status]
   return (
-    <div style={{ background: 'linear-gradient(115deg,var(--cyan-bright),var(--cyan) 45%,var(--teal))', borderRadius: 19, padding: 3, boxShadow: '0 8px 26px rgba(6,170,222,.35)', position: 'relative' }}>
-      <span style={{ position: 'absolute', top: -13, left: 18, background: 'linear-gradient(120deg,#f5b400,#e89a00)', color: '#3d2c00', fontSize: 11.5, fontWeight: 800, letterSpacing: .6, padding: '4px 14px', borderRadius: 999, boxShadow: '0 2px 8px rgba(180,120,0,.35)' }}>
+    <div style={{ position: 'relative', background: '#fff', border: '2.5px solid #0a7dba', borderRadius: 18, boxShadow: '0 8px 24px rgba(6,170,222,.16)', padding: '24px 22px 14px' }}>
+      <span style={{ position: 'absolute', top: -14, left: 18, background: 'linear-gradient(120deg,#f5b400,#e89a00)', color: '#3d2c00', fontSize: 11.5, fontWeight: 800, letterSpacing: .6, padding: '5px 15px', borderRadius: 999, boxShadow: '0 2px 8px rgba(180,120,0,.35)' }}>
         ⭐ UP NEXT FOR YOU
       </span>
-      <div style={{ background: 'linear-gradient(120deg,#f0faff,#ffffff 55%)', borderRadius: 16, padding: '20px 20px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 800, fontSize: 20, color: '#0d2f55' }}>{row.a.title}</div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-              <FormatBadge format={row.a.format} />
-              <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
-              <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.name}</span>
-              <DueChip dueDate={row.a.dueDate} status={row.status} />
-            </div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ transform: 'scale(1.2)', transformOrigin: 'left center' }}><FormatBadge format={row.a.format} /></span>
+            <span style={{ fontWeight: 800, fontSize: 23, color: '#0d2f55' }}>{row.a.title}</span>
           </div>
-          <button className="btn" disabled={busy} onClick={() => begin(row)} style={{ padding: '12px 26px', fontSize: 15, boxShadow: '0 4px 14px rgba(2,56,77,.3)' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
+            <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
+            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.name}</span>
+            <DueChip dueDate={row.a.dueDate} status={row.status} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 9 }}>
+          <button className="btn" disabled={busy} onClick={() => begin(row)} style={{ padding: '13px 30px', fontSize: 15.5 }}>
             {row.status === 'in_progress' ? 'Continue →' : 'Begin ▶'}
           </button>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
-          <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>See all assignments →</button>
+          <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>See all assignments →</button>
         </div>
       </div>
     </div>
@@ -213,6 +210,84 @@ function GoalBanner({ me, onData }) {
           <button className="btn" onClick={onData}>Set a goal →</button>
         </>
       )}
+    </div>
+  )
+}
+
+/* ---- Daily Challenge banner: navy space theme (mockup) ---- */
+function DailyBanner({ dc, busy, onGo }) {
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 18, background: 'linear-gradient(110deg,#0b1e4b 0%,#13306b 55%,#0b1e4b 100%)', color: '#fff', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 20, boxShadow: '0 8px 24px rgba(11,30,75,.35)' }}>
+      <span style={{ position: 'absolute', top: 14, left: '34%', color: '#ffd76b', fontSize: 15 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 16, left: '46%', color: 'rgba(255,255,255,.6)', fontSize: 10 }}>✦</span>
+      <span style={{ position: 'absolute', top: 22, right: '30%', color: '#8fd8ff', fontSize: 13 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 10, right: '18%', fontSize: 30, opacity: .8 }}>💻</span>
+      <span style={{ position: 'absolute', bottom: 8, right: '13%', fontSize: 21, opacity: .8 }}>☕</span>
+      <div style={{ width: 78, height: 78, borderRadius: '50%', flexShrink: 0, background: 'radial-gradient(circle at 40% 35%, #4a7ff0, #1b3f8f 75%)', display: 'grid', placeItems: 'center', fontSize: 42, boxShadow: '0 0 26px rgba(90,150,255,.75)' }}>🤖</div>
+      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.2, color: '#9fc4ef', textTransform: 'uppercase' }}>
+          Daily Challenge · Revision{dc?.genre ? ` · ${dc.genre}` : ''}
+        </div>
+        <div style={{ fontSize: 19.5, fontWeight: 800, margin: '3px 0 2px' }}>
+          {dc?.done ? "Today's challenge is done — nice work! ✓" : `${dc?.author || 'A robot'} wrote something rough — can you fix it up?`}
+        </div>
+        <div style={{ fontSize: 13, color: '#c6d9f2', marginBottom: 9 }}>
+          {dc?.done ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.' : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"}
+        </div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'linear-gradient(120deg,#7b5cd6,#5b3fb8)', borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 800 }}>
+          ⭐ EARN A BADGE!
+        </span>
+      </div>
+      <button disabled={busy} onClick={onGo}
+        style={{ position: 'relative', whiteSpace: 'nowrap', background: 'rgba(18,52,110,.7)', border: '2px solid #55d7ff', color: '#fff', fontWeight: 800, fontSize: 15, borderRadius: 999, padding: '12px 26px', boxShadow: '0 0 18px rgba(85,215,255,.55)' }}>
+        {dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
+      </button>
+    </div>
+  )
+}
+
+/* ---- Share Wall right rail (mockup) ---- */
+function relTime(d) {
+  const days = Math.max(0, Math.floor((Date.now() - new Date(d + 'T12:00:00')) / 86400000))
+  if (days === 0) return 'Today'
+  if (days < 7) return `${days}d ago`
+  return `${Math.floor(days / 7)}w ago`
+}
+
+function ShareWallRail({ state, me, onChange, onViewAll }) {
+  const wall = (state.shareWall || []).slice(0, 3)
+  async function kudo(id) { await api.kudos(id); onChange && onChange() }
+  return (
+    <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+        <span style={{ fontSize: 20 }}>🌟</span>
+        <div>
+          <b style={{ fontSize: 16 }}>Share Wall</b>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>See what other students are writing!</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginTop: 8 }}>
+        {wall.map((e, i) => (
+          <div key={e.id} style={{ padding: '13px 0', borderBottom: i < wall.length - 1 ? '1px solid var(--line)' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#eef3f6', display: 'grid', placeItems: 'center', fontSize: 17 }}>{e.avatar}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 800, lineHeight: 1.15 }}>{e.studentName}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{e.genre}</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, margin: '7px 0 6px', color: '#0d2f55' }}>{e.title}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <button onClick={() => kudo(e.id)} title="Give kudos"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#d84a57', fontWeight: 800, fontSize: 13.5, padding: 0 }}>
+                ❤️ {e.kudos}
+              </button>
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{relTime(e.sharedOn)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button className="btn" style={{ marginTop: 12, justifyContent: 'center' }} onClick={onViewAll}>View all →</button>
     </div>
   )
 }
@@ -458,7 +533,7 @@ function AssignmentsCard({ rows, busy, begin }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onChange }) {
+export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onWall, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
@@ -533,7 +608,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           {[['home', '🏠 Home'], ['assignments', '📋 Assignments'], ['data', '📊 Data & Goals']].map(([k, label]) => (
             <button key={k} onClick={() => setHomeTab(k)}
               style={{ padding: '9px 18px', borderRadius: 9, fontSize: 13.5, fontWeight: 800,
-                background: homeTab === k ? 'var(--teal-mid)' : 'transparent', color: homeTab === k ? '#fff' : 'var(--teal)' }}>
+                background: homeTab === k ? '#0d2f55' : 'transparent', color: homeTab === k ? '#fff' : 'var(--teal)' }}>
               {label}
             </button>
           ))}
@@ -541,50 +616,32 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       </div>
 
       {/* ================= HOME ================= */}
-      {homeTab === 'home' && (<>
-      <div className="hero-banner" style={{ marginBottom: 18 }}>
-        <span className="spark" style={{ left: '38%', top: 12 }}>✦</span>
-        <span className="spark" style={{ left: '55%', bottom: 14, fontSize: 9 }}>✦</span>
-        <span className="spark" style={{ left: '70%', top: 20, fontSize: 10 }}>✦</span>
-        <span className="art">📓💻☕</span>
-        <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', display: 'grid', placeItems: 'center', fontSize: 30, flexShrink: 0 }}>🤖</div>
-        <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, opacity: .85, textTransform: 'uppercase' }}>Daily Challenge · Revision{dc?.genre ? ` · ${dc.genre}` : ''}</div>
-          <div style={{ fontSize: 19, fontWeight: 800 }}>
-            {dc?.done ? "Today's challenge is done — nice work! ✓" : `${dc?.author || 'A robot'} wrote something rough — can you fix it up?`}
-          </div>
-          <div style={{ fontSize: 13, opacity: .9, marginTop: 2 }}>
-            {dc?.done ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.' : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"}
-          </div>
-        </div>
-        <button className="btn white" disabled={busy} onClick={peer} style={{ whiteSpace: 'nowrap', position: 'relative' }}>
-          {dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
-        </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'stretch', marginBottom: 18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {homeTab === 'home' && (
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 330px', gap: 18, alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <UpNextCard row={upNext} busy={busy} begin={begin} onAll={() => setHomeTab('assignments')} />
-          {gs && <GrowthSummaryCard gs={gs} onGrowth={() => setHomeTab('data')} />}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div className="card" style={{ padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 17 }}>🖊️</span><b style={{ fontSize: 15 }}>Ways to Write</b>
-              <button onClick={onBank} style={{ marginLeft: 'auto', color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>🗂️ Writing Bank →</button>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
-              <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={freeWrite} />
-              <WayTile icon="🎯" title="Fluency Games" sub="Play & build writing muscles" onClick={() => setGamePicker(true)} />
-            </div>
-          </div>
-          <LunaNook modules={state.modules} onLuna={onLuna} />
-        </div>
-      </div>
 
-      <ShareWallTab state={state} me={me} onChange={onChange} />
-      </>)}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.12fr', gap: 18, alignItems: 'stretch', flex: 1 }}>
+            <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 17 }}>🖊️</span><b style={{ fontSize: 15 }}>Ways to Write</b>
+                <button onClick={onBank} style={{ marginLeft: 'auto', color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>🗂️ Writing Bank →</button>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flex: 1 }}>
+                <WayTile icon="⚡" title="Quick Write" sub="A timed prompt to warm up" busy={busy} onClick={onQuickWrite} />
+                <WayTile icon="🕊️" title="Free Write" sub="Write anything, no rules" busy={busy} onClick={freeWrite} />
+                <WayTile icon="🎯" title="Fluency Games" sub="Play & build writing muscles" onClick={() => setGamePicker(true)} />
+              </div>
+            </div>
+            <LunaNook modules={state.modules} onLuna={onLuna} />
+          </div>
+
+          <DailyBanner dc={dc} busy={busy} onGo={peer} />
+        </div>
+
+        <ShareWallRail state={state} me={me} onChange={onChange} onViewAll={onWall} />
+      </div>
+      )}
 
       {/* ================= ASSIGNMENTS ================= */}
       {homeTab === 'assignments' && (<>

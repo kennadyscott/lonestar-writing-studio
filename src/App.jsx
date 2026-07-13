@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { api } from './lib/api.js'
 import { TopBar, RoleSwitcher } from './components/Shell.jsx'
+import { ShareWallTab } from './student/GrowthPage.jsx'
 import StudentHome from './student/StudentHome.jsx'
 import WritingStudio from './student/WritingStudio.jsx'
 import RevisionStudio from './student/RevisionStudio.jsx'
@@ -46,11 +47,18 @@ export default function App() {
         ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
         : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
     } else if (view === 'home') {
-      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onChange={refresh} />
+      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
     } else if (view === 'luna') {
       body = <LunaPage state={state} onBack={goHome} />
     } else if (view === 'quickwrite') {
       body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
+    } else if (view === 'wall') {
+      body = (
+        <div>
+          <button className="backlink" onClick={goHome}>← Back to Dashboard</button>
+          <ShareWallTab state={state} me={me} onChange={refresh} />
+        </div>
+      )
     } else if (view === 'bank') {
       body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onChange={refresh} />
     } else {
