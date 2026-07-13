@@ -47,31 +47,41 @@ function WayTile({ icon, title, sub, onClick, busy }) {
 function LunaNook({ modules, onLuna }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
+  const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div style={{ flex: 1, borderRadius: 18, background: 'linear-gradient(135deg,#0d2f55,#0a2342)', padding: 14, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 12, boxShadow: 'var(--shadow)' }}>
-      <span style={{ position: 'absolute', top: 12, right: 18, color: 'rgba(255,255,255,.5)', fontSize: 12 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 14, right: 40, color: '#f5c542', fontSize: 10 }}>✦</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-        <img src={BRAND.luna} alt="Luna" style={{ height: 44 }} />
+    <div style={{ borderRadius: 20, background: '#131048', border: '2px solid rgba(18,12,58,.5)', overflow: 'hidden', boxShadow: '0 10px 26px rgba(20,15,70,.32)' }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 13, padding: '13px 18px',
+        background: `linear-gradient(90deg, rgba(19,16,72,.94) 0%, rgba(19,16,72,.5) 42%, rgba(19,16,72,.15) 70%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
+        <span style={{ width: 56, height: 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#8b5cf6,#c9b6ff,#8b5cf6)', display: 'grid', placeItems: 'center' }}>
+          <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#1a1554', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+            <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
+          </span>
+        </span>
         <div>
-          <b style={{ fontSize: 16, color: '#fff' }}>Luna's Writing Nook</b>
-          <div style={{ fontSize: 12, color: '#bcdcf0', fontWeight: 600 }}>Your writing path</div>
+          <b style={{ fontSize: 17, color: '#fff' }}>Luna's Writing Nook</b>
+          <div style={{ fontSize: 12.5, color: '#c9bcf5', fontWeight: 700 }}>Your writing path</div>
         </div>
       </div>
-      <div style={{ background: '#fff', borderRadius: 14, padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
-        <b style={{ fontSize: 14.5 }}>Module {idx + 1}: {current.label}</b>
-        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>4 of 6 activities completed</div>
-        <div style={{ height: 8, background: '#e6eef3', borderRadius: 5 }}>
-          <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--cyan))', borderRadius: 5 }} />
+      <div style={{ background: '#fdfcf8', margin: '2px 14px 14px', borderRadius: 14, padding: '16px 20px' }}>
+        <b style={{ fontSize: 15, color: '#1c1650' }}>Module {idx + 1}: {current.label}</b>
+        <div style={{ fontSize: 12.5, color: CARD_PURPLE, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ flex: 1, height: 9, background: '#e8e6f2', borderRadius: 6 }}>
+            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: `linear-gradient(90deg,#7d5df0,${CARD_PURPLE})`, borderRadius: 6 }} />
+          </div>
+          <b style={{ fontSize: 13, color: CARD_PURPLE }}>{Math.round(current.progress * 100)}%</b>
         </div>
-        <div style={{ display: 'flex', gap: 8, margin: '4px 0 6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           {modules.map((m) => (
             <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
               <ModuleBadge id={m.id} size={30} dim={m.status === 'not_started'} />
             </span>
           ))}
+          <span style={{ flex: 1 }} />
+          <button onClick={onLuna} style={{ background: CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: `0 5px 14px ${CARD_PURPLE}55`, cursor: 'pointer' }}>
+            Go to my path →
+          </button>
         </div>
-        <button className="btn" style={{ alignSelf: 'flex-start', padding: '9px 22px', fontSize: 13.5 }} onClick={onLuna}>Go to my path →</button>
       </div>
     </div>
   )
@@ -218,17 +228,17 @@ function GoalBanner({ me, onData }) {
 const STEP_META = {
   assignments: { icon: '📄', label: 'ECR or SCR Assignment', accent: 'Show What You Know', badge: '📄',
     desc: 'Work on the writing your teacher assigned — draft, revise, or polish.', ctaWord: 'Continue Assignment', illus: ['📄', '✨'] },
-  quickwrite: { icon: '⚡', label: 'Quick Write', accent: 'Spark a Response', badge: '⚡',
+  quickwrite: { icon: '⚡', label: 'Quick Write', accent: 'Spark a Response', badge: '⚡', art: 'head-quickwrite.jpg',
     desc: "Write a short response to today's question using clear ideas.", ctaWord: 'Start Writing', illus: ['📓', '🖊️'] },
-  luna: { icon: '🌟', label: "Luna's Writing Nook", accent: 'Level Up Your Skills', badge: '🌟',
+  luna: { icon: '🌟', label: "Luna's Writing Nook", accent: 'Level Up Your Skills', badge: '🌟', art: 'head-luna.jpg',
     desc: 'Complete one activity in your current module.', ctaWord: "Open Luna's Nook", illus: ['🌟', '📚'] },
-  revision: { icon: '✏️', label: 'Daily Revision Challenge', accent: 'Make It Shine', badge: '✏️',
+  revision: { icon: '✏️', label: 'Daily Revision Challenge', accent: 'Make It Shine', badge: '✏️', art: 'head-revision.jpg',
     desc: 'Improve one short piece of writing by fixing and strengthening sentences.', ctaWord: 'Take the Challenge', illus: ['✏️', '✨'] },
-  freewrite: { icon: '🕊️', label: 'Free Write', accent: 'Follow Your Idea', badge: '✍️',
+  freewrite: { icon: '🕊️', label: 'Free Write', accent: 'Follow Your Idea', badge: '✍️', art: 'head-freewrite.jpg',
     desc: 'Write about anything you choose. Start with a prompt or your own topic.', ctaWord: 'Start a New Free Write', illus: ['📖', '🌙'] },
-  games: { icon: '🎯', label: 'Fluency Games', accent: 'Build Your Flow', badge: '🎮',
+  games: { icon: '🎯', label: 'Fluency Games', accent: 'Build Your Flow', badge: '🎮', art: 'head-games.jpg',
     desc: 'Play short games that help you write complete sentences quickly and smoothly.', ctaWord: 'Play', illus: ['🎮', '⭐'] },
-  goal_data: { icon: '🎯', label: 'My Writing Goals', accent: 'Choose Your Next Focus', badge: '⭐',
+  goal_data: { icon: '🎯', label: 'My Writing Goals', accent: 'Choose Your Next Focus', badge: '⭐', art: 'head-goals.jpg',
     desc: 'Check the skill you are working on and see your progress.', ctaWord: 'View My Goal', illus: ['⭐', '📈'] },
 }
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -506,13 +516,17 @@ function TaskCard({ meta, rows, number, status, gamesNote, ctaLabel, onAction, b
       )}
       {/* illustration zone */}
       <div style={{ position: 'relative', height: 108, borderRadius: '17px 17px 0 0', overflow: 'hidden',
-        background: 'radial-gradient(ellipse at 75% 20%, rgba(120,90,220,.55) 0%, transparent 55%), linear-gradient(160deg,#251c52,#3d2f80)' }}>
+        background: meta.art
+          ? `url(${import.meta.env.BASE_URL || '/'}${meta.art}) center 32% / cover no-repeat`
+          : 'radial-gradient(ellipse at 75% 20%, rgba(120,90,220,.55) 0%, transparent 55%), linear-gradient(160deg,#251c52,#3d2f80)' }}>
+        {!meta.art && <>
         <span style={{ position: 'absolute', top: 12, left: '14%', color: '#f5d97a', fontSize: 11 }}>✦</span>
         <span style={{ position: 'absolute', top: 30, right: '16%', color: 'rgba(255,255,255,.75)', fontSize: 8 }}>✦</span>
         <span style={{ position: 'absolute', bottom: 26, left: '24%', color: 'rgba(255,255,255,.5)', fontSize: 7 }}>✦</span>
         <span style={{ position: 'absolute', top: 16, right: '38%', color: '#f5d97a', fontSize: 8 }}>✦</span>
         <span style={{ position: 'absolute', left: '50%', top: '44%', transform: 'translate(-50%,-50%) rotate(-6deg)', fontSize: 44, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,.45))' }}>{meta.illus[0]}</span>
         <span style={{ position: 'absolute', left: '64%', top: '58%', fontSize: 22, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.4))' }}>{meta.illus[1]}</span>
+        </>}
       </div>
       {/* circular badge bridging the zones */}
       <span style={{ alignSelf: 'center', marginTop: -26, width: 52, height: 52, borderRadius: '50%', display: 'grid', placeItems: 'center', zIndex: 2,
@@ -553,21 +567,27 @@ function TaskCard({ meta, rows, number, status, gamesNote, ctaLabel, onAction, b
   )
 }
 
-/* ---- unlocked studio: big bold task cards (structurally distinct from the Launchpad) ---- */
-function BigTask({ icon, title, sub, grad, onClick, busy }) {
+/* ---- unlocked studio: mockup banner cards with art vignettes ---- */
+function BigTask({ icon, title, sub, grad, art, onClick, busy }) {
   const [c1, c2] = grad
+  const BASE = import.meta.env.BASE_URL || '/'
   return (
     <button disabled={busy} onClick={onClick}
-      style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, padding: '24px 24px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 18,
-        background: `linear-gradient(120deg,${c1},${c2})`, boxShadow: `0 10px 26px ${c1}55`, color: '#fff', cursor: 'pointer' }}>
-      <span style={{ position: 'absolute', top: 12, right: 74, color: 'rgba(255,255,255,.6)', fontSize: 12 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 14, right: 150, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
-      <span style={{ width: 66, height: 66, borderRadius: 18, background: 'rgba(255,255,255,.18)', border: '1.5px solid rgba(255,255,255,.35)', display: 'grid', placeItems: 'center', fontSize: 34, flexShrink: 0 }}>{icon}</span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: 'block', fontSize: 20, fontWeight: 800 }}>{title}</span>
-        <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
+      style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
+        display: 'flex', alignItems: 'center', gap: 16, background: `linear-gradient(120deg,${c1},${c2})`,
+        border: '2px solid rgba(18,12,58,.5)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
+      <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
+        background: `linear-gradient(90deg, transparent 55%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
+      <span style={{ position: 'absolute', top: 12, right: 88, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
+      <span style={{ position: 'absolute', bottom: 13, right: 200, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
+      <span style={{ position: 'absolute', top: 22, right: 268, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
+      <span style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
+        background: 'rgba(255,255,255,.15)', border: '2.5px solid rgba(255,255,255,.8)', boxShadow: '0 0 20px rgba(255,255,255,.3)' }}>{icon}</span>
+      <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+        <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
+        <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
       </span>
-      <span style={{ background: '#fff', color: c1, fontWeight: 800, borderRadius: 999, padding: '10px 24px', fontSize: 14.5, whiteSpace: 'nowrap' }}>Go →</span>
+      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 800, borderRadius: 999, padding: '10px 24px', fontSize: 14.5, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(0,0,0,.25)' }}>Go →</span>
     </button>
   )
 }
@@ -584,7 +604,7 @@ function Comet({ x, y, c, rot = -18, w = 80 }) {
 function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
   return (
     <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24,
-      background: 'radial-gradient(ellipse at 12% 15%, rgba(60,90,200,.45) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(40,70,160,.4) 0%, transparent 50%), linear-gradient(110deg,#0a1434 0%,#0e1d4a 55%,#0a1434 100%)',
+      background: 'radial-gradient(ellipse at 12% 15%, rgba(100,70,210,.4) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(80,55,180,.35) 0%, transparent 50%), linear-gradient(110deg,#151040 0%,#1e1656 55%,#151040 100%)',
       boxShadow: '0 10px 30px rgba(8,16,50,.45)' }}>
 
       {/* star field + comets */}
@@ -600,22 +620,12 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
       <Comet x="58%" y="34%" c="#ffd76b" rot={-20} w={90} />
       <Comet x="86%" y="42%" c="#5ad7ff" rot={-16} w={64} />
 
-      {/* robot in glowing ring orb */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        <div style={{ width: 108, height: 108, borderRadius: '50%', padding: 3.5,
-          background: 'conic-gradient(from 210deg, #8b5cf6, #38b6ff, #6ee7ff, #8b5cf6)',
-          boxShadow: locked ? 'none' : '0 0 30px rgba(110,150,255,.7)', filter: locked ? 'grayscale(.45) brightness(.8)' : 'none' }}>
-          <div style={{ width: '100%', height: '100%', borderRadius: '50%', position: 'relative', overflow: 'hidden',
-            background: 'radial-gradient(circle at 35% 28%, #2b4bb8 0%, #14205a 55%, #0c1440 100%)',
-            display: 'grid', placeItems: 'center', fontSize: 52 }}>
-            <span style={{ position: 'absolute', top: 12, right: 16, color: '#fff', fontSize: 7 }}>✦</span>
-            <span style={{ position: 'absolute', bottom: 16, left: 14, color: '#8fd8ff', fontSize: 6 }}>✦</span>
-            🤖
-          </div>
-        </div>
-        <span style={{ position: 'absolute', bottom: -2, left: -10, fontSize: 24, filter: 'drop-shadow(0 0 6px rgba(255,200,60,.8))' }}>⭐</span>
-        <span style={{ position: 'absolute', top: -6, right: -4, fontSize: 14, filter: 'drop-shadow(0 0 5px rgba(255,200,60,.8))' }}>⭐</span>
-        {locked && <span style={{ position: 'absolute', bottom: -2, right: -4, width: 34, height: 34, borderRadius: '50%', background: '#f5b400', display: 'grid', placeItems: 'center', fontSize: 17, boxShadow: '0 2px 10px rgba(0,0,0,.45)', zIndex: 2 }}>🔒</span>}
+      {/* Nova robot art */}
+      <div style={{ position: 'relative', flexShrink: 0, filter: locked ? 'grayscale(.45) brightness(.85)' : 'none' }}>
+        <img src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Nova the Robot" style={{ width: 148, display: 'block',
+          WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)',
+          maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)' }} />
+        {locked && <span style={{ position: 'absolute', bottom: 4, right: 8, width: 34, height: 34, borderRadius: '50%', background: '#f5b400', display: 'grid', placeItems: 'center', fontSize: 17, boxShadow: '0 2px 10px rgba(0,0,0,.45)', zIndex: 2 }}>🔒</span>}
       </div>
 
       {/* content */}
@@ -640,23 +650,10 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
         </span>
       </div>
 
-      {/* rubric laptop + charged mug vignette */}
-      <div aria-hidden style={{ position: 'relative', flexShrink: 0, alignSelf: 'flex-end', display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: -4 }}>
-        <div>
-          <div style={{ width: 84, height: 54, borderRadius: '7px 7px 0 0', border: '3px solid #c9955c', borderBottom: 'none', background: '#0d2438', padding: '5px 7px' }}>
-            <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: 1, color: '#7fd4a0' }}>RUBRIC</div>
-            {[0, 1].map((i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                <span style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(150,190,230,.45)' }} />
-                <span style={{ fontSize: 8, color: '#57d98a' }}>✔</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ width: 100, height: 8, background: 'linear-gradient(#d8a86b,#b07d43)', borderRadius: '2px 2px 8px 8px', margin: '0 auto' }} />
-        </div>
-        <span style={{ fontSize: 30, filter: 'hue-rotate(165deg) saturate(2) brightness(1.15)' }}>☕</span>
-        <span style={{ position: 'absolute', right: 6, bottom: 8, fontSize: 11 }}>⚡</span>
-      </div>
+      {/* rubric tablet vignette */}
+      <img aria-hidden src={`${import.meta.env.BASE_URL || '/'}rubric-vig.jpg`} alt="" style={{ width: 190, flexShrink: 0, alignSelf: 'center', display: 'block',
+        WebkitMaskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)',
+        maskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)' }} />
 
       {/* locked: dim the whole banner under an explicit lock panel */}
       {locked && (
@@ -690,8 +687,8 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
       {/* glowing CTA */}
       <button disabled={busy || locked} onClick={locked ? undefined : onGo}
         style={{ position: 'relative', flexShrink: 0, whiteSpace: 'nowrap', color: locked ? '#8fa3c8' : '#fff', fontWeight: 800, fontSize: locked ? 15 : 19, borderRadius: 20, padding: locked ? '18px 24px' : '20px 32px',
-          background: locked ? 'rgba(20,40,90,.6)' : 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: locked ? '2.5px solid #33507e' : '2.5px solid #55d7ff',
-          boxShadow: locked ? 'none' : '0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22)', cursor: locked ? 'default' : 'pointer' }}>
+          background: locked ? 'rgba(30,25,80,.6)' : 'linear-gradient(120deg,#4b32c4,#6a4ce8)', border: locked ? '2.5px solid #3d3670' : '2.5px solid #b9a4ff',
+          boxShadow: locked ? 'none' : '0 0 26px rgba(140,110,255,.6), inset 0 0 18px rgba(170,140,255,.25)', cursor: locked ? 'default' : 'pointer' }}>
         {locked ? `🔒 Unlocks after 2 missions (${missionsDone}/2)` : dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
       </button>
     </div>
@@ -1159,10 +1156,10 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1180, margin: '0 auto' }}>
           <PathRibbon wp={wp} />
           <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
-            <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#8b5cf6', '#6d3fd8']} busy={busy} onClick={onQuickWrite} />
-            <BigTask icon="🕊️" title="Free Write" sub="Your page, your rules — write anything" grad={['#2f8ceb', '#1668c4']} busy={busy} onClick={freeWrite} />
-            <BigTask icon="🎯" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0b8a8f', '#067276']} onClick={() => setGamePicker(true)} />
-            <BigTask icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#e89a00', '#c97a00']} onClick={onBank} />
+            <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#52309f', '#3a2178']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
+            <BigTask icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
+            <BigTask icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
           <LunaNook modules={state.modules} onLuna={onLuna} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
