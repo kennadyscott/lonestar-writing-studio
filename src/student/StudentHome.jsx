@@ -226,7 +226,7 @@ function GoalBanner({ me, onData }) {
 
 /* ---- Daily Writing Path: the Writing Launchpad (mission control) ---- */
 const STEP_META = {
-  assignments: { icon: '📄', label: 'ECR or SCR Assignment', accent: 'Show What You Know', badge: '📄', art: 'head-revision.jpg',
+  assignments: { icon: '📄', label: "Today's Assignment", accent: 'Show What You Know', badge: '💻', art: 'head-assignment.jpg',
     desc: 'Work on the writing your teacher assigned — draft, revise, or polish.', ctaWord: 'Continue Assignment', illus: ['📄', '✨'] },
   quickwrite: { icon: '⚡', label: 'Quick Write', accent: 'Spark a Response', badge: '⚡', art: 'head-quickwrite.jpg',
     desc: "Write a short response to today's question using clear ideas.", ctaWord: 'Start Writing', illus: ['📓', '🖊️'] },
@@ -253,49 +253,82 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onQui
   const curIdx = quest ? wp.done.findIndex((d) => !d) : -1
   const doneCount = wp?.steps ? wp.done.filter(Boolean).length : 0
 
-  // live detail rows per card (time, type, status — real data)
+  // featured content per card — one engaging element, minimal text
   const qp = state.quickPrompts?.length ? state.quickPrompts[Math.floor(Date.now() / 86400000) % state.quickPrompts.length] : null
   const mod = state.modules?.find((m) => m.status === 'in_progress') || state.modules?.[0]
-  const qMin = Math.round((state.settings?.quickWriteSeconds ?? 180) / 60)
   const lastFree = (state.submissions || []).filter((x) => x.studentId === me.id && state.assignments.find((a) => a.id === x.assignmentId)?.genre === 'free').slice(-1)[0]
   const lastFreeTitle = lastFree ? state.assignments.find((a) => a.id === lastFree.assignmentId)?.title : null
-  const gameCount = (state.fluencyGames || []).filter((g) => g.kind !== 'soon').length
-  const rowsFor = (t) => ({
-    quickwrite: [
-      ['💬', qp ? `Today's prompt: “${qp.title}”` : 'A fresh prompt each day'],
-      ['🕐', `About ${qMin} minutes`],
-      ['👤', 'Practice — builds your streak'],
-    ],
-    assignments: [
-      ['📄', upNext ? `${upNext.a.format || 'SCR'} · ${upNext.a.title}` : 'Pick any assignment'],
-      ['🕐', 'About 10–15 minutes'],
-      ['👤', upNext ? `Assigned by ${upNext.a.teacher.name}` : 'From your teacher'],
-    ],
-    luna: [
-      ['🌟', mod ? `Module ${state.modules.indexOf(mod) + 1}: ${mod.label}` : 'Your writing path'],
-      ['📈', '4 of 6 activities complete'],
-      ['🕐', 'One activity'],
-    ],
-    revision: [
-      ['✏️', 'One challenge a day'],
-      ['🕐', 'Usually 3–10 minutes'],
-      ['🔥', 'Feeds your daily streak'],
-    ],
-    freewrite: [
-      ['📄', lastFreeTitle ? `Your last free write: ${lastFreeTitle}` : 'A blank page, all yours'],
-      ['🕐', '10–20 minutes'],
-      ['💾', 'Autosaves as you write'],
-    ],
-    games: [
-      ['🎮', `${gameCount} games in the library`],
-      ['🏆', 'Play any 2 to finish'],
-      ['🕐', '5–10 minutes'],
-    ],
-    goal_data: [
-      ['🎯', me.goal ? `Current goal: ${me.goal.text}` : 'No goal set — pick one!'],
-      ['📈', 'Then take a quick data dive'],
-      ['🕐', 'About 5 minutes'],
-    ],
+  const fmtName = (f) => (f === 'ECR' ? 'Extended Constructed Response' : f === 'SCR' ? 'Short Constructed Response' : f)
+  const featureFor = (t, gamesPlayed) => ({
+    quickwrite: (
+      <div style={{ textAlign: 'left' }}>
+        <span style={{ display: 'inline-block', background: CARD_PURPLE, color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 1.2, borderRadius: '8px 8px 0 0', padding: '4px 12px' }}>💬 TODAY'S PROMPT</span>
+        <div style={{ background: '#f3f0fd', border: `1.5px solid ${CARD_PURPLE}33`, borderRadius: '0 12px 12px 12px', padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <span style={{ fontFamily: 'Georgia,serif', fontSize: 30, lineHeight: .9, color: CARD_PURPLE }}>“</span>
+          <b style={{ fontSize: 14.5, color: '#241d5e', lineHeight: 1.35 }}>{qp ? qp.title : 'A fresh prompt each day'}</b>
+        </div>
+      </div>
+    ),
+    assignments: upNext ? (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CARD_PURPLE, textTransform: 'uppercase' }}>{fmtName(upNext.a.format || 'SCR')}</div>
+        <div style={{ fontSize: 16.5, fontWeight: 800, color: '#1c1650', lineHeight: 1.3, marginTop: 6 }}>{upNext.a.title}</div>
+      </div>
+    ) : (
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#41586b', textAlign: 'center' }}>Pick any assignment to begin</div>
+    ),
+    luna: (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {(state.modules || []).map((m, mi) => {
+            const done = m.status === 'complete'
+            const cur = m.status === 'in_progress'
+            return (
+              <React.Fragment key={m.id}>
+                {mi > 0 && <span style={{ flex: 1, borderTop: '2px dashed #cfc8ef', margin: '0 3px', minWidth: 7 }} />}
+                <span title={m.label} style={{ width: cur ? 34 : 23, height: cur ? 34 : 23, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: cur ? 15 : 10, flexShrink: 0,
+                  background: done ? CARD_PURPLE : cur ? 'linear-gradient(135deg,#f5c542,#e89a00)' : '#eceafa',
+                  color: done || cur ? '#fff' : '#b4aede',
+                  boxShadow: cur ? '0 0 12px rgba(245,180,0,.55)' : 'none', border: cur ? '2px solid #fff' : 'none' }}>
+                  {done ? '✓' : cur ? '🌟' : '★'}
+                </span>
+              </React.Fragment>
+            )
+          })}
+        </div>
+        <div style={{ fontSize: 12.5, fontWeight: 800, color: CARD_PURPLE, textAlign: 'center', marginTop: 9 }}>
+          {mod ? `You're on Module ${state.modules.indexOf(mod) + 1}: ${mod.label}` : 'Your writing path'}
+        </div>
+      </div>
+    ),
+    revision: (
+      <div style={{ fontSize: 14, fontWeight: 800, color: CARD_PURPLE, textAlign: 'center' }}>✨ One challenge — make it shine</div>
+    ),
+    freewrite: (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#41586b' }}>Where will your idea go today?</div>
+        {lastFreeTitle && <div style={{ fontSize: 12.5, fontWeight: 800, color: CARD_PURPLE, marginTop: 7 }}>📄 Last piece: {lastFreeTitle}</div>}
+      </div>
+    ),
+    games: (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: '#0d5f66' }}>🎮 Play Two to Move Forward</div>
+        {gamesPlayed != null && (
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 10 }}>
+            {[0, 1].map((i) => (
+              <span key={i} style={{ width: 21, height: 21, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff',
+                background: i < gamesPlayed ? 'var(--good)' : '#eceafa', border: i < gamesPlayed ? 'none' : '2px dashed #b4aede' }}>{i < gamesPlayed ? '✓' : ''}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    ),
+    goal_data: (
+      <div style={{ textAlign: 'left', background: '#f3f0fd', borderRadius: 12, padding: '10px 14px' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CARD_PURPLE }}>🎯 CURRENT GOAL</div>
+        <b style={{ fontSize: 13.5, color: '#241d5e', lineHeight: 1.35, display: 'block', marginTop: 4 }}>{me.goal ? me.goal.text : 'No goal set — pick one!'}</b>
+      </div>
+    ),
   })[t]
 
   const freeTiles = [
@@ -340,18 +373,17 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onQui
               const done = wp.done[i]
               const current = i === curIdx
               return (
-                <TaskCard key={t} meta={STEP_META[t]} rows={rowsFor(t)} number={i + 1}
+                <TaskCard key={t} meta={STEP_META[t]} feature={featureFor(t, Math.min(wp.gamesPlayed, 2))} number={i + 1}
                   status={done ? 'done' : current ? 'current' : 'future'}
-                  gamesNote={t === 'games' && (current || done) ? `${Math.min(wp.gamesPlayed, 2)} of 2 played` : null}
                   ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} />
               )
             })}
           </div>
         ) : (
           <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
-            <TaskCard meta={STEP_META.quickwrite} rows={rowsFor('quickwrite')} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
-            <TaskCard meta={STEP_META.freewrite} rows={rowsFor('freewrite')} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
-            <TaskCard meta={STEP_META.games} rows={rowsFor('games')} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
+            <TaskCard meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
+            <TaskCard meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
+            <TaskCard meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
           </div>
         )}
       </div>
@@ -499,7 +531,7 @@ function DemoWeekStrip({ wp, onPick }) {
 
 /* ---- unified task card: illustration, badge, plain title + accent, desc, details, CTA ---- */
 const CARD_PURPLE = '#6455e0'
-function TaskCard({ meta, rows, number, status, gamesNote, ctaLabel, onAction, busy }) {
+function TaskCard({ meta, feature, number, status, ctaLabel, onAction, busy }) {
   const done = status === 'done'
   const current = status === 'current' || status === 'free'
   const future = status === 'future'
@@ -539,19 +571,9 @@ function TaskCard({ meta, rows, number, status, gamesNote, ctaLabel, onAction, b
         <div style={{ fontSize: 13, color: CARD_PURPLE, fontWeight: 800, marginTop: 3 }}>{meta.accent}</div>
         <p style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, margin: '9px 0 0', fontWeight: 600 }}>{meta.desc}</p>
         <div style={{ borderTop: '1px solid var(--line)', margin: '11px 0 10px' }} />
-        {/* detail rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7, textAlign: 'left', flex: 1 }}>
-          {rows.map(([icon, text], ri) => (
-            <div key={ri} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, fontWeight: 700, color: '#33475a' }}>
-              <span style={{ fontSize: 13, width: 18, textAlign: 'center', flexShrink: 0 }}>{icon}</span>
-              <span style={{ lineHeight: 1.35, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{text}</span>
-            </div>
-          ))}
-          {gamesNote && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, fontWeight: 800, color: CARD_PURPLE }}>
-              <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>▶</span>{gamesNote}
-            </div>
-          )}
+        {/* featured content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '2px 0' }}>
+          {feature}
         </div>
         {/* CTA */}
         <button disabled={busy || (!current && !done ? true : done)} onClick={current ? onAction : undefined}
@@ -742,26 +764,70 @@ function ShareWallRail({ state, me, onChange, onViewAll }) {
 }
 
 /* ---- Fluency game picker: the growing games library, by grade level ---- */
-function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose }) {
+function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose, mission, playedCount = 0, seed = '' }) {
+  const [playing, setPlaying] = useState(null)
+  const playable = games.filter((g) => g.kind !== 'soon')
+  let list = games
+  if (mission && playable.length > 1) {
+    let h = 0
+    for (const ch of String(seed)) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+    const a = h % playable.length
+    const b = (a + 1 + ((h >> 3) % (playable.length - 1))) % playable.length
+    list = [playable[a], playable[b]]
+  }
+
+  /* in-dashboard game window — the dashboard is one click away */
+  if (playing) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'flex', flexDirection: 'column', background: '#0e0b33' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 18px', background: '#131048', color: '#fff', borderBottom: '2px solid rgba(255,255,255,.12)', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 22 }}>{playing.icon}</span>
+          <b style={{ fontSize: 15.5 }}>{playing.title}</b>
+          <span style={{ fontSize: 12, color: '#b9aef2', fontWeight: 700 }}>{playing.skill}</span>
+          <span style={{ flex: 1 }} />
+          {mission && <span style={{ fontSize: 12.5, fontWeight: 800, color: '#ffd76b' }}>Game {Math.min(playedCount + 1, 2)} of 2</span>}
+          <button onClick={() => { onPlayed && onPlayed(); setPlaying(null) }}
+            style={{ background: 'var(--good)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '8px 18px', cursor: 'pointer' }}>
+            ✓ Done playing
+          </button>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,.14)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '8px 18px', cursor: 'pointer' }}>
+            ✕ Back to Dashboard
+          </button>
+        </div>
+        <iframe src={playing.url} title={playing.title} style={{ flex: 1, border: 'none', background: '#fff' }} />
+      </div>
+    )
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card" style={{ width: 520, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <span style={{ fontSize: 26 }}>🎯</span>
-          <b style={{ fontSize: 18 }}>Fluency Games</b>
+          <span style={{ fontSize: 26 }}>🎮</span>
+          <b style={{ fontSize: 18 }}>{mission ? "Today's Two Games" : 'Fluency Games'}</b>
           <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
         <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>
-          Quick games that build writing muscles. New games are added by grade level — you're in <b>Grade {grade}</b>.
+          {mission
+            ? <>Play <b>both games</b> to move forward — they open right here, so the dashboard is never far away.</>
+            : <>Quick games that build writing muscles. New games are added by grade level — you're in <b>Grade {grade}</b>.</>}
         </p>
+        {mission && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+            {[0, 1].map((i) => (
+              <span key={i} style={{ flex: 1, height: 7, borderRadius: 5, background: i < playedCount ? 'var(--good)' : '#e6eef3' }} />
+            ))}
+            <b style={{ fontSize: 12.5, color: playedCount >= 2 ? 'var(--good)' : 'var(--muted)' }}>{Math.min(playedCount, 2)}/2</b>
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 420, overflowY: 'auto', paddingRight: 4 }}>
-          {games.map((g) => {
+          {list.map((g) => {
             const soon = g.kind === 'soon'
             return (
-              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--line)', borderRadius: 12, padding: '11px 14px', opacity: soon ? .6 : 1 }}>
-                <span style={{ width: 42, height: 42, borderRadius: 11, background: '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{g.icon}</span>
+              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--line)', borderRadius: 12, padding: mission ? '16px 16px' : '11px 14px', opacity: soon ? .6 : 1 }}>
+                <span style={{ width: mission ? 52 : 42, height: mission ? 52 : 42, borderRadius: 12, background: '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: mission ? 27 : 22, flexShrink: 0 }}>{g.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14.5 }}>{g.title}</div>
+                  <div style={{ fontWeight: 800, fontSize: mission ? 15.5 : 14.5 }}>{g.title}</div>
                   <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginTop: 3 }}>
                     <span className="pill" style={{ fontSize: 10.5, padding: '2px 8px', background: '#e2f2f3', color: 'var(--scr)' }}>{g.skill}</span>
                     <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--muted)' }}>Grades {g.grades}</span>
@@ -770,17 +836,19 @@ function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose }) {
                 {soon ? (
                   <span style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>COMING SOON</span>
                 ) : g.kind === 'external' ? (
-                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={() => { window.open(g.url, '_blank', 'noopener'); onPlayed && onPlayed() }}>Play ↗</button>
+                  <button className="btn" style={{ padding: mission ? '9px 20px' : '7px 16px', fontSize: 13 }} onClick={() => setPlaying(g)}>Play ▶</button>
                 ) : (
-                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={onPlayBuiltin}>Play ▶</button>
+                  <button className="btn" style={{ padding: mission ? '9px 20px' : '7px 16px', fontSize: 13 }} onClick={onPlayBuiltin}>Play ▶</button>
                 )}
               </div>
             )
           })}
         </div>
-        <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
-          🎮 The library grows all year — games publish straight from the ClearK12 games repo.
-        </p>
+        {!mission && (
+          <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
+            🎮 The library grows all year — games publish straight from the ClearK12 games repo.
+          </p>
+        )}
       </div>
     </div>
   )
@@ -1112,6 +1180,8 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       {game && <FluencyGame onClose={() => setGame(false)} onFinished={gamePlayed} />}
       {gamePicker && (
         <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6} onPlayed={gamePlayed}
+          mission={!!(wp?.steps && wp.steps.includes('games') && !wp.done[wp.steps.indexOf('games')])}
+          playedCount={wp?.gamesPlayed ?? 0} seed={`${wp?.date || ''}-${wp?.day ?? ''}`}
           onPlayBuiltin={() => { setGamePicker(false); setGame(true) }}
           onClose={() => setGamePicker(false)} />
       )}
