@@ -49,6 +49,42 @@ import { PEER_TASKS, bandFor, todaysTask } from './peerTasks.mjs'
 
 const ME = 'stu_kscott'
 const now = () => new Date().toISOString()
+
+// ---- Daily Writing Path: weekday schedule + per-day state ----
+const PATH_SCHEDULE = {
+  1: ['assignments', 'quickwrite', 'luna'],
+  2: ['quickwrite', 'assignments', 'games'],
+  3: ['games', 'assignments', 'luna'],
+  4: ['freewrite', 'assignments', 'games'],
+  5: ['quickwrite', 'goal_data', 'games'],
+}
+function ensurePath() {
+  const today = now().slice(0, 10)
+  const dow = state.demoDay ?? new Date().getDay()
+  if (!state.writingPath || state.writingPath.date !== today || state.writingPath.day !== dow) {
+    const steps = PATH_SCHEDULE[dow] || null
+    state.writingPath = { date: today, day: dow, steps, done: steps ? steps.map(() => false) : [], gamesPlayed: 0, started: false, completed: !steps }
+    save()
+  }
+  return state.writingPath
+}
+function feedStreak() {
+  const today = now().slice(0, 10)
+  const gsum = state.growthSummary
+  if (gsum && gsum.lastStreakDate !== today) { gsum.streakDays += 1; gsum.lastStreakDate = today; return true }
+  return false
+}
+function completePathIfDone(wp) {
+  if (wp.steps && wp.done.every(Boolean) && !wp.completed) {
+    wp.completed = true
+    const coins = 25
+    state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'writing_path', coins, ts: now() })
+    const stu = findStu(ME); if (stu) stu.coins += coins
+    feedStreak()
+    return coins
+  }
+  return 0
+}
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
 const findSub = (id) => state.submissions.find((s) => s.id === id)
 const findAsg = (id) => state.assignments.find((a) => a.id === id)
@@ -144,7 +180,8 @@ const server = http.createServer(async (req, res) => {
       const stu = findStu(ME)
       const band = bandFor(stu?.gradeLevel ?? 6)
       const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
-      return send(res, 200, { ...state, dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } })
+      const wp = ensurePath()
+      return send(res, 200, { ...state, writingPath: wp, dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } })
     }
 
     if (req.method === 'POST' && url.pathname === '/api/reset') { state = seedState(); save(); return send(res, 200, state) }
@@ -233,7 +270,7 @@ const server = http.createServer(async (req, res) => {
       const revision = sub.drafts[sub.drafts.length - 1]
       const traits = await runTraits(sub, revision)
       revision.traits = traits
-      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 20, ts: now() },
+      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 100, ts: now() },
         ...evaluateMilestones(sub, original, revision)]
       sub.milestones.push(...newMilestones)
       for (const m of newMilestones) {
@@ -310,6 +347,48 @@ const server = http.createServer(async (req, res) => {
         state.submissions.push(sub); save()
       }
       return send(res, 200, { submissionId: sub.id })
+    }
+
+    // ---- Daily Writing Path ----
+    // demo-only: preview any weekday's path
+    if (req.method === 'POST' && url.pathname === '/api/path/demo-day') {
+      const body = await readBody(req)
+      state.demoDay = body.day == null ? undefined : Number(body.day)
+      state.writingPath = null
+      const wp = ensurePath()
+      return send(res, 200, { path: wp })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/start') {
+      const wp = ensurePath(); wp.started = true; save()
+      return send(res, 200, { path: wp })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/advance') {
+      const body = await readBody(req)
+      const wp = ensurePath()
+      let coins = 0
+      if (wp.steps && wp.started) {
+        const idx = wp.done.findIndex((d) => !d)
+        if (idx >= 0 && wp.steps[idx] === body.step) {
+          wp.done[idx] = true
+          coins = completePathIfDone(wp)
+        }
+      }
+      save()
+      return send(res, 200, { path: wp, coinsAwarded: coins })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/game') {
+      const wp = ensurePath()
+      let coins = 0
+      wp.gamesPlayed = (wp.gamesPlayed || 0) + 1
+      if (wp.steps && wp.started) {
+        const idx = wp.done.findIndex((d) => !d)
+        if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
+          wp.done[idx] = true
+          coins = completePathIfDone(wp)
+        }
+      }
+      save()
+      return send(res, 200, { path: wp, coinsAwarded: coins })
     }
 
     // POST /api/submissions/:id/publish -> finalize a self-started piece
@@ -392,6 +471,48 @@ const server = http.createServer(async (req, res) => {
         state.submissions.push(sub); save()
       }
       return send(res, 200, { submissionId: sub.id })
+    }
+
+    // ---- Daily Writing Path ----
+    // demo-only: preview any weekday's path
+    if (req.method === 'POST' && url.pathname === '/api/path/demo-day') {
+      const body = await readBody(req)
+      state.demoDay = body.day == null ? undefined : Number(body.day)
+      state.writingPath = null
+      const wp = ensurePath()
+      return send(res, 200, { path: wp })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/start') {
+      const wp = ensurePath(); wp.started = true; save()
+      return send(res, 200, { path: wp })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/advance') {
+      const body = await readBody(req)
+      const wp = ensurePath()
+      let coins = 0
+      if (wp.steps && wp.started) {
+        const idx = wp.done.findIndex((d) => !d)
+        if (idx >= 0 && wp.steps[idx] === body.step) {
+          wp.done[idx] = true
+          coins = completePathIfDone(wp)
+        }
+      }
+      save()
+      return send(res, 200, { path: wp, coinsAwarded: coins })
+    }
+    if (req.method === 'POST' && url.pathname === '/api/path/game') {
+      const wp = ensurePath()
+      let coins = 0
+      wp.gamesPlayed = (wp.gamesPlayed || 0) + 1
+      if (wp.steps && wp.started) {
+        const idx = wp.done.findIndex((d) => !d)
+        if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
+          wp.done[idx] = true
+          coins = completePathIfDone(wp)
+        }
+      }
+      save()
+      return send(res, 200, { path: wp, coinsAwarded: coins })
     }
 
     // POST /api/submissions/:id/publish -> finalize a self-started piece

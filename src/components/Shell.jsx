@@ -47,7 +47,7 @@ export function TopBar({ role, view, setView, who, onArcade, onLogo }) {
   )
 }
 
-export function RoleSwitcher({ role, setRole }) {
+export function RoleSwitcher({ role, setRole, onSkipPath, onResetDemo }) {
   return (
     <div className="rolepick">
       Viewing as
@@ -55,6 +55,16 @@ export function RoleSwitcher({ role, setRole }) {
         <option value="student">Student · Kayla Scott</option>
         <option value="teacher">Teacher · Dirk Nowitski</option>
       </select>
+      {role === 'student' && onSkipPath && (
+        <button onClick={onSkipPath} style={{ display: 'block', width: '100%', marginTop: 7, padding: '6px 8px', borderRadius: 8, background: '#fdf1dc', color: '#8a6400', fontSize: 11.5, fontWeight: 800 }}>
+          ⚡ Demo: complete today's path
+        </button>
+      )}
+      {onResetDemo && (
+        <button onClick={onResetDemo} style={{ display: 'block', width: '100%', marginTop: 5, padding: '6px 8px', borderRadius: 8, background: '#eef3f6', color: 'var(--muted)', fontSize: 11.5, fontWeight: 800 }}>
+          ↺ Reset demo data
+        </button>
+      )}
     </div>
   )
 }

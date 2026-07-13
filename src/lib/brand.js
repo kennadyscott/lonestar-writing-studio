@@ -1,7 +1,11 @@
-// Official LoneStar CR brand assets (public CDN URLs from the live app).
-// Badge images are hotlink-protected, so modules use medal icons instead.
+// Official LoneStar CR brand assets — bundled locally in public/ (sourced from
+// the brand folder + live-app CDN). BASE_URL keeps paths right on GitHub Pages.
+const BASE = import.meta.env.BASE_URL || '/'
 export const BRAND = {
-  logo: 'https://prodcllonestar.z19.web.core.windows.net/static/imgs/LoneStarCR-web-logo.png',
-  luna: 'https://prodcllonestar.z19.web.core.windows.net/static/imgs/Luna-Happy.svg',
+  logo: BASE + 'lonestar-logo.png',
+  luna: BASE + 'luna.png',
+  rocket: BASE + 'rocket.png',
+  launchBg: BASE + 'launch-bg.jpg',
+  trophy: BASE + 'trophy.png',
   classcade: 'https://assets.cleark12.com/clearlearning/classcadelogo.png',
 }

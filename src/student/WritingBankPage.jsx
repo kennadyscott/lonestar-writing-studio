@@ -18,7 +18,7 @@ function statusOf(sub) {
   return { k: 'progress', label: '✏️ In progress', bg: '#e5f1fb', c: 'var(--ecr)' }
 }
 
-export default function WritingBankPage({ state, me, onBack, onOpen, onChange }) {
+export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onChange }) {
   const [filter, setFilter] = useState('all')
   const [confirmId, setConfirmId] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -49,7 +49,10 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onChange })
         <div>
           <div className="eyebrow">The Writing Studio</div>
           <h1 className="page" style={{ margin: '2px 0' }}>🗂️ My Writing Bank</h1>
-          <p className="page-sub" style={{ margin: 0 }}>Every piece you've started — revise it, publish it, share it, or clear it out.</p>
+          <p className="page-sub" style={{ margin: 0 }}>
+            Every piece you've started — revise it, publish it, share it, or clear it out.
+            {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>🌟 Visit the Writing Wall →</button></>}
+          </p>
         </div>
         <div style={{ display: 'inline-flex', background: '#dcebf3', borderRadius: 11, padding: 3 }}>
           {FILTERS.map(([k, label]) => (

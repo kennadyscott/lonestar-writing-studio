@@ -39,6 +39,21 @@ export default function App() {
 
   const goHome = () => { setView('home'); setOpenSub(null) }
 
+  // prototype demo controls (floating switcher)
+  async function skipPath() {
+    const wp = state?.writingPath
+    if (!wp?.steps || wp.completed) return
+    if (!wp.started) await api.pathStart()
+    for (let i = 0; i < wp.steps.length; i++) { if (!wp.done[i]) await api.pathAdvance(wp.steps[i]) }
+    await refresh()
+  }
+  async function resetDemo() {
+    Object.keys(localStorage).filter((k) => k.startsWith('pathCelebrated')).forEach((k) => localStorage.removeItem(k))
+    await api.reset()
+    goHome()
+    await refresh()
+  }
+
   let body
   if (role === 'student') {
     const sub = openSub ? state.submissions.find((s) => s.id === openSub) : null
@@ -49,7 +64,7 @@ export default function App() {
     } else if (view === 'home') {
       body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
     } else if (view === 'luna') {
-      body = <LunaPage state={state} onBack={goHome} />
+      body = <LunaPage state={state} onBack={goHome} onChange={refresh} />
     } else if (view === 'quickwrite') {
       body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
     } else if (view === 'wall') {
@@ -60,7 +75,7 @@ export default function App() {
         </div>
       )
     } else if (view === 'bank') {
-      body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onChange={refresh} />
+      body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
     } else {
       body = <ArcadePage me={me} state={state} onBack={goHome} />
     }
@@ -86,7 +101,7 @@ export default function App() {
         onLogo={goHome}
       />
       <div className="content">{body}</div>
-      <RoleSwitcher role={role} setRole={(r) => { setRole(r); goHome() }} />
+      <RoleSwitcher role={role} setRole={(r) => { setRole(r); goHome() }} onSkipPath={skipPath} onResetDemo={resetDemo} />
     </div>
   )
 }

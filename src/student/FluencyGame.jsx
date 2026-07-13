@@ -9,7 +9,7 @@ const ROUNDS = [
   { base: 'The team won.', ask: 'How did they win? What did it feel like?' },
 ]
 
-export default function FluencyGame({ onClose }) {
+export default function FluencyGame({ onClose, onFinished }) {
   const [round, setRound] = useState(0)
   const [text, setText] = useState('')
   const [done, setDone] = useState([])
@@ -22,7 +22,7 @@ export default function FluencyGame({ onClose }) {
     setDone((d) => [...d, { base: r.base, stretched: text.trim(), words: extra }])
     setText('')
     if (round + 1 < ROUNDS.length) setRound(round + 1)
-    else setRound(-1) // finished
+    else { setRound(-1); onFinished && onFinished() } // finished
   }
 
   return (
