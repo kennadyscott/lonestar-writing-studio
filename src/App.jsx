@@ -9,6 +9,7 @@ import ArcadePage from './student/ArcadePage.jsx'
 import LunaPage from './student/LunaPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
+import AssignmentPage from './student/AssignmentPage.jsx'
 import TeacherHome from './teacher/TeacherHome.jsx'
 import Portfolio from './teacher/Portfolio.jsx'
 import TraitTrends from './teacher/TraitTrends.jsx'
@@ -22,6 +23,7 @@ export default function App() {
   const [role, setRole] = useState('student')
   const [view, setView] = useState('home')
   const [openSub, setOpenSub] = useState(null) // submission id for studio/portfolio
+  const [assignA, setAssignA] = useState(null) // assignment shown in the runner
 
   const refresh = useCallback(async () => setState(await api.state()), [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
@@ -47,6 +49,11 @@ export default function App() {
     for (let i = 0; i < wp.steps.length; i++) { if (!wp.done[i]) await api.pathAdvance(wp.steps[i]) }
     await refresh()
   }
+  async function completeAssignment() {
+    try { await api.pathAdvance('assignments') } catch {}
+    await refresh()
+    goHome()
+  }
   async function resetDemo() {
     Object.keys(localStorage).filter((k) => k.startsWith('pathCelebrated')).forEach((k) => localStorage.removeItem(k))
     await api.reset()
@@ -62,11 +69,13 @@ export default function App() {
         ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
         : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
     } else if (view === 'home') {
-      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
+      body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onAssignment={(a) => { setAssignA(a || null); setView('assignment') }} onChange={refresh} />
     } else if (view === 'luna') {
       body = <LunaPage state={state} onBack={goHome} onChange={refresh} />
     } else if (view === 'quickwrite') {
       body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
+    } else if (view === 'assignment') {
+      body = <AssignmentPage a={assignA} onBack={goHome} onComplete={completeAssignment} />
     } else if (view === 'wall') {
       body = (
         <div>

@@ -227,7 +227,7 @@ function GoalBanner({ me, onData }) {
 /* ---- Daily Writing Path: the Writing Launchpad (mission control) ---- */
 const STEP_META = {
   assignments: { icon: '📄', label: "Today's Assignment", accent: 'Show What You Know', badge: '💻', art: 'head-assignment.jpg',
-    desc: 'Work on the writing your teacher assigned — draft, revise, or polish.', ctaWord: 'Continue Assignment', illus: ['📄', '✨'] },
+    desc: 'Work on the writing your teacher assigned — draft, revise, or polish.', ctaWord: 'Start Assignment', illus: ['📄', '✨'] },
   quickwrite: { icon: '⚡', label: 'Quick Write', accent: 'Spark a Response', badge: '⚡', art: 'head-quickwrite.jpg',
     desc: "Write a short response to today's question using clear ideas.", ctaWord: 'Start Writing', illus: ['📓', '🖊️'] },
   luna: { icon: '🌟', label: "Luna's Writing Nook", accent: 'Level Up Your Skills', badge: '🌟', art: 'head-luna.jpg',
@@ -1050,7 +1050,7 @@ function AssignmentsCard({ rows, busy, begin }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onWall, onChange }) {
+export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onWall, onAssignment, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(false)
@@ -1128,7 +1128,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const challengeLocked = !!(wp?.steps && missionsDone < 2)
 
   function launchStep(step) {
-    if (step === 'assignments') { upNext ? begin(upNext) : setHomeTab('assignments') }
+    if (step === 'assignments') onAssignment(upNext?.a)
     else if (step === 'quickwrite') onQuickWrite()
     else if (step === 'luna') onLuna()
     else if (step === 'revision') peer()
