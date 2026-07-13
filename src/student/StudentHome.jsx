@@ -226,7 +226,7 @@ function GoalBanner({ me, onData }) {
 
 /* ---- Daily Writing Path: the Writing Launchpad (mission control) ---- */
 const STEP_META = {
-  assignments: { icon: '📄', label: 'ECR or SCR Assignment', accent: 'Show What You Know', badge: '📄',
+  assignments: { icon: '📄', label: 'ECR or SCR Assignment', accent: 'Show What You Know', badge: '📄', art: 'head-revision.jpg',
     desc: 'Work on the writing your teacher assigned — draft, revise, or polish.', ctaWord: 'Continue Assignment', illus: ['📄', '✨'] },
   quickwrite: { icon: '⚡', label: 'Quick Write', accent: 'Spark a Response', badge: '⚡', art: 'head-quickwrite.jpg',
     desc: "Write a short response to today's question using clear ideas.", ctaWord: 'Start Writing', illus: ['📓', '🖊️'] },
