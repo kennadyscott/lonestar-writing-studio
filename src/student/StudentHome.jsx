@@ -617,11 +617,11 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 330px', gap: 18, alignItems: 'stretch' }}>
+      <div className="home-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <UpNextCard row={upNext} busy={busy} begin={begin} onAll={() => setHomeTab('assignments')} />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.12fr', gap: 18, alignItems: 'stretch', flex: 1 }}>
+          <div className="home-split">
             <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <span style={{ fontSize: 17 }}>🖊️</span><b style={{ fontSize: 15 }}>Ways to Write</b>
@@ -646,7 +646,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       {/* ================= ASSIGNMENTS ================= */}
       {homeTab === 'assignments' && (<>
         <GoalBanner me={me} onData={() => setHomeTab('data')} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.65fr) 400px', gap: 18, alignItems: 'stretch', marginBottom: 18 }}>
+        <div className="assign-grid">
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <AssignmentsCard rows={rows} busy={busy} begin={begin} />
           </div>

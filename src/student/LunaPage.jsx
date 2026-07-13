@@ -143,7 +143,7 @@ export default function LunaPage({ state, onBack }) {
       <div style={{ position: 'absolute', bottom: -60, left: -40, width: 300, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.5)', filter: 'blur(6px)' }} />
       <div style={{ position: 'absolute', bottom: -80, right: -30, width: 380, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.45)', filter: 'blur(8px)' }} />
 
-      <div style={{ position: 'relative', maxWidth: 1320, margin: '0 auto', padding: '0 34px' }}>
+      <div style={{ position: 'relative', maxWidth: 1780, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* page header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
           <div>
