@@ -542,7 +542,7 @@ function DemoWeekStrip({ wp, onPick }) {
   const effective = wp?.day ?? realDow
   const days = [[1, 'Monday'], [2, 'Tuesday'], [3, 'Wednesday'], [4, 'Thursday'], [5, 'Friday'], [0, '🏖️ Weekend']]
   return (
-    <div style={{ marginTop: 26, border: '2px dashed #c3d5e4', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: 'rgba(255,255,255,.6)' }}>
+    <div style={{ marginTop: 26, border: '2px dashed #c3d5e4', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: 'rgba(255,255,255,.85)', position: 'relative', zIndex: 1 }}>
       <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>🎛️ Demo · preview the week</span>
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
@@ -1247,7 +1247,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12, position: 'relative', zIndex: 1 }}>
         <h1 className="page" style={{ margin: 0, fontSize: 21, lineHeight: 1.35, maxWidth: 720 }}>
           Hi Kayla! <span style={{ fontWeight: 700, color: '#28536e' }}>{nudge}</span>
         </h1>
@@ -1281,14 +1281,14 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
       {pathLocked ? (
         /* QUEST — the Launch Sequence */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck}
             onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
       ) : (
         /* UNLOCKED STUDIO — a different world: big open task cards */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <PathRibbon wp={wp} onResume={(i) => launchStep(wp.steps[i])} />
           <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
             <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
