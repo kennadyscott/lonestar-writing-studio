@@ -246,7 +246,8 @@ const MISSION_COLORS = ['#8b5cf6', '#2f8ceb', '#0b8a8f']
 
 const MISSION_GRADS = [['#8b5cf6', '#6d3fd8'], ['#2f8ceb', '#1668c4'], ['#0b8a8f', '#067276']]
 
-function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank }) {
+function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank, nudge }) {
+  const firstName = (me.name || '').split(' ')[0]
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   const quest = !!(wp?.steps && !wp.completed)
   const weekend = !wp?.steps
@@ -351,6 +352,10 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
             {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+          </div>
+          <div style={{ marginLeft: 'auto', maxWidth: 430, background: '#e5f1fb', border: '1.5px solid #c7e0f2', borderRadius: 13, padding: '10px 16px',
+            fontSize: 12.5, fontWeight: 700, color: '#28536e', lineHeight: 1.45, alignSelf: 'flex-start' }}>
+            👋 <b style={{ color: '#0d2f55' }}>Hi {firstName}!</b> {nudge}
           </div>
         </div>
         {quest ? (
@@ -1247,10 +1252,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12, position: 'relative', zIndex: 1 }}>
-        <h1 className="page" style={{ margin: 0, fontSize: 21, lineHeight: 1.35, maxWidth: 720 }}>
-          Hi Kayla! <span style={{ fontWeight: 700, color: '#28536e' }}>{nudge}</span>
-        </h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12, position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
           border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
           {[['home', '🏠 Home'], ['assignments', '📋 Assignments'], ['data', '📊 Data & Goals']].map(([k, label]) => (
@@ -1282,7 +1284,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       {pathLocked ? (
         /* QUEST — the Launch Sequence */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck}
+          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck} nudge={nudge}
             onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
