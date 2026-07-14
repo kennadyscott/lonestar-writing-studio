@@ -246,7 +246,7 @@ const MISSION_COLORS = ['#8b5cf6', '#2f8ceb', '#0b8a8f']
 
 const MISSION_GRADS = [['#8b5cf6', '#6d3fd8'], ['#2f8ceb', '#1668c4'], ['#0b8a8f', '#067276']]
 
-function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onQuickWrite, onFreeWrite, onGames, onBank }) {
+function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank }) {
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   const quest = !!(wp?.steps && !wp.completed)
   const weekend = !wp?.steps
@@ -371,10 +371,11 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onQui
           <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
             {wp.steps.map((t, i) => {
               const done = wp.done[i]
-              const current = i === curIdx
+              const current = i === curIdx || (wp.stuck && !done)
               return (
                 <TaskCard key={t} meta={STEP_META[t]} feature={featureFor(t, Math.min(wp.gamesPlayed, 2))} number={i + 1}
                   status={done ? 'done' : current ? 'current' : 'future'}
+                  note={wp.stuck && wp.stuckStep === t && !done ? '😵 Flagged stuck — help is on the way' : null}
                   ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} />
               )
             })}
@@ -401,8 +402,14 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onQui
               </React.Fragment>
             ))}
           </div>
-          <span style={{ fontSize: 12, fontWeight: 700, color: quest ? 'var(--muted)' : 'var(--good)', whiteSpace: 'nowrap' }}>
-            {quest ? 'Finish all 3 to unlock your full dashboard! 🔒' : '🎉 Dashboard unlocked!'}
+          <span style={{ fontSize: 12, fontWeight: 700, color: quest ? (wp.stuck ? '#b3641d' : 'var(--muted)') : 'var(--good)', whiteSpace: 'nowrap', textAlign: 'right' }}>
+            {quest ? (wp.stuck ? "🧭 Missions unlocked while you're stuck — your teacher knows. Finish all 3!" : 'Finish all 3 to unlock your full dashboard! 🔒') : '🎉 Dashboard unlocked!'}
+            {quest && !wp.stuck && (
+              <button onClick={onStuck} disabled={busy}
+                style={{ display: 'block', marginTop: 3, marginLeft: 'auto', color: '#b3641d', fontSize: 12, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', background: 'none' }}>
+                😵 I'm Stuck — I need another way in
+              </button>
+            )}
           </span>
         </div>
       ) : null}
@@ -485,8 +492,50 @@ function PathCelebration({ wp, streak, onClose }) {
   )
 }
 
+/* ---- I'm Stuck: open the studio, notify the teacher, coach self-advocacy ---- */
+function StuckModal({ teacher, stepLabel, onClose }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,9,38,.72)', display: 'grid', placeItems: 'center', zIndex: 70 }}>
+      <div style={{ width: 560, maxWidth: '94vw', background: '#fff', borderRadius: 24, padding: '30px 34px', animation: 'popIn .3s ease' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+          <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fdf1dc', display: 'grid', placeItems: 'center', fontSize: 26, flexShrink: 0 }}>😵</span>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 22 }}>Stuck? That happens to every writer.</h2>
+            <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>Here's what just happened:</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 }}>
+          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#e6f6ee', borderRadius: 12, padding: '11px 14px' }}>
+            <span style={{ fontSize: 18 }}>🔓</span>
+            <span style={{ fontSize: 13.5, lineHeight: 1.5 }}><b>Your other two missions just opened up.</b> Jump into either one — sometimes starting something different shakes an idea loose.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#e5f1fb', borderRadius: 12, padding: '11px 14px' }}>
+            <span style={{ fontSize: 18 }}>📨</span>
+            <span style={{ fontSize: 13.5, lineHeight: 1.5 }}><b>{teacher} has been notified</b> that you're stuck{stepLabel ? <> on <b>{stepLabel}</b></> : null}, so help is on the way.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#f3f0fd', borderRadius: 12, padding: '11px 14px' }}>
+            <span style={{ fontSize: 18 }}>🗣️</span>
+            <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+              <b>Advocate for yourself, too.</b> If {teacher} isn't at their computer, it's always okay to ask for help in a respectful way — try:
+              <i style={{ display: 'block', marginTop: 5, color: '#4a3fb0' }}>"Excuse me — I'm stuck on my writing. Could you help me when you have a minute?"</i>
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#fdf1dc', borderRadius: 12, padding: '11px 14px' }}>
+            <span style={{ fontSize: 18 }}>🎯</span>
+            <span style={{ fontSize: 13.5, lineHeight: 1.5 }}><b>All 3 missions still count.</b> Come back to the one you're stuck on when help arrives or a fresh idea strikes.</span>
+          </div>
+        </div>
+        <button onClick={onClose}
+          style={{ width: '100%', padding: '14px 0', borderRadius: 12, fontSize: 15.5, fontWeight: 800, color: '#fff', background: `linear-gradient(120deg, ${CARD_PURPLE}, #7d5df0)`, boxShadow: `0 6px 18px ${CARD_PURPLE}55`, cursor: 'pointer' }}>
+          Got it — show me my open missions →
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ---- slim ribbons for the unlocked dashboard ---- */
-function PathRibbon({ wp }) {
+function PathRibbon({ wp, onResume }) {
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   if (!wp) return null
   if (!wp.steps) {
@@ -531,7 +580,7 @@ function DemoWeekStrip({ wp, onPick }) {
 
 /* ---- unified task card: illustration, badge, plain title + accent, desc, details, CTA ---- */
 const CARD_PURPLE = '#6455e0'
-function TaskCard({ meta, feature, number, status, ctaLabel, onAction, busy }) {
+function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, busy }) {
   const done = status === 'done'
   const current = status === 'current' || status === 'free'
   const future = status === 'future'
@@ -584,6 +633,7 @@ function TaskCard({ meta, feature, number, status, ctaLabel, onAction, busy }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {done ? '✓ Done!' : current ? <>{ctaLabel} <span>→</span></> : `After Mission ${number - 1}`}
         </button>
+        {note && <div style={{ fontSize: 11.5, fontWeight: 800, color: '#b3641d', marginTop: 8 }}>{note}</div>}
       </div>
     </div>
   )
@@ -1056,6 +1106,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [game, setGame] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
+  const [stuckOpen, setStuckOpen] = useState(false)
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -1137,9 +1188,9 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
     else if (step === 'goal_data') setHomeTab('data')
   }
   async function missionStart(i) {
-    if (!wp?.steps) return
+    if (!wp?.steps || wp.done[i]) return
     const curIdx = wp.done.findIndex((d) => !d)
-    if (i !== curIdx) return
+    if (!wp.stuck && i !== curIdx) return
     if (!wp.started) { try { await api.pathStart(); onChange && onChange() } catch {} }
     launchStep(wp.steps[i])
   }
@@ -1151,6 +1202,10 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       api.pathAdvance('goal_data').then(() => onChange && onChange()).catch(() => {})
     }
   }, [homeTab])
+  async function imStuck() {
+    setBusy(true)
+    try { await api.pathStuck(); onChange && onChange(); setStuckOpen(true) } finally { setBusy(false) }
+  }
   function pickDemoDay(d) {
     api.pathDemoDay(d).then(() => onChange && onChange()).catch(() => {})
   }
@@ -1213,18 +1268,23 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         <PathCelebration wp={wp} streak={gs?.streakDays ?? 0} onClose={() => setCelebrate(false)} />
       )}
       {how && <HowItWorksModal onClose={() => setHow(false)} />}
+      {stuckOpen && (
+        <StuckModal teacher={state.teacher?.name || 'your teacher'}
+          stepLabel={wp?.stuckStep ? STEP_META[wp.stuckStep]?.label : null}
+          onClose={() => setStuckOpen(false)} />
+      )}
 
       {pathLocked ? (
         /* QUEST — the Launch Sequence */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1180, margin: '0 auto' }}>
-          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
+          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck}
             onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
       ) : (
         /* UNLOCKED STUDIO — a different world: big open task cards */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1180, margin: '0 auto' }}>
-          <PathRibbon wp={wp} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
+          <PathRibbon wp={wp} onResume={(i) => launchStep(wp.steps[i])} />
           <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
             <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#52309f', '#3a2178']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
             <BigTask icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />

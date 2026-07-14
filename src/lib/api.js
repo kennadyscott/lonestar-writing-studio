@@ -32,6 +32,7 @@ const networkApi = {
   pathStart: () => fetch(u('/api/path/start'), { method: 'POST' }).then(j),
   pathAdvance: (step) => fetch(u('/api/path/advance'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ step }) }).then(j),
   pathGame: () => fetch(u('/api/path/game'), { method: 'POST' }).then(j),
+  pathStuck: () => fetch(u('/api/path/stuck'), { method: 'POST' }).then(j),
   publish: (subId) => fetch(u(`/api/submissions/${subId}/publish`), { method: 'POST' }).then(j),
   discard: (subId) => fetch(u(`/api/submissions/${subId}/discard`), { method: 'POST' }).then(j),
   share: (submissionId) => fetch(u('/api/share'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ submissionId }) }).then(j),

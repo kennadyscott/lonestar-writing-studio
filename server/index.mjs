@@ -367,7 +367,8 @@ const server = http.createServer(async (req, res) => {
       const wp = ensurePath()
       let coins = 0
       if (wp.steps && wp.started) {
-        const idx = wp.done.findIndex((d) => !d)
+        let idx = wp.done.findIndex((d) => !d)
+        if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === body.step)
         if (idx >= 0 && wp.steps[idx] === body.step) {
           wp.done[idx] = true
           coins = completePathIfDone(wp)
@@ -376,12 +377,26 @@ const server = http.createServer(async (req, res) => {
       save()
       return send(res, 200, { path: wp, coinsAwarded: coins })
     }
+    if (req.method === 'POST' && url.pathname === '/api/path/stuck') {
+      const wp = ensurePath()
+      if (wp.steps && !wp.completed) {
+        wp.started = true
+        wp.stuck = true
+        const idx = wp.done.findIndex((d) => !d)
+        wp.stuckStep = idx >= 0 ? wp.steps[idx] : null
+        state.stuckAlerts = state.stuckAlerts || []
+        state.stuckAlerts.push({ id: uid('sa'), studentId: 'stu_kscott', step: wp.stuckStep, date: wp.date, ts: now() })
+      }
+      save()
+      return send(res, 200, { path: wp })
+    }
     if (req.method === 'POST' && url.pathname === '/api/path/game') {
       const wp = ensurePath()
       let coins = 0
       wp.gamesPlayed = (wp.gamesPlayed || 0) + 1
       if (wp.steps && wp.started) {
-        const idx = wp.done.findIndex((d) => !d)
+        let idx = wp.done.findIndex((d) => !d)
+        if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
         if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
           wp.done[idx] = true
           coins = completePathIfDone(wp)
@@ -491,7 +506,8 @@ const server = http.createServer(async (req, res) => {
       const wp = ensurePath()
       let coins = 0
       if (wp.steps && wp.started) {
-        const idx = wp.done.findIndex((d) => !d)
+        let idx = wp.done.findIndex((d) => !d)
+        if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === body.step)
         if (idx >= 0 && wp.steps[idx] === body.step) {
           wp.done[idx] = true
           coins = completePathIfDone(wp)
@@ -505,7 +521,8 @@ const server = http.createServer(async (req, res) => {
       let coins = 0
       wp.gamesPlayed = (wp.gamesPlayed || 0) + 1
       if (wp.steps && wp.started) {
-        const idx = wp.done.findIndex((d) => !d)
+        let idx = wp.done.findIndex((d) => !d)
+        if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
         if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
           wp.done[idx] = true
           coins = completePathIfDone(wp)
