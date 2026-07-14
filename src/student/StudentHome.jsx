@@ -525,14 +525,7 @@ function StuckModal({ teacher, stepLabel, onClose }) {
 function PathRibbon({ wp, onResume }) {
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   if (!wp) return null
-  if (!wp.steps) {
-    return (
-      <div className="card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, background: 'linear-gradient(120deg,#f0faff,#fff)' }}>
-        <span style={{ fontSize: 24 }}>🏖️</span>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>No writing path on {day}s — Mission Control is all yours.</span>
-      </div>
-    )
-  }
+  if (!wp.steps) return null
   return (
     <div style={{ borderRadius: 16, background: 'linear-gradient(115deg,#1e8a5c,#2e9e6b)', color: '#fff', padding: '11px 20px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, boxShadow: '0 4px 16px rgba(46,158,107,.3)' }}>
       <span style={{ fontSize: 22 }}>🎉</span>
