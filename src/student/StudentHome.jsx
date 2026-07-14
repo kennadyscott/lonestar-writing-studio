@@ -348,27 +348,25 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
           </div>
         </div>
-        <button onClick={onHow} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: '1.5px solid var(--line)', borderRadius: 999, padding: '8px 16px', fontSize: 13, fontWeight: 800, color: 'var(--ink)', background: '#fff', boxShadow: 'var(--shadow)' }}>
-          <span style={{ width: 17, height: 17, borderRadius: '50%', background: '#0d2f55', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10.5, fontWeight: 800 }}>?</span>
-          How it works
-        </button>
       </div>
 
-      {/* space panel (real art) */}
+      {/* space hero — robot pops out the top of the panel */}
       <div style={{ position: 'relative' }}>
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
-          background: `linear-gradient(95deg, rgba(7,16,48,.94) 0%, rgba(7,16,48,.72) 38%, rgba(7,16,48,.22) 66%, rgba(7,16,48,.05) 100%), url(${BRAND.launchBg}) right center / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
-          </div>
-          <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
-          <div style={{ fontSize: 14, color: '#cdddf5' }}>
-            {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+        <div style={{ position: 'relative' }}>
+          <img src={`${import.meta.env.BASE_URL || '/'}hero-robot.png`} alt="" style={{ width: '100%', display: 'block' }} />
+          <div style={{ position: 'absolute', left: '3.4%', top: '40%', color: '#fff' }}>
+            <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, textShadow: '0 1px 8px rgba(0,0,0,.7)' }}>
+              <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 14px rgba(0,0,0,.7)' }}>Launch Sequence</div>
+            <div style={{ fontSize: 14.5, color: '#e6edff', fontWeight: 600, textShadow: '0 1px 8px rgba(0,0,0,.65)' }}>
+              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+            </div>
           </div>
         </div>
 
         {quest ? (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -110, alignItems: 'stretch' }}>
             {wp.steps.map((t, i) => {
               const done = wp.done[i]
               const current = i === curIdx || (wp.stuck && !done)
@@ -382,7 +380,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             })}
           </div>
         ) : (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -110, alignItems: 'stretch' }}>
             <TaskCard meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
             <TaskCard meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
             <TaskCard meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
