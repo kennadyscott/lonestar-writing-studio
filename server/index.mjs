@@ -371,7 +371,10 @@ const server = http.createServer(async (req, res) => {
         if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === body.step)
         if (idx >= 0 && wp.steps[idx] === body.step) {
           wp.done[idx] = true
-          coins = completePathIfDone(wp)
+          const stu = findStu('stu_kscott')
+          if (stu) stu.coins += 10
+          state.coinEvents.push({ id: uid('ce'), studentId: 'stu_kscott', type: 'mission_complete', coins: 10, ts: now() })
+          coins = 10 + completePathIfDone(wp)
         }
       }
       save()
@@ -399,7 +402,10 @@ const server = http.createServer(async (req, res) => {
         if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
         if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
           wp.done[idx] = true
-          coins = completePathIfDone(wp)
+          const stu = findStu('stu_kscott')
+          if (stu) stu.coins += 10
+          state.coinEvents.push({ id: uid('ce'), studentId: 'stu_kscott', type: 'mission_complete', coins: 10, ts: now() })
+          coins = 10 + completePathIfDone(wp)
         }
       }
       save()
@@ -510,7 +516,10 @@ const server = http.createServer(async (req, res) => {
         if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === body.step)
         if (idx >= 0 && wp.steps[idx] === body.step) {
           wp.done[idx] = true
-          coins = completePathIfDone(wp)
+          const stu = findStu('stu_kscott')
+          if (stu) stu.coins += 10
+          state.coinEvents.push({ id: uid('ce'), studentId: 'stu_kscott', type: 'mission_complete', coins: 10, ts: now() })
+          coins = 10 + completePathIfDone(wp)
         }
       }
       save()
@@ -525,7 +534,10 @@ const server = http.createServer(async (req, res) => {
         if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
         if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
           wp.done[idx] = true
-          coins = completePathIfDone(wp)
+          const stu = findStu('stu_kscott')
+          if (stu) stu.coins += 10
+          state.coinEvents.push({ id: uid('ce'), studentId: 'stu_kscott', type: 'mission_complete', coins: 10, ts: now() })
+          coins = 10 + completePathIfDone(wp)
         }
       }
       save()

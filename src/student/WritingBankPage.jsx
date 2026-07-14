@@ -21,6 +21,7 @@ function statusOf(sub) {
 export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onChange }) {
   const [filter, setFilter] = useState('all')
   const [confirmId, setConfirmId] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null) // { kind: 'publish'|'share', sub, a }
   const [busy, setBusy] = useState(false)
 
   const sharedIds = new Set((state.shareWall || []).map((e) => e.submissionId).filter(Boolean))
@@ -98,18 +99,18 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
               </button>
               {!sub.published && wcount > 0 && (
                 <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy}
-                  onClick={() => act(() => api.publish(sub.id))}>🌟 Publish</button>
+                  onClick={() => setConfirmAction({ kind: 'publish', sub, a })}>🌟 Publish</button>
               )}
               {sub.published && !shared && (
                 <button className="btn" style={{ padding: '7px 15px', fontSize: 13, background: '#c2571f' }} disabled={busy}
-                  onClick={() => act(() => api.share(sub.id))}>💛 Share to Wall</button>
+                  onClick={() => setConfirmAction({ kind: 'share', sub, a })}>💛 Share to Wall</button>
               )}
               {confirmId === sub.id ? (
                 <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', background: '#fdeeee', border: '1px solid #f0b9be', borderRadius: 10, padding: '5px 10px' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#d84a57' }}>Discard forever?</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#d84a57' }}>Delete this piece? You can't undo this.</span>
                   <button style={{ fontSize: 12.5, fontWeight: 800, color: '#d84a57' }} disabled={busy}
-                    onClick={() => act(async () => { await api.discard(sub.id); setConfirmId(null) })}>Yes</button>
-                  <button style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }} onClick={() => setConfirmId(null)}>No</button>
+                    onClick={() => act(async () => { await api.discard(sub.id); setConfirmId(null) })}>Yes, delete</button>
+                  <button style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }} onClick={() => setConfirmId(null)}>Keep it</button>
                 </span>
               ) : (
                 <button title="Discard this piece" style={{ fontSize: 16, color: 'var(--muted)', padding: 6 }} disabled={busy}
@@ -119,6 +120,56 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
           </div>
         ))}
       </div>
+
+      {/* guardrail: confirm publish/share with plain-language audience info */}
+      {confirmAction && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 70 }} onClick={() => setConfirmAction(null)}>
+          <div className="card" style={{ width: 460, maxWidth: '94vw', padding: '26px 28px' }} onClick={(e) => e.stopPropagation()}>
+            {confirmAction.kind === 'share' ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <span style={{ fontSize: 26 }}>💛</span>
+                  <b style={{ fontSize: 18 }}>Share to the Writing Wall?</b>
+                </div>
+                <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
+                  "<b>{confirmAction.a.title}</b>" will appear on the class Writing Wall.
+                </p>
+                <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
+                  👀 <b>Who can see it:</b> only the students and teacher in <b>{state.teacher?.name || 'your teacher'}'s class</b>.
+                  It never leaves your classroom, and you or your teacher can take it down anytime.
+                </div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                  <button className="btn ghost" style={{ padding: '10px 20px' }} onClick={() => setConfirmAction(null)}>Not yet</button>
+                  <button className="btn" style={{ padding: '10px 22px', background: '#c2571f' }} disabled={busy}
+                    onClick={() => act(async () => { await api.share(confirmAction.sub.id); setConfirmAction(null) })}>
+                    💛 Yes, share it
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <span style={{ fontSize: 26 }}>🌟</span>
+                  <b style={{ fontSize: 18 }}>Publish this piece?</b>
+                </div>
+                <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
+                  Publishing marks "<b>{confirmAction.a.title}</b>" as finished — it becomes <b>read-only</b> and earns <b>+15 coins</b>.
+                </p>
+                <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
+                  👀 <b>Who can see it:</b> just you and your teacher — publishing does <b>not</b> put it on the Writing Wall. Sharing is a separate choice you make after.
+                </div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                  <button className="btn ghost" style={{ padding: '10px 20px' }} onClick={() => setConfirmAction(null)}>Keep working on it</button>
+                  <button className="btn" style={{ padding: '10px 22px' }} disabled={busy}
+                    onClick={() => act(async () => { await api.publish(confirmAction.sub.id); setConfirmAction(null) })}>
+                    🌟 Publish it
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

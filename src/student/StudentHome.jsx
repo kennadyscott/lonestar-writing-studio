@@ -380,7 +380,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
                 <TaskCard key={t} meta={STEP_META[t]} feature={featureFor(t, Math.min(wp.gamesPlayed, 2))} number={i + 1}
                   status={done ? 'done' : current ? 'current' : 'future'}
                   note={wp.stuck && wp.stuckStep === t && !done ? '😵 Flagged stuck — help is on the way' : null}
-                  onStuckLink={!wp.stuck && i === curIdx ? onStuck : null}
+                  onStuckLink={!wp.stuck && i === curIdx && wp.done.filter((d) => !d).length > 1 ? onStuck : null}
                   ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} big />
               )
             })}
@@ -395,23 +395,52 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
         )}
       </div>
 
-      {/* progress / status row */}
+      {/* reward track — every milestone shows its payoff */}
       {wp?.steps ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f4f8fb', borderRadius: 13, padding: '10px 16px', margin: '16px 0 4px' }}>
-          <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(140deg,#f5c542,#e89a00)', display: 'grid', placeItems: 'center', fontSize: 17, flexShrink: 0 }}>⭐</span>
-          <b style={{ fontSize: 13.5, whiteSpace: 'nowrap' }}>{doneCount} of 3 missions completed</b>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', maxWidth: 260, margin: '0 auto' }}>
-            {[0, 1, 2].map((i) => (
-              <React.Fragment key={i}>
-                {i > 0 && <span style={{ flex: 1, height: 4, background: wp.done[i - 1] && wp.done[i] ? '#f5b400' : '#dbe5ee' }} />}
-                <span style={{ width: 15, height: 15, borderRadius: '50%', background: wp.done[i] ? '#f5b400' : '#dbe5ee', boxShadow: wp.done[i] ? '0 0 8px rgba(245,180,0,.6)' : 'none' }} />
-              </React.Fragment>
-            ))}
+        <div style={{ background: '#f4f8fb', borderRadius: 13, padding: '13px 20px', margin: '16px 0 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(140deg,#f5c542,#e89a00)', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>⭐</span>
+            <b style={{ fontSize: 13.5 }}>{doneCount} of 3 missions completed</b>
+            <span style={{ flex: 1 }} />
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: '#8a6400', background: '#fdf1d2', borderRadius: 999, padding: '5px 14px' }}>
+              🪙 {doneCount * 10 + (wp.completed ? 25 : 0)} of 55 coins banked today
+            </span>
           </div>
-          <span style={{ fontSize: 12, fontWeight: 700, color: quest ? (wp.stuck ? '#b3641d' : 'var(--muted)') : 'var(--good)', whiteSpace: 'nowrap', textAlign: 'right' }}>
-            {quest ? (wp.stuck ? "🧭 Missions unlocked while you're stuck — your teacher knows. Finish all 3!" : 'Finish all 3 to unlock your full dashboard! 🔒') : '🎉 Dashboard unlocked!'}
-
-          </span>
+          <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: 12 }}>
+            {[0, 1, 2].map((i) => {
+              const done = wp.done[i]
+              const isNext = !done && i === wp.done.findIndex((d) => !d)
+              return (
+                <React.Fragment key={i}>
+                  {i > 0 && <div style={{ flex: 1, height: 4, borderRadius: 3, marginTop: 11, background: wp.done[i - 1] ? 'linear-gradient(90deg,#f5c542,#e89a00)' : '#dbe5ee' }} />}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 120 }}>
+                    <span style={{ width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 12.5, fontWeight: 800,
+                      background: done ? 'linear-gradient(140deg,#f5c542,#e89a00)' : '#fff', color: done ? '#fff' : '#8fa5b8',
+                      border: done ? 'none' : isNext ? '2px solid #f0b429' : '2px dashed #c3d3e0',
+                      boxShadow: done ? '0 0 10px rgba(245,180,0,.55)' : 'none' }}>
+                      {done ? '✓' : i + 1}
+                    </span>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, borderRadius: 999, padding: '3px 11px', whiteSpace: 'nowrap',
+                      background: done ? '#fdf1d2' : '#eef3f6', color: done ? '#8a6400' : '#7d94a6' }}>
+                      🪙 +10{done ? ' ✓' : ''}
+                    </span>
+                    {i === 1 && (
+                      <span style={{ fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '3px 11px', whiteSpace: 'nowrap',
+                        background: doneCount >= 2 ? '#e6f6ee' : '#eef3f6', color: doneCount >= 2 ? 'var(--good)' : '#7d94a6' }}>
+                        🤖 {doneCount >= 2 ? 'Challenge unlocked!' : 'Unlocks the 100-coin Challenge'}
+                      </span>
+                    )}
+                    {i === 2 && (
+                      <span style={{ fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '3px 11px', whiteSpace: 'nowrap',
+                        background: wp.completed ? '#e6f6ee' : '#eef3f6', color: wp.completed ? 'var(--good)' : '#7d94a6' }}>
+                        🏆 +25 bonus · Mission Control
+                      </span>
+                    )}
+                  </div>
+                </React.Fragment>
+              )
+            })}
+          </div>
         </div>
       ) : null}
 
@@ -570,6 +599,8 @@ function DemoWeekStrip({ wp, onPick }) {
 }
 
 /* ---- unified task card: illustration, badge, plain title + accent, desc, details, CTA ---- */
+let lastSeenMissions = { key: null, n: 0 } // survives route changes so the payoff toast fires after returning home
+
 const CARD_PURPLE = '#16386b' // deep LoneStar navy
 const CYAN = '#35c3e8' // bright logo-script blue
 const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
@@ -829,7 +860,7 @@ function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose, missi
     let h = 0
     for (const ch of String(seed)) h = (h * 31 + ch.charCodeAt(0)) >>> 0
     const a = h % playable.length
-    const b = (a + 1 + ((h >> 3) % (playable.length - 1))) % playable.length
+    const b = (a + 1 + ((h >>> 3) % (playable.length - 1))) % playable.length
     list = [playable[a], playable[b]]
   }
 
@@ -1114,6 +1145,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
   const [stuckOpen, setStuckOpen] = useState(false)
+  const [payoff, setPayoff] = useState(null)
 
 
   const rows = useMemo(() => {
@@ -1214,6 +1246,18 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
     setBusy(true)
     try { await api.pathStuck(); onChange && onChange(); setStuckOpen(true) } finally { setBusy(false) }
   }
+  // payoff toast when a mission lands (not on the 3rd — the trophy owns that moment)
+  useEffect(() => {
+    if (!wp?.steps) return
+    const key = `${wp.date}-${wp.day}`
+    const doneNow = wp.done.filter(Boolean).length
+    if (lastSeenMissions.key !== key) { lastSeenMissions = { key, n: doneNow }; return }
+    const prev = lastSeenMissions.n
+    lastSeenMissions.n = doneNow
+    if (wp.completed) { setPayoff(null); return }
+    if (doneNow > prev) setPayoff({ n: doneNow, challenge: doneNow === 2 })
+  }, [wp?.steps ? wp.done.filter(Boolean).length : 0])
+
   function pickDemoDay(d) {
     api.pathDemoDay(d).then(() => onChange && onChange()).catch(() => {})
   }
@@ -1290,6 +1334,33 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         <PathCelebration wp={wp} streak={gs?.streakDays ?? 0} onClose={() => setCelebrate(false)} />
       )}
       {how && <HowItWorksModal onClose={() => setHow(false)} />}
+      {payoff && !wp?.completed && (() => {
+        const nextIdx = wp?.steps ? wp.done.findIndex((d) => !d) : -1
+        return (
+          <div style={{ position: 'fixed', bottom: 26, left: '50%', transform: 'translateX(-50%)', zIndex: 65, maxWidth: '94vw',
+            background: '#0d2440', color: '#fff', borderRadius: 18, padding: '14px 20px', display: 'flex', gap: 14, alignItems: 'center',
+            boxShadow: '0 14px 44px rgba(0,0,0,.45), 0 0 24px rgba(53,195,232,.3)', border: '1.5px solid #35c3e8', animation: 'popIn .3s ease', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 28 }}>🪙</span>
+            <div style={{ minWidth: 0 }}>
+              <b style={{ fontSize: 14.5 }}>Mission {payoff.n} complete — +10 coins deposited!</b>
+              <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700, marginTop: 2 }}>
+                {payoff.challenge ? 'The Daily Challenge just unlocked — 100 coins on the table! 🤖' : 'Nice work — keep it rolling!'}
+              </div>
+            </div>
+            {nextIdx >= 0 && (
+              <button onClick={() => { setPayoff(null); missionStart(nextIdx) }}
+                style={{ background: 'linear-gradient(120deg,#f5c542,#e89a00)', color: '#3d2c00', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '11px 20px', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 0 16px rgba(245,180,0,.5)' }}>
+                ▶ Start Mission {nextIdx + 1} →
+              </button>
+            )}
+            <button onClick={() => { setPayoff(null); setGame(true) }}
+              style={{ background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', fontWeight: 800, fontSize: 12, borderRadius: 999, padding: '9px 14px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+              🕹️ Bonus round
+            </button>
+            <button onClick={() => setPayoff(null)} style={{ color: '#8fb4d6', fontSize: 18, cursor: 'pointer', background: 'none' }}>✕</button>
+          </div>
+        )
+      })()}
       {stuckOpen && (
         <StuckModal teacher={state.teacher?.name || 'your teacher'}
           stepLabel={wp?.stuckStep ? STEP_META[wp.stuckStep]?.label : null}

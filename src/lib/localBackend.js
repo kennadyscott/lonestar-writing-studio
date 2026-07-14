@@ -95,7 +95,11 @@ export const localApi = {
     if (wp.steps && wp.started) {
       let idx = wp.done.findIndex((d) => !d)
       if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === step)
-      if (idx >= 0 && wp.steps[idx] === step) { wp.done[idx] = true; coins = completePathIfDone(wp) }
+      if (idx >= 0 && wp.steps[idx] === step) {
+        wp.done[idx] = true
+        const stu = findStu(ME); if (stu) stu.coins += 10
+        coins = 10 + completePathIfDone(wp)
+      }
     }
     return { path: clone(wp), coinsAwarded: coins }
   },
@@ -115,7 +119,11 @@ export const localApi = {
     if (wp.steps && wp.started) {
       let idx = wp.done.findIndex((d) => !d)
       if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
-      if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) { wp.done[idx] = true; coins = completePathIfDone(wp) }
+      if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
+        wp.done[idx] = true
+        const stu = findStu(ME); if (stu) stu.coins += 10
+        coins = 10 + completePathIfDone(wp)
+      }
     }
     return { path: clone(wp), coinsAwarded: coins }
   },
