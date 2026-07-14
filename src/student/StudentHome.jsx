@@ -238,6 +238,8 @@ const STEP_META = {
     desc: 'Write about anything you choose. Start with a prompt or your own topic.', ctaWord: 'Start a New Free Write', illus: ['📖', '🌙'] },
   games: { icon: '🎯', label: 'Fluency Games', accent: 'Build Your Flow', badge: '🎮', art: 'head-games.jpg',
     desc: 'Play short games that help you write complete sentences quickly and smoothly.', ctaWord: 'Play', illus: ['🎮', '⭐'] },
+  bank: { icon: '🗂️', label: 'Writing Bank', accent: 'Revise & Publish', badge: '🗂️',
+    desc: 'Every piece you have started — revise it, publish it, or share it to the wall.', ctaWord: 'Open the Bank', illus: ['🗂️', '⭐'] },
   goal_data: { icon: '🎯', label: 'My Writing Goals', accent: 'Choose Your Next Focus', badge: '⭐', art: 'head-goals.jpg',
     desc: 'Check the skill you are working on and see your progress.', ctaWord: 'View My Goal', illus: ['⭐', '📈'] },
 }
@@ -260,7 +262,14 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
   const lastFree = (state.submissions || []).filter((x) => x.studentId === me.id && state.assignments.find((a) => a.id === x.assignmentId)?.genre === 'free').slice(-1)[0]
   const lastFreeTitle = lastFree ? state.assignments.find((a) => a.id === lastFree.assignmentId)?.title : null
   const fmtName = (f) => (f === 'ECR' ? 'Extended Constructed Response' : f === 'SCR' ? 'Short Constructed Response' : f)
+  const bankCount = (state.submissions || []).filter((x) => x.studentId === me.id && ['free', 'quick'].includes(state.assignments.find((a) => a.id === x.assignmentId)?.genre)).length
   const featureFor = (t, gamesPlayed) => ({
+    bank: (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: CYAN_TEXT }}>🗂️ {bankCount} piece{bankCount === 1 ? '' : 's'} in your bank</div>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#41586b', marginTop: 7 }}>Publish your best to the Writing Wall 🌟</div>
+      </div>
+    ),
     quickwrite: (
       <div style={{ textAlign: 'left' }}>
         <span style={{ display: 'inline-block', background: 'linear-gradient(120deg,#e0a51c,#c98a08)', color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 1.2, borderRadius: '8px 8px 0 0', padding: '4px 12px' }}>💬 TODAY'S PROMPT</span>
@@ -348,7 +357,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 2, color: '#c99312', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 9 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 9 }}>✦</span>
             </div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>Launch Sequence</div>
+            <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>{quest ? 'Launch Sequence' : 'Mission Control'}</div>
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
             {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
@@ -373,10 +382,11 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             })}
           </div>
         ) : (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 28, padding: 0, marginTop: 0, alignItems: 'stretch' }}>
-            <TaskCard big meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
-            <TaskCard big meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
-            <TaskCard big meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 22, padding: 0, marginTop: 0, alignItems: 'stretch' }}>
+            <TaskCard meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
+            <TaskCard meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a Free Write" onAction={onFreeWrite} busy={busy} />
+            <TaskCard meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
+            <TaskCard meta={STEP_META.bank} feature={featureFor('bank', null)} status="free" ctaLabel="Open the Bank" onAction={onBank} busy={busy} />
           </div>
         )}
       </div>
@@ -400,11 +410,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
           </span>
         </div>
       ) : null}
-      {!quest && (
-        <div style={{ textAlign: 'right', margin: '6px 0 2px' }}>
-          <button onClick={onBank} style={{ color: 'var(--link)', fontSize: 12.5, fontWeight: 800 }}>🗂️ Writing Bank →</button>
-        </div>
-      )}
+
     </div>
   )
 }
@@ -1282,15 +1288,10 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
       ) : (
-        /* UNLOCKED STUDIO — a different world: big open task cards */
+        /* MISSION CONTROL — same design family as the launchpad */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <PathRibbon wp={wp} onResume={(i) => launchStep(wp.steps[i])} />
-          <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
-            <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
-            <BigTask icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-            <BigTask icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-          </div>
+          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck} nudge={nudge}
+            onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <LunaNook modules={state.modules} onLuna={onLuna} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
