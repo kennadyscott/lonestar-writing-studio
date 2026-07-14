@@ -49,27 +49,27 @@ function LunaNook({ modules, onLuna }) {
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div style={{ borderRadius: 20, background: '#131048', border: '2px solid rgba(18,12,58,.5)', overflow: 'hidden', boxShadow: '0 10px 26px rgba(20,15,70,.32)' }}>
+    <div style={{ borderRadius: 20, background: '#0d2440', border: '2px solid rgba(9,26,52,.6)', overflow: 'hidden', boxShadow: '0 10px 26px rgba(20,15,70,.32)' }}>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 13, padding: '13px 18px',
-        background: `linear-gradient(90deg, rgba(19,16,72,.94) 0%, rgba(19,16,72,.5) 42%, rgba(19,16,72,.15) 70%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
-        <span style={{ width: 56, height: 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#8b5cf6,#c9b6ff,#8b5cf6)', display: 'grid', placeItems: 'center' }}>
-          <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#1a1554', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+        background: `linear-gradient(90deg, rgba(13,36,64,.94) 0%, rgba(13,36,64,.5) 42%, rgba(13,36,64,.15) 70%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
+        <span style={{ width: 56, height: 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
+          <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
             <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
           </span>
         </span>
         <div>
           <b style={{ fontSize: 17, color: '#fff' }}>Luna's Writing Nook</b>
-          <div style={{ fontSize: 12.5, color: '#c9bcf5', fontWeight: 700 }}>Your writing path</div>
+          <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700 }}>Your writing path</div>
         </div>
       </div>
       <div style={{ background: '#fdfcf8', margin: '2px 14px 14px', borderRadius: 14, padding: '16px 20px' }}>
         <b style={{ fontSize: 15, color: '#1c1650' }}>Module {idx + 1}: {current.label}</b>
-        <div style={{ fontSize: 12.5, color: CARD_PURPLE, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
+        <div style={{ fontSize: 12.5, color: CYAN_TEXT, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1, height: 9, background: '#e8e6f2', borderRadius: 6 }}>
-            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: `linear-gradient(90deg,#7d5df0,${CARD_PURPLE})`, borderRadius: 6 }} />
+            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#1479b8)', borderRadius: 6 }} />
           </div>
-          <b style={{ fontSize: 13, color: CARD_PURPLE }}>{Math.round(current.progress * 100)}%</b>
+          <b style={{ fontSize: 13, color: CYAN_TEXT }}>{Math.round(current.progress * 100)}%</b>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           {modules.map((m) => (
@@ -78,7 +78,7 @@ function LunaNook({ modules, onLuna }) {
             </span>
           ))}
           <span style={{ flex: 1 }} />
-          <button onClick={onLuna} style={{ background: CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: `0 5px 14px ${CARD_PURPLE}55`, cursor: 'pointer' }}>
+          <button onClick={onLuna} style={{ background: CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: '0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
             Go to my path →
           </button>
         </div>
@@ -263,15 +263,15 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
     quickwrite: (
       <div style={{ textAlign: 'left' }}>
         <span style={{ display: 'inline-block', background: 'linear-gradient(120deg,#e0a51c,#c98a08)', color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 1.2, borderRadius: '8px 8px 0 0', padding: '4px 12px' }}>💬 TODAY'S PROMPT</span>
-        <div style={{ background: '#f3f0fd', border: `1.5px solid ${CARD_PURPLE}33`, borderRadius: '0 12px 12px 12px', padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-          <span style={{ fontFamily: 'Georgia,serif', fontSize: 30, lineHeight: .9, color: CARD_PURPLE }}>“</span>
+        <div style={{ background: '#e9f5fb', border: '1.5px solid rgba(53,195,232,.4)', borderRadius: '0 12px 12px 12px', padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <span style={{ fontFamily: 'Georgia,serif', fontSize: 30, lineHeight: .9, color: CYAN_TEXT }}>“</span>
           <b style={{ fontSize: 14.5, color: '#241d5e', lineHeight: 1.35 }}>{qp ? qp.title : 'A fresh prompt each day'}</b>
         </div>
       </div>
     ),
     assignments: upNext ? (
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CARD_PURPLE, textTransform: 'uppercase' }}>{fmtName(upNext.a.format || 'SCR')}</div>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CYAN_TEXT, textTransform: 'uppercase' }}>{fmtName(upNext.a.format || 'SCR')}</div>
         <div style={{ fontSize: 16.5, fontWeight: 800, color: '#1c1650', lineHeight: 1.3, marginTop: 6 }}>{upNext.a.title}</div>
       </div>
     ) : (
@@ -285,10 +285,10 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             const cur = m.status === 'in_progress'
             return (
               <React.Fragment key={m.id}>
-                {mi > 0 && <span style={{ flex: 1, borderTop: '2px dashed #cfc8ef', margin: '0 3px', minWidth: 7 }} />}
+                {mi > 0 && <span style={{ flex: 1, borderTop: '2px dashed #bcd8e8', margin: '0 3px', minWidth: 7 }} />}
                 <span title={m.label} style={{ width: cur ? 34 : 23, height: cur ? 34 : 23, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: cur ? 15 : 10, flexShrink: 0,
-                  background: done ? CARD_PURPLE : cur ? 'linear-gradient(135deg,#f5c542,#e89a00)' : '#eceafa',
-                  color: done || cur ? '#fff' : '#b4aede',
+                  background: done ? CARD_PURPLE : cur ? 'linear-gradient(135deg,#f5c542,#e89a00)' : '#e3eef5',
+                  color: done || cur ? '#fff' : '#9fbfd6',
                   boxShadow: cur ? '0 0 12px rgba(245,180,0,.55)' : 'none', border: cur ? '2px solid #fff' : 'none' }}>
                   {done ? '✓' : cur ? '🌟' : '★'}
                 </span>
@@ -296,18 +296,18 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             )
           })}
         </div>
-        <div style={{ fontSize: 12.5, fontWeight: 800, color: CARD_PURPLE, textAlign: 'center', marginTop: 9 }}>
+        <div style={{ fontSize: 12.5, fontWeight: 800, color: CYAN_TEXT, textAlign: 'center', marginTop: 9 }}>
           {mod ? `You're on Module ${state.modules.indexOf(mod) + 1}: ${mod.label}` : 'Your writing path'}
         </div>
       </div>
     ),
     revision: (
-      <div style={{ fontSize: 14, fontWeight: 800, color: CARD_PURPLE, textAlign: 'center' }}>✨ One challenge — make it shine</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: CYAN_TEXT, textAlign: 'center' }}>✨ One challenge — make it shine</div>
     ),
     freewrite: (
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 13.5, fontWeight: 700, color: '#41586b' }}>Where will your idea go today?</div>
-        {lastFreeTitle && <div style={{ fontSize: 12.5, fontWeight: 800, color: CARD_PURPLE, marginTop: 7 }}>📄 Last piece: {lastFreeTitle}</div>}
+        {lastFreeTitle && <div style={{ fontSize: 12.5, fontWeight: 800, color: CYAN_TEXT, marginTop: 7 }}>📄 Last piece: {lastFreeTitle}</div>}
       </div>
     ),
     games: (
@@ -317,15 +317,15 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 10 }}>
             {[0, 1].map((i) => (
               <span key={i} style={{ width: 21, height: 21, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff',
-                background: i < gamesPlayed ? 'var(--good)' : '#eceafa', border: i < gamesPlayed ? 'none' : '2px dashed #b4aede' }}>{i < gamesPlayed ? '✓' : ''}</span>
+                background: i < gamesPlayed ? 'var(--good)' : '#e3eef5', border: i < gamesPlayed ? 'none' : '2px dashed #9fbfd6' }}>{i < gamesPlayed ? '✓' : ''}</span>
             ))}
           </div>
         )}
       </div>
     ),
     goal_data: (
-      <div style={{ textAlign: 'left', background: '#f3f0fd', borderRadius: 12, padding: '10px 14px' }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CARD_PURPLE }}>🎯 CURRENT GOAL</div>
+      <div style={{ textAlign: 'left', background: '#e9f5fb', borderRadius: 12, padding: '10px 14px' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.3, color: CYAN_TEXT }}>🎯 CURRENT GOAL</div>
         <b style={{ fontSize: 13.5, color: '#241d5e', lineHeight: 1.35, display: 'block', marginTop: 4 }}>{me.goal ? me.goal.text : 'No goal set — pick one!'}</b>
       </div>
     ),
@@ -405,12 +405,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
           </div>
           <span style={{ fontSize: 12, fontWeight: 700, color: quest ? (wp.stuck ? '#b3641d' : 'var(--muted)') : 'var(--good)', whiteSpace: 'nowrap', textAlign: 'right' }}>
             {quest ? (wp.stuck ? "🧭 Missions unlocked while you're stuck — your teacher knows. Finish all 3!" : 'Finish all 3 to unlock your full dashboard! 🔒') : '🎉 Dashboard unlocked!'}
-            {quest && !wp.stuck && (
-              <button onClick={onStuck} disabled={busy}
-                style={{ display: 'block', marginTop: 3, marginLeft: 'auto', color: '#b3641d', fontSize: 12, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', background: 'none' }}>
-                😵 I'm Stuck — I need another way in
-              </button>
-            )}
+
           </span>
         </div>
       ) : null}
@@ -455,21 +450,21 @@ function HowItWorksModal({ onClose }) {
 function PathCelebration({ wp, streak, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,9,38,.78)', display: 'grid', placeItems: 'center', zIndex: 70 }}>
-      <div style={{ position: 'relative', width: 620, maxWidth: '94vw', background: '#f7f5fc', borderRadius: 28,
-        border: '2px solid #8b7cf5', boxShadow: '0 0 60px rgba(120,100,240,.35), 0 24px 60px rgba(0,0,0,.5)',
+      <div style={{ position: 'relative', width: 620, maxWidth: '94vw', background: '#f4f9fc', borderRadius: 28,
+        border: '2px solid #57c8ec', boxShadow: '0 0 60px rgba(53,195,232,.35), 0 24px 60px rgba(0,0,0,.5)',
         padding: '38px 44px 34px', textAlign: 'center', animation: 'popIn .35s ease' }}>
-        <span style={{ position: 'absolute', top: 26, left: 34, color: '#a894f8', fontSize: 20 }}>✦</span>
+        <span style={{ position: 'absolute', top: 26, left: 34, color: '#6fcdf0', fontSize: 20 }}>✦</span>
         <span style={{ position: 'absolute', top: 44, left: 58, color: '#e2c96a', fontSize: 11 }}>✦</span>
-        <span style={{ position: 'absolute', top: 30, right: 38, color: '#a894f8', fontSize: 16 }}>✦</span>
-        <span style={{ position: 'absolute', top: 52, right: 62, color: '#c9bcfa', fontSize: 10 }}>✦</span>
-        <span style={{ position: 'absolute', bottom: 34, left: 40, color: '#c9bcfa', fontSize: 13 }}>✦</span>
-        <span style={{ position: 'absolute', bottom: 46, right: 44, color: '#a894f8', fontSize: 12 }}>✦</span>
+        <span style={{ position: 'absolute', top: 30, right: 38, color: '#6fcdf0', fontSize: 16 }}>✦</span>
+        <span style={{ position: 'absolute', top: 52, right: 62, color: '#a8dff5', fontSize: 10 }}>✦</span>
+        <span style={{ position: 'absolute', bottom: 34, left: 40, color: '#a8dff5', fontSize: 13 }}>✦</span>
+        <span style={{ position: 'absolute', bottom: 46, right: 44, color: '#6fcdf0', fontSize: 12 }}>✦</span>
 
         <img src={BRAND.trophy} alt="" style={{ width: 230, mixBlendMode: 'multiply', WebkitMaskImage: 'radial-gradient(ellipse 62% 58% at 50% 50%, #000 52%, transparent 76%)', maskImage: 'radial-gradient(ellipse 62% 58% at 50% 50%, #000 52%, transparent 76%)' }} />
 
         <h2 style={{ margin: '10px 0 8px', fontSize: 36, fontWeight: 800, color: '#151238', letterSpacing: -.5 }}>Sequence Complete</h2>
         <p style={{ color: '#43406e', margin: '0 0 22px', fontSize: 16.5, fontWeight: 600 }}>
-          You did the writer's work today — <b style={{ color: CARD_PURPLE }}>Mission Control</b> is <b style={{ color: CARD_PURPLE }}>unlocked</b>.
+          You did the writer's work today — <b style={{ color: CYAN_TEXT }}>Mission Control</b> is <b style={{ color: CYAN_TEXT }}>unlocked</b>.
         </p>
 
         {/* stat chips */}
@@ -484,7 +479,7 @@ function PathCelebration({ wp, streak, onClose }) {
 
         <button onClick={onClose}
           style={{ width: '100%', padding: '16px 0', borderRadius: 14, fontSize: 16.5, fontWeight: 800, letterSpacing: .3, color: '#fff',
-            background: `linear-gradient(120deg, ${CARD_PURPLE}, #7d5df0)`, boxShadow: `0 8px 24px ${CARD_PURPLE}66`, cursor: 'pointer',
+            background: `linear-gradient(120deg, ${CARD_PURPLE}, #1e5a94)`, boxShadow: '0 8px 24px rgba(53,195,232,.5)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           🚀 Take me to Mission Control <span>→</span>
         </button>
@@ -514,11 +509,11 @@ function StuckModal({ teacher, stepLabel, onClose }) {
             <span style={{ fontSize: 18 }}>📨</span>
             <span style={{ fontSize: 13.5, lineHeight: 1.5 }}><b>{teacher} has been notified</b> that you're stuck{stepLabel ? <> on <b>{stepLabel}</b></> : null}, so help is on the way.</span>
           </div>
-          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#f3f0fd', borderRadius: 12, padding: '11px 14px' }}>
+          <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 12, padding: '11px 14px' }}>
             <span style={{ fontSize: 18 }}>🗣️</span>
             <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
               <b>Advocate for yourself, too.</b> If {teacher} isn't at their computer, it's always okay to ask for help in a respectful way — try:
-              <i style={{ display: 'block', marginTop: 5, color: '#4a3fb0' }}>"Excuse me — I'm stuck on my writing. Could you help me when you have a minute?"</i>
+              <i style={{ display: 'block', marginTop: 5, color: '#0f97c2' }}>"Excuse me — I'm stuck on my writing. Could you help me when you have a minute?"</i>
             </span>
           </div>
           <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: '#fdf1dc', borderRadius: 12, padding: '11px 14px' }}>
@@ -527,7 +522,7 @@ function StuckModal({ teacher, stepLabel, onClose }) {
           </div>
         </div>
         <button onClick={onClose}
-          style={{ width: '100%', padding: '14px 0', borderRadius: 12, fontSize: 15.5, fontWeight: 800, color: '#fff', background: `linear-gradient(120deg, ${CARD_PURPLE}, #7d5df0)`, boxShadow: `0 6px 18px ${CARD_PURPLE}55`, cursor: 'pointer' }}>
+          style={{ width: '100%', padding: '14px 0', borderRadius: 12, fontSize: 15.5, fontWeight: 800, color: '#fff', background: `linear-gradient(120deg, ${CARD_PURPLE}, #1e5a94)`, boxShadow: '0 6px 18px rgba(53,195,232,.5)', cursor: 'pointer' }}>
           Got it — show me my open missions →
         </button>
       </div>
@@ -580,7 +575,9 @@ function DemoWeekStrip({ wp, onPick }) {
 }
 
 /* ---- unified task card: illustration, badge, plain title + accent, desc, details, CTA ---- */
-const CARD_PURPLE = '#6455e0'
+const CARD_PURPLE = '#16386b' // deep LoneStar navy
+const CYAN = '#35c3e8' // bright logo-script blue
+const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onStuckLink, busy }) {
   const done = status === 'done'
   const current = status === 'current' || status === 'free'
@@ -626,7 +623,7 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onS
       {/* content */}
       <div style={{ padding: '10px 16px 14px', display: 'flex', flexDirection: 'column', flex: 1, textAlign: 'center' }}>
         <div style={{ fontWeight: 800, fontSize: 15.5, letterSpacing: .4, textTransform: 'uppercase', color: '#1c1650', lineHeight: 1.2 }}>{meta.label}</div>
-        <div style={{ fontSize: 13, color: CARD_PURPLE, fontWeight: 800, marginTop: 3 }}>{meta.accent}</div>
+        <div style={{ fontSize: 13, color: CYAN_TEXT, fontWeight: 800, marginTop: 3 }}>{meta.accent}</div>
         <p style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, margin: '9px 0 0', fontWeight: 600 }}>{meta.desc}</p>
         <div style={{ borderTop: '1px solid var(--line)', margin: '11px 0 10px' }} />
         {/* featured content */}
@@ -638,7 +635,7 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onS
           style={{ marginTop: 12, width: '100%', padding: '12px 0', borderRadius: 12, fontWeight: 800, fontSize: 13.5, letterSpacing: .6, textTransform: 'uppercase',
             color: done ? 'var(--good)' : current ? '#fff' : '#9db0c0',
             background: done ? '#e6f6ee' : current ? CARD_PURPLE : '#eef0f6',
-            boxShadow: current ? `0 6px 16px ${CARD_PURPLE}55` : 'none', cursor: current ? 'pointer' : 'default',
+            boxShadow: current ? '0 6px 18px rgba(53,195,232,.45)' : 'none', cursor: current ? 'pointer' : 'default',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {done ? '✓ Done!' : current ? <>{ctaLabel} <span>→</span></> : `After Mission ${number - 1}`}
         </button>
@@ -774,8 +771,8 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
       {/* glowing CTA */}
       <button disabled={busy || locked} onClick={locked ? undefined : onGo}
         style={{ position: 'relative', flexShrink: 0, whiteSpace: 'nowrap', color: locked ? '#8fa3c8' : '#fff', fontWeight: 800, fontSize: locked ? 15 : 19, borderRadius: 20, padding: locked ? '18px 24px' : '20px 32px',
-          background: locked ? 'rgba(30,25,80,.6)' : 'linear-gradient(120deg,#4b32c4,#6a4ce8)', border: locked ? '2.5px solid #3d3670' : '2.5px solid #b9a4ff',
-          boxShadow: locked ? 'none' : '0 0 26px rgba(140,110,255,.6), inset 0 0 18px rgba(170,140,255,.25)', cursor: locked ? 'default' : 'pointer' }}>
+          background: locked ? 'rgba(30,25,80,.6)' : 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: locked ? '2.5px solid #3d3670' : '2.5px solid #55d7ff',
+          boxShadow: locked ? 'none' : '0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22)', cursor: locked ? 'default' : 'pointer' }}>
         {locked ? `🔒 Unlocks after 2 missions (${missionsDone}/2)` : dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
       </button>
     </div>
@@ -1301,7 +1298,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
           <PathRibbon wp={wp} onResume={(i) => launchStep(wp.steps[i])} />
           <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
-            <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#52309f', '#3a2178']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
+            <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
             <BigTask icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
             <BigTask icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />

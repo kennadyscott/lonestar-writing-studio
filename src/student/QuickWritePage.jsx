@@ -72,12 +72,12 @@ export default function QuickWritePage({ state, onBack, onChange }) {
 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
         <div style={{ position: 'relative', display: 'inline-block' }}>
-          <h1 className="page" style={{ margin: 0, fontSize: 40, color: '#161342' }}>Quick Write</h1>
+          <h1 className="page" style={{ margin: 0, fontSize: 40, color: '#0d2440' }}>Quick Write</h1>
           <span style={{ position: 'absolute', top: -6, right: -26, color: '#f5c542', fontSize: 16 }}>✦</span>
           <span style={{ position: 'absolute', top: 14, right: -40, color: '#8b7cf5', fontSize: 11 }}>✦</span>
-          <div style={{ height: 5, width: '70%', borderRadius: 3, background: 'linear-gradient(90deg,#6455e0,transparent)', marginTop: 4 }} />
+          <div style={{ height: 5, width: '70%', borderRadius: 3, background: 'linear-gradient(90deg,#35c3e8,transparent)', marginTop: 4 }} />
         </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#efeafd', color: '#4a3fb0', fontWeight: 800, fontSize: 14.5, borderRadius: 999, padding: '10px 20px' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e9f5fb', color: '#0e6a94', fontWeight: 800, fontSize: 14.5, borderRadius: 999, padding: '10px 20px' }}>
           🕐 About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
         </span>
       </div>
@@ -93,26 +93,26 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                 style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,80,.25)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#efeafd', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#6455e0', textTransform: 'uppercase' }}>Writing Topic</span>
+                  <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>Writing Topic</span>
                 </div>
-                <div style={{ fontSize: 42, fontWeight: 800, color: '#161342', lineHeight: 1.1, margin: '10px 0 12px' }}>{pick.title}</div>
-                <div style={{ height: 4, width: 300, maxWidth: '85%', borderRadius: 3, background: 'linear-gradient(90deg,#2c2478,#8b7cf5 70%,transparent)', marginBottom: 20 }} />
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#6455e0', textTransform: 'uppercase', marginBottom: 8 }}>Writing Prompt</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#1f1a4e', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#efeafd', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
+                <div style={{ fontSize: 42, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '10px 0 12px' }}>{pick.title}</div>
+                <div style={{ height: 4, width: 300, maxWidth: '85%', borderRadius: 3, background: 'linear-gradient(90deg,#16386b,#35c3e8 70%,transparent)', marginBottom: 20 }} />
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>Writing Prompt</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#10294a', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
                   <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
-                  <div style={{ fontSize: 14, color: '#3c3670', lineHeight: 1.45 }}>
-                    <b style={{ color: '#6455e0' }}>Think about:</b> {pick.hint || 'What details and examples will make your idea clear to a reader?'}
+                  <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.45 }}>
+                    <b style={{ color: '#0f97c2' }}>Think about:</b> {pick.hint || 'What details and examples will make your idea clear to a reader?'}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                   <button onClick={() => setStage('writing')}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#6455e0', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
-                      boxShadow: '0 8px 22px rgba(100,85,224,.45)', cursor: 'pointer' }}>
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#16386b', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
+                      boxShadow: '0 8px 22px rgba(53,195,232,.45)', cursor: 'pointer' }}>
                     ✏️ Start Writing
                   </button>
-                  <span style={{ fontSize: 19, color: '#6455e0' }}>→</span>
+                  <span style={{ fontSize: 19, color: '#0f97c2' }}>→</span>
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>
                     ⏱ The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
                   </span>
@@ -129,7 +129,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                 <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '18px 22px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
                   <span style={{ fontSize: 24, filter: `drop-shadow(0 1px 2px ${c}55)` }}>{icon}</span>
                   <span>
-                    <b style={{ display: 'block', fontSize: 14.5, color: '#161342' }}>{title}</b>
+                    <b style={{ display: 'block', fontSize: 14.5, color: '#0d2440' }}>{title}</b>
                     <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>{blurb}</span>
                   </span>
                 </div>
