@@ -338,27 +338,32 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
   ]
 
   return (
-    <div className="card" style={{ padding: '16px 18px 12px' }}>
-      {/* header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
-        <img src={BRAND.rocket} alt="" style={{ height: 42 }} />
-        <div style={{ flex: 1 }}>
-          <b style={{ fontSize: 18 }}>Writing Launchpad</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>
-            {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
-          </div>
-        </div>
-      </div>
+    <div className="card" style={{ padding: '14px 18px 12px' }}>
 
-      {/* space hero — robot pops out the top of the panel */}
+      {/* space hero — the transparent strip IS the header; robot pops beside it */}
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           <img src={`${import.meta.env.BASE_URL || '/'}hero-robot.png`} alt="" style={{ width: '100%', display: 'block' }} />
+          {/* launchpad header floats in the transparent strip, left of the robot */}
+          <div style={{ position: 'absolute', left: '1%', top: 0, height: '31%', width: '58%', display: 'flex', alignItems: 'center', gap: 14, padding: '0 10px' }}>
+            <img src={BRAND.rocket} alt="" style={{ height: 'clamp(34px, 4.2vw, 58px)' }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 'clamp(17px, 2vw, 27px)', fontWeight: 800, color: '#10294a', lineHeight: 1.1 }}>
+                Writing Launchpad <span style={{ color: '#f0b429', fontSize: 'clamp(11px, 1.2vw, 16px)', verticalAlign: 'middle' }}>✦</span>
+              </div>
+              <div style={{ fontSize: 'clamp(11.5px, 1.15vw, 15px)', color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>
+                {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
+              </div>
+            </div>
+          </div>
+          <span style={{ position: 'absolute', left: '46%', top: '9%', color: '#f0b429', fontSize: 13 }}>✦</span>
+          <span style={{ position: 'absolute', left: '52%', top: '20%', color: '#35c3e8', fontSize: 9 }}>✦</span>
+          <span style={{ position: 'absolute', left: '2.5%', top: '24%', color: '#c9d8ea', fontSize: 10 }}>✦</span>
           <div style={{ position: 'absolute', left: '3.4%', top: '40%', color: '#fff' }}>
             <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, textShadow: '0 1px 8px rgba(0,0,0,.7)' }}>
               <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
             </div>
-            <div style={{ fontSize: 30, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 14px rgba(0,0,0,.7)' }}>Launch Sequence</div>
+            <div style={{ fontSize: 'clamp(20px, 2.3vw, 32px)', fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 14px rgba(0,0,0,.7)' }}>Launch Sequence</div>
             <div style={{ fontSize: 14.5, color: '#e6edff', fontWeight: 600, textShadow: '0 1px 8px rgba(0,0,0,.65)' }}>
               {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
             </div>
@@ -685,7 +690,7 @@ function Comet({ x, y, c, rot = -18, w = 80 }) {
 
 function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24,
+    <div className="nova-banner" style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
       background: 'radial-gradient(ellipse at 12% 15%, rgba(100,70,210,.4) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(80,55,180,.35) 0%, transparent 50%), linear-gradient(110deg,#151040 0%,#1e1656 55%,#151040 100%)',
       boxShadow: '0 10px 30px rgba(8,16,50,.45)' }}>
 
@@ -704,14 +709,14 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
 
       {/* Nova robot art */}
       <div style={{ position: 'relative', flexShrink: 0, filter: locked ? 'grayscale(.45) brightness(.85)' : 'none' }}>
-        <img src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Nova the Robot" style={{ width: 148, display: 'block',
+        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Nova the Robot" style={{ width: 148, display: 'block',
           WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)',
           maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)' }} />
         {locked && <span style={{ position: 'absolute', bottom: 4, right: 8, width: 34, height: 34, borderRadius: '50%', background: '#f5b400', display: 'grid', placeItems: 'center', fontSize: 17, boxShadow: '0 2px 10px rgba(0,0,0,.45)', zIndex: 2 }}>🔒</span>}
       </div>
 
       {/* content */}
-      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+      <div style={{ flex: 1, minWidth: 300, position: 'relative' }}>
         <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span>Daily Challenge</span>
           <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
@@ -733,7 +738,7 @@ function DailyBanner({ dc, busy, onGo, locked, missionsDone }) {
       </div>
 
       {/* rubric tablet vignette */}
-      <img aria-hidden src={`${import.meta.env.BASE_URL || '/'}rubric-vig.jpg`} alt="" style={{ width: 190, flexShrink: 0, alignSelf: 'center', display: 'block',
+      <img aria-hidden className="nova-rubric" src={`${import.meta.env.BASE_URL || '/'}rubric-vig.jpg`} alt="" style={{ width: 190, flexShrink: 0, alignSelf: 'center', display: 'block',
         WebkitMaskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)',
         maskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)' }} />
 
