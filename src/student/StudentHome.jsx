@@ -370,10 +370,6 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
               </div>
             )}
           </div>
-          <div style={{ marginLeft: 'auto', maxWidth: 430, background: '#e5f1fb', border: '1.5px solid #c7e0f2', borderRadius: 13, padding: '10px 16px',
-            fontSize: 12.5, fontWeight: 700, color: '#28536e', lineHeight: 1.45, alignSelf: 'flex-start' }}>
-            👋 <b style={{ color: '#0d2f55' }}>Hi {firstName}!</b> {nudge}
-          </div>
         </div>
         {quest ? (
           <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 28, padding: 0, marginTop: 0, alignItems: 'stretch' }}>
@@ -1259,7 +1255,19 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12, position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+        {/* Luna delivers the personalized nudge */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, maxWidth: 640 }}>
+          <span style={{ width: 52, height: 52, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center', boxShadow: '0 4px 12px rgba(53,195,232,.35)' }}>
+            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+              <img src={BRAND.luna} alt="Luna" style={{ height: 38 }} />
+            </span>
+          </span>
+          <div style={{ position: 'relative', background: '#fff', border: '1.5px solid #c7e0f2', borderRadius: '4px 16px 16px 16px', padding: '10px 16px',
+            fontSize: 13.5, fontWeight: 700, color: '#28536e', lineHeight: 1.45, boxShadow: '0 6px 18px rgba(13,47,85,.12)' }}>
+            <b style={{ color: '#0d2f55' }}>Hi Kayla!</b> {nudge}
+          </div>
+        </div>
         <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
           border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
           {[['home', '🏠 Home'], ['assignments', '📋 Assignments'], ['data', '📊 Data & Goals']].map(([k, label]) => (
