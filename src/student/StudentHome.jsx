@@ -359,8 +359,16 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             </div>
             <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>{quest ? 'Launch Sequence' : 'Mission Control'}</div>
           </div>
-          <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
-            {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+          <div style={{ paddingBottom: 6 }}>
+            <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700 }}>
+              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+            </div>
+            {quest && (
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: '#16386b', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11 }}>{wp.stuck ? '🔓' : '🔒'}</span>
+                {wp.stuck ? 'Missions unlocked — finish all 3 in any order.' : 'Finish each mission to unlock the next.'}
+              </div>
+            )}
           </div>
           <div style={{ marginLeft: 'auto', maxWidth: 430, background: '#e5f1fb', border: '1.5px solid #c7e0f2', borderRadius: 13, padding: '10px 16px',
             fontSize: 12.5, fontWeight: 700, color: '#28536e', lineHeight: 1.45, alignSelf: 'flex-start' }}>
