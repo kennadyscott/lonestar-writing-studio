@@ -108,7 +108,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                   <button onClick={() => setStage('writing')}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#16386b', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
                       boxShadow: '0 8px 22px rgba(53,195,232,.45)', cursor: 'pointer' }}>
                     ✏️ Start Writing
                   </button>

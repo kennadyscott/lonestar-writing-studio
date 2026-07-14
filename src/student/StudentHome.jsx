@@ -78,7 +78,7 @@ function LunaNook({ modules, onLuna }) {
             </span>
           ))}
           <span style={{ flex: 1 }} />
-          <button onClick={onLuna} style={{ background: CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: '0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
+          <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
             Go to my path →
           </button>
         </div>
@@ -246,7 +246,7 @@ const MISSION_COLORS = ['#8b5cf6', '#2f8ceb', '#0b8a8f']
 
 const MISSION_GRADS = [['#8b5cf6', '#6d3fd8'], ['#2f8ceb', '#1668c4'], ['#0b8a8f', '#067276']]
 
-function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank, heroStyle = 'A' }) {
+function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank }) {
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   const quest = !!(wp?.steps && !wp.completed)
   const weekend = !wp?.steps
@@ -339,46 +339,22 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
 
   return (
     <div className="card" style={{ padding: '16px 18px 12px' }}>
-      {/* header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
-        <img src={BRAND.rocket} alt="" style={{ height: 42 }} />
-        <div style={{ flex: 1 }}>
-          <b style={{ fontSize: 18 }}>Writing Launchpad</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>
-            {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
+
+      {/* quiet heading — the cards carry the design; starfield glows behind the box */}
+      <div style={{ position: 'relative' }}>
+        <div style={{ padding: '6px 4px 22px', display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 2, color: '#c99312', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 9 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 9 }}>✦</span>
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>Launch Sequence</div>
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
+            {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
           </div>
         </div>
-      </div>
-
-      {/* hero: A = cockpit panel · B = quiet heading, cards carry the design */}
-      <div style={{ position: 'relative' }}>
-        {heroStyle === 'A' ? (
-          <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
-            background: `linear-gradient(95deg, rgba(5,12,40,.85) 0%, rgba(5,12,40,.5) 40%, rgba(5,12,40,.05) 70%), url(${import.meta.env.BASE_URL || '/'}hero-cockpit.jpg) center 40% / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
-            <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
-            </div>
-            <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
-            <div style={{ fontSize: 14, color: '#cdddf5' }}>
-              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
-            </div>
-          </div>
-        ) : (
-          <div style={{ padding: '6px 4px 22px', display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 2, color: '#c99312', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 9 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 9 }}>✦</span>
-              </div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>Launch Sequence</div>
-            </div>
-            <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
-              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
-            </div>
-          </div>
-        )}
-
         {quest ? (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: heroStyle === 'B' ? 28 : 24, padding: heroStyle === 'B' ? 0 : '0 20px', marginTop: heroStyle === 'B' ? 0 : -70, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 28, padding: 0, marginTop: 0, alignItems: 'stretch' }}>
             {wp.steps.map((t, i) => {
               const done = wp.done[i]
               const current = i === curIdx || (wp.stuck && !done)
@@ -387,15 +363,15 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
                   status={done ? 'done' : current ? 'current' : 'future'}
                   note={wp.stuck && wp.stuckStep === t && !done ? '😵 Flagged stuck — help is on the way' : null}
                   onStuckLink={!wp.stuck && i === curIdx ? onStuck : null}
-                  ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} big={heroStyle === 'B'} />
+                  ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} big />
               )
             })}
           </div>
         ) : (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: heroStyle === 'B' ? 28 : 24, padding: heroStyle === 'B' ? 0 : '0 20px', marginTop: heroStyle === 'B' ? 0 : -70, alignItems: 'stretch' }}>
-            <TaskCard big={heroStyle === 'B'} meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
-            <TaskCard big={heroStyle === 'B'} meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
-            <TaskCard big={heroStyle === 'B'} meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 28, padding: 0, marginTop: 0, alignItems: 'stretch' }}>
+            <TaskCard big meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
+            <TaskCard big meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
+            <TaskCard big meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
           </div>
         )}
       </div>
@@ -489,7 +465,7 @@ function PathCelebration({ wp, streak, onClose }) {
 
         <button onClick={onClose}
           style={{ width: '100%', padding: '16px 0', borderRadius: 14, fontSize: 16.5, fontWeight: 800, letterSpacing: .3, color: '#fff',
-            background: `linear-gradient(120deg, ${CARD_PURPLE}, #1e5a94)`, boxShadow: '0 8px 24px rgba(53,195,232,.5)', cursor: 'pointer',
+            background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 8px 24px rgba(53,195,232,.5)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           🚀 Take me to Mission Control <span>→</span>
         </button>
@@ -532,7 +508,7 @@ function StuckModal({ teacher, stepLabel, onClose }) {
           </div>
         </div>
         <button onClick={onClose}
-          style={{ width: '100%', padding: '14px 0', borderRadius: 12, fontSize: 15.5, fontWeight: 800, color: '#fff', background: `linear-gradient(120deg, ${CARD_PURPLE}, #1e5a94)`, boxShadow: '0 6px 18px rgba(53,195,232,.5)', cursor: 'pointer' }}>
+          style={{ width: '100%', padding: '14px 0', borderRadius: 12, fontSize: 15.5, fontWeight: 800, color: '#fff', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 6px 18px rgba(53,195,232,.5)', cursor: 'pointer' }}>
           Got it — show me my open missions →
         </button>
       </div>
@@ -561,22 +537,14 @@ function PathRibbon({ wp, onResume }) {
 }
 
 /* ---- demo-only: scrub through the week ---- */
-function DemoWeekStrip({ wp, onPick, hero, onHero }) {
+function DemoWeekStrip({ wp, onPick }) {
   const realDow = new Date().getDay()
   const effective = wp?.day ?? realDow
   const days = [[1, 'Monday'], [2, 'Tuesday'], [3, 'Wednesday'], [4, 'Thursday'], [5, 'Friday'], [0, '🏖️ Weekend']]
   return (
     <div style={{ marginTop: 26, border: '2px dashed #c3d5e4', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: 'rgba(255,255,255,.6)' }}>
       <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>🎛️ Demo · preview the week</span>
-      <span style={{ display: 'inline-flex', gap: 5, alignItems: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)' }}>Hero:</span>
-        {['A', 'B'].map((h) => (
-          <button key={h} onClick={() => onHero(h)}
-            style={{ padding: '6px 13px', borderRadius: 999, fontSize: 12, fontWeight: 800,
-              background: hero === h ? '#0d2f55' : '#fff', color: hero === h ? '#fff' : 'var(--teal)',
-              border: '1.5px solid ' + (hero === h ? '#0d2f55' : 'var(--line)') }}>{h}</button>
-        ))}
-      </span>
+
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
         {days.map(([d, label]) => (
           <button key={d} onClick={() => onPick(d)}
@@ -653,8 +621,8 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onS
         <button disabled={busy || (!current && !done ? true : done)} onClick={current ? onAction : undefined}
           style={{ marginTop: 12, width: '100%', padding: '12px 0', borderRadius: 12, fontWeight: 800, fontSize: 13.5, letterSpacing: .6, textTransform: 'uppercase',
             color: done ? 'var(--good)' : current ? '#fff' : '#9db0c0',
-            background: done ? '#e6f6ee' : current ? CARD_PURPLE : '#eef0f6',
-            boxShadow: current ? '0 6px 18px rgba(53,195,232,.45)' : 'none', cursor: current ? 'pointer' : 'default',
+            background: done ? '#e6f6ee' : current ? 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)' : '#eef0f6',
+            boxShadow: current ? 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 6px 18px rgba(53,195,232,.45)' : 'none', cursor: current ? 'pointer' : 'default',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {done ? '✓ Done!' : current ? <>{ctaLabel} <span>→</span></> : `After Mission ${number - 1}`}
         </button>
@@ -1138,8 +1106,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
   const [stuckOpen, setStuckOpen] = useState(false)
-  const [heroStyle, setHeroStyle] = useState(() => localStorage.getItem('heroStyle') || 'A')
-  const pickHero = (h) => { localStorage.setItem('heroStyle', h); setHeroStyle(h) }
+
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -1284,11 +1251,14 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         <h1 className="page" style={{ margin: 0, fontSize: 21, lineHeight: 1.35, maxWidth: 720 }}>
           Hi Kayla! <span style={{ fontWeight: 700, color: '#28536e' }}>{nudge}</span>
         </h1>
-        <div style={{ display: 'inline-flex', background: '#dcebf3', borderRadius: 12, padding: 4 }}>
+        <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
+          border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
           {[['home', '🏠 Home'], ['assignments', '📋 Assignments'], ['data', '📊 Data & Goals']].map(([k, label]) => (
             <button key={k} onClick={() => setHomeTab(k)}
-              style={{ padding: '9px 18px', borderRadius: 9, fontSize: 13.5, fontWeight: 800,
-                background: homeTab === k ? '#0d2f55' : 'transparent', color: homeTab === k ? '#fff' : 'var(--teal)' }}>
+              style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14.5, fontWeight: 800,
+                background: homeTab === k ? 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)' : 'transparent',
+                color: homeTab === k ? '#fff' : '#16386b',
+                boxShadow: homeTab === k ? 'inset 0 1.5px 0 rgba(255,255,255,.3), 0 4px 12px rgba(13,47,85,.3)' : 'none' }}>
               {label}
             </button>
           ))}
@@ -1297,10 +1267,8 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (<>
-      {heroStyle === 'B' && (
-        <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-          background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
-      )}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       {celebrate && (
         <PathCelebration wp={wp} streak={gs?.streakDays ?? 0} onClose={() => setCelebrate(false)} />
       )}
@@ -1314,7 +1282,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       {pathLocked ? (
         /* QUEST — the Launch Sequence */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
-          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck} heroStyle={heroStyle}
+          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck}
             onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
@@ -1333,7 +1301,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         </div>
       )}
 
-      <DemoWeekStrip wp={wp} onPick={pickDemoDay} hero={heroStyle} onHero={pickHero} />
+      <DemoWeekStrip wp={wp} onPick={pickDemoDay} />
       </>)}
 
       {/* ================= ASSIGNMENTS ================= */}
