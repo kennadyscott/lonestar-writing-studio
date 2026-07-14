@@ -262,7 +262,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
   const featureFor = (t, gamesPlayed) => ({
     quickwrite: (
       <div style={{ textAlign: 'left' }}>
-        <span style={{ display: 'inline-block', background: CARD_PURPLE, color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 1.2, borderRadius: '8px 8px 0 0', padding: '4px 12px' }}>💬 TODAY'S PROMPT</span>
+        <span style={{ display: 'inline-block', background: 'linear-gradient(120deg,#e0a51c,#c98a08)', color: '#fff', fontSize: 10, fontWeight: 800, letterSpacing: 1.2, borderRadius: '8px 8px 0 0', padding: '4px 12px' }}>💬 TODAY'S PROMPT</span>
         <div style={{ background: '#f3f0fd', border: `1.5px solid ${CARD_PURPLE}33`, borderRadius: '0 12px 12px 12px', padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
           <span style={{ fontFamily: 'Georgia,serif', fontSize: 30, lineHeight: .9, color: CARD_PURPLE }}>“</span>
           <b style={{ fontSize: 14.5, color: '#241d5e', lineHeight: 1.35 }}>{qp ? qp.title : 'A fresh prompt each day'}</b>
@@ -358,8 +358,8 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
           background: `linear-gradient(95deg, rgba(7,16,48,.94) 0%, rgba(7,16,48,.72) 38%, rgba(7,16,48,.22) 66%, rgba(7,16,48,.05) 100%), url(${BRAND.launchBg}) right center / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#7fd4ff', textTransform: 'uppercase' }}>
-            {quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}
+          <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
           </div>
           <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
           <div style={{ fontSize: 14, color: '#cdddf5' }}>
@@ -376,6 +376,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
                 <TaskCard key={t} meta={STEP_META[t]} feature={featureFor(t, Math.min(wp.gamesPlayed, 2))} number={i + 1}
                   status={done ? 'done' : current ? 'current' : 'future'}
                   note={wp.stuck && wp.stuckStep === t && !done ? '😵 Flagged stuck — help is on the way' : null}
+                  onStuckLink={!wp.stuck && i === curIdx ? onStuck : null}
                   ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} />
               )
             })}
@@ -580,18 +581,25 @@ function DemoWeekStrip({ wp, onPick }) {
 
 /* ---- unified task card: illustration, badge, plain title + accent, desc, details, CTA ---- */
 const CARD_PURPLE = '#6455e0'
-function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, busy }) {
+function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onStuckLink, busy }) {
   const done = status === 'done'
   const current = status === 'current' || status === 'free'
   const future = status === 'future'
   return (
     <div style={{ position: 'relative', background: '#fff', borderRadius: 20, display: 'flex', flexDirection: 'column',
-      border: done ? '2px solid #7ccfa4' : current && status !== 'free' ? `2px solid ${CARD_PURPLE}` : '2px solid #2b2361',
-      boxShadow: current && status !== 'free' ? `0 12px 30px ${CARD_PURPLE}45` : '0 8px 20px rgba(30,25,80,.14)',
+      border: done ? '2px solid #7ccfa4' : current && status !== 'free' ? '2.5px solid #f0b429' : '2px solid #2b2361',
+      boxShadow: current && status !== 'free' ? '0 12px 32px rgba(240,180,41,.4), 0 0 0 5px rgba(245,197,66,.22)' : '0 8px 20px rgba(30,25,80,.14)',
       filter: future ? 'saturate(.5) opacity(.75)' : 'none', overflow: 'visible' }}>
+      {current && !done && status !== 'free' && (
+        <>
+          <span style={{ position: 'absolute', top: -10, right: 14, color: '#f5c542', fontSize: 16, zIndex: 3, textShadow: '0 0 8px rgba(245,197,66,.8)' }}>✦</span>
+          <span style={{ position: 'absolute', bottom: 26, left: -9, color: '#f5c542', fontSize: 11, zIndex: 3, textShadow: '0 0 6px rgba(245,197,66,.8)' }}>✦</span>
+        </>
+      )}
       {number != null && (
         <span style={{ position: 'absolute', top: -14, left: -14, width: 38, height: 38, borderRadius: '50%', display: 'grid', placeItems: 'center', zIndex: 3,
-          background: done ? 'var(--good)' : CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 17, border: '3px solid #fff', boxShadow: '0 4px 12px rgba(30,25,80,.35)' }}>
+          background: done ? 'var(--good)' : current ? 'linear-gradient(135deg,#f5c542,#e89a00)' : CARD_PURPLE, color: '#fff', fontWeight: 800, fontSize: 17, border: '3px solid #fff',
+          boxShadow: current && !done ? '0 4px 14px rgba(232,154,0,.6)' : '0 4px 12px rgba(30,25,80,.35)' }}>
           {done ? '✓' : number}
         </span>
       )}
@@ -611,7 +619,8 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, bus
       </div>
       {/* circular badge bridging the zones */}
       <span style={{ alignSelf: 'center', marginTop: -26, width: 52, height: 52, borderRadius: '50%', display: 'grid', placeItems: 'center', zIndex: 2,
-        background: done ? 'var(--good)' : CARD_PURPLE, border: '4px solid #fff', fontSize: 22, boxShadow: '0 4px 12px rgba(30,25,80,.3)' }}>
+        background: done ? 'var(--good)' : CARD_PURPLE, border: current && !done && status !== 'free' ? '4px solid #f5c542' : '4px solid #fff', fontSize: 22,
+        boxShadow: current && !done && status !== 'free' ? '0 0 16px rgba(245,197,66,.65)' : '0 4px 12px rgba(30,25,80,.3)' }}>
         {done ? '✓' : meta.badge}
       </span>
       {/* content */}
@@ -634,6 +643,12 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, bus
           {done ? '✓ Done!' : current ? <>{ctaLabel} <span>→</span></> : `After Mission ${number - 1}`}
         </button>
         {note && <div style={{ fontSize: 11.5, fontWeight: 800, color: '#b3641d', marginTop: 8 }}>{note}</div>}
+        {onStuckLink && (
+          <button onClick={onStuckLink} disabled={busy}
+            style={{ marginTop: 8, fontSize: 11.5, fontWeight: 800, color: '#b3641d', textDecoration: 'underline', textUnderlineOffset: 3, background: 'none', cursor: 'pointer' }}>
+            😵 I'm stuck on this — open my other missions
+          </button>
+        )}
       </div>
     </div>
   )
