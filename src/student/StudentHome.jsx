@@ -338,40 +338,33 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
   ]
 
   return (
-    <div className="card" style={{ padding: '14px 18px 12px' }}>
-
-      {/* space hero — the transparent strip IS the header; robot pops beside it */}
-      <div style={{ position: 'relative' }}>
-        <div style={{ position: 'relative' }}>
-          <img src={`${import.meta.env.BASE_URL || '/'}hero-robot.png`} alt="" style={{ width: '100%', display: 'block' }} />
-          {/* launchpad header floats in the transparent strip, left of the robot */}
-          <div style={{ position: 'absolute', left: '1%', top: 0, height: '31%', width: '58%', display: 'flex', alignItems: 'center', gap: 14, padding: '0 10px' }}>
-            <img src={BRAND.rocket} alt="" style={{ height: 'clamp(34px, 4.2vw, 58px)' }} />
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 'clamp(17px, 2vw, 27px)', fontWeight: 800, color: '#10294a', lineHeight: 1.1 }}>
-                Writing Launchpad <span style={{ color: '#f0b429', fontSize: 'clamp(11px, 1.2vw, 16px)', verticalAlign: 'middle' }}>✦</span>
-              </div>
-              <div style={{ fontSize: 'clamp(11.5px, 1.15vw, 15px)', color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>
-                {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
-              </div>
-            </div>
+    <div className="card" style={{ padding: '16px 18px 12px' }}>
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
+        <img src={BRAND.rocket} alt="" style={{ height: 42 }} />
+        <div style={{ flex: 1 }}>
+          <b style={{ fontSize: 18 }}>Writing Launchpad</b>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>
+            {quest ? 'Your daily writing path. One mission at a time.' : weekend ? 'Mission Control is open — no missions today.' : 'Missions complete — free flight!'}
           </div>
-          <span style={{ position: 'absolute', left: '46%', top: '9%', color: '#f0b429', fontSize: 13 }}>✦</span>
-          <span style={{ position: 'absolute', left: '52%', top: '20%', color: '#35c3e8', fontSize: 9 }}>✦</span>
-          <span style={{ position: 'absolute', left: '2.5%', top: '24%', color: '#c9d8ea', fontSize: 10 }}>✦</span>
-          <div style={{ position: 'absolute', left: '3.4%', top: '40%', color: '#fff' }}>
-            <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, textShadow: '0 1px 8px rgba(0,0,0,.7)' }}>
-              <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
-            </div>
-            <div style={{ fontSize: 'clamp(20px, 2.3vw, 32px)', fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 14px rgba(0,0,0,.7)' }}>Launch Sequence</div>
-            <div style={{ fontSize: 14.5, color: '#e6edff', fontWeight: 600, textShadow: '0 1px 8px rgba(0,0,0,.65)' }}>
-              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
-            </div>
+        </div>
+      </div>
+
+      {/* space panel (real art) */}
+      <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
+          background: `linear-gradient(95deg, rgba(7,16,48,.94) 0%, rgba(7,16,48,.72) 38%, rgba(7,16,48,.22) 66%, rgba(7,16,48,.05) 100%), url(${BRAND.launchBg}) right center / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
+          <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
+          </div>
+          <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
+          <div style={{ fontSize: 14, color: '#cdddf5' }}>
+            {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
           </div>
         </div>
 
         {quest ? (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -110, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
             {wp.steps.map((t, i) => {
               const done = wp.done[i]
               const current = i === curIdx || (wp.stuck && !done)
@@ -385,7 +378,7 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
             })}
           </div>
         ) : (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -110, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
             <TaskCard meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
             <TaskCard meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
             <TaskCard meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
