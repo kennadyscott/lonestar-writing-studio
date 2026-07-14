@@ -246,7 +246,7 @@ const MISSION_COLORS = ['#8b5cf6', '#2f8ceb', '#0b8a8f']
 
 const MISSION_GRADS = [['#8b5cf6', '#6d3fd8'], ['#2f8ceb', '#1668c4'], ['#0b8a8f', '#067276']]
 
-function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank }) {
+function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStuck, onQuickWrite, onFreeWrite, onGames, onBank, heroStyle = 'A' }) {
   const day = DAY_NAMES[wp?.day ?? new Date().getDay()]
   const quest = !!(wp?.steps && !wp.completed)
   const weekend = !wp?.steps
@@ -350,21 +350,35 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
         </div>
       </div>
 
-      {/* space panel (real art) */}
+      {/* hero: A = cockpit panel · B = quiet heading, cards carry the design */}
       <div style={{ position: 'relative' }}>
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
-          background: `linear-gradient(95deg, rgba(7,16,48,.94) 0%, rgba(7,16,48,.72) 38%, rgba(7,16,48,.22) 66%, rgba(7,16,48,.05) 100%), url(${BRAND.launchBg}) right center / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
+        {heroStyle === 'A' ? (
+          <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '24px 26px 96px', color: '#fff',
+            background: `linear-gradient(95deg, rgba(5,12,40,.85) 0%, rgba(5,12,40,.5) 40%, rgba(5,12,40,.05) 70%), url(${import.meta.env.BASE_URL || '/'}hero-cockpit.jpg) center 40% / cover no-repeat, linear-gradient(115deg,#0b1e4b,#12306b)` }}>
+            <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2, color: '#ffd76b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 10 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 10 }}>✦</span>
+            </div>
+            <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
+            <div style={{ fontSize: 14, color: '#cdddf5' }}>
+              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+            </div>
           </div>
-          <div style={{ fontSize: 27, fontWeight: 800, margin: '4px 0 3px', textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>Launch Sequence</div>
-          <div style={{ fontSize: 14, color: '#cdddf5' }}>
-            {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+        ) : (
+          <div style={{ padding: '6px 4px 22px', display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 2, color: '#c99312', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 9 }}>✦</span>{quest ? `Today · ${day}` : weekend ? `${day} · Open Studio` : `Today · ${day} · Complete`}<span style={{ fontSize: 9 }}>✦</span>
+              </div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#10294a', margin: '2px 0 0' }}>Launch Sequence</div>
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, paddingBottom: 6 }}>
+              {quest ? 'Complete 3 missions to power up your day!' : weekend ? 'No missions — pick anything and fly.' : 'All 3 missions complete. Mission Control is yours!'}
+            </div>
           </div>
-        </div>
+        )}
 
         {quest ? (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: heroStyle === 'B' ? 28 : 24, padding: heroStyle === 'B' ? 0 : '0 20px', marginTop: heroStyle === 'B' ? 0 : -70, alignItems: 'stretch' }}>
             {wp.steps.map((t, i) => {
               const done = wp.done[i]
               const current = i === curIdx || (wp.stuck && !done)
@@ -373,15 +387,15 @@ function WritingLaunchpad({ state, me, wp, busy, upNext, onMission, onHow, onStu
                   status={done ? 'done' : current ? 'current' : 'future'}
                   note={wp.stuck && wp.stuckStep === t && !done ? '😵 Flagged stuck — help is on the way' : null}
                   onStuckLink={!wp.stuck && i === curIdx ? onStuck : null}
-                  ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} />
+                  ctaLabel={STEP_META[t].ctaWord} onAction={() => onMission(i)} busy={busy} big={heroStyle === 'B'} />
               )
             })}
           </div>
         ) : (
-          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24, padding: '0 20px', marginTop: -70, alignItems: 'stretch' }}>
-            <TaskCard meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
-            <TaskCard meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
-            <TaskCard meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: heroStyle === 'B' ? 28 : 24, padding: heroStyle === 'B' ? 0 : '0 20px', marginTop: heroStyle === 'B' ? 0 : -70, alignItems: 'stretch' }}>
+            <TaskCard big={heroStyle === 'B'} meta={STEP_META.quickwrite} feature={featureFor('quickwrite', null)} status="free" ctaLabel="Start Writing" onAction={onQuickWrite} busy={busy} />
+            <TaskCard big={heroStyle === 'B'} meta={STEP_META.freewrite} feature={featureFor('freewrite', null)} status="free" ctaLabel="Start a New Free Write" onAction={onFreeWrite} busy={busy} />
+            <TaskCard big={heroStyle === 'B'} meta={STEP_META.games} feature={featureFor('games', null)} status="free" ctaLabel="Play" onAction={onGames} busy={busy} />
           </div>
         )}
       </div>
@@ -547,13 +561,22 @@ function PathRibbon({ wp, onResume }) {
 }
 
 /* ---- demo-only: scrub through the week ---- */
-function DemoWeekStrip({ wp, onPick }) {
+function DemoWeekStrip({ wp, onPick, hero, onHero }) {
   const realDow = new Date().getDay()
   const effective = wp?.day ?? realDow
   const days = [[1, 'Monday'], [2, 'Tuesday'], [3, 'Wednesday'], [4, 'Thursday'], [5, 'Friday'], [0, '🏖️ Weekend']]
   return (
     <div style={{ marginTop: 26, border: '2px dashed #c3d5e4', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: 'rgba(255,255,255,.6)' }}>
       <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>🎛️ Demo · preview the week</span>
+      <span style={{ display: 'inline-flex', gap: 5, alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)' }}>Hero:</span>
+        {['A', 'B'].map((h) => (
+          <button key={h} onClick={() => onHero(h)}
+            style={{ padding: '6px 13px', borderRadius: 999, fontSize: 12, fontWeight: 800,
+              background: hero === h ? '#0d2f55' : '#fff', color: hero === h ? '#fff' : 'var(--teal)',
+              border: '1.5px solid ' + (hero === h ? '#0d2f55' : 'var(--line)') }}>{h}</button>
+        ))}
+      </span>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
         {days.map(([d, label]) => (
           <button key={d} onClick={() => onPick(d)}
@@ -574,7 +597,7 @@ function DemoWeekStrip({ wp, onPick }) {
 const CARD_PURPLE = '#16386b' // deep LoneStar navy
 const CYAN = '#35c3e8' // bright logo-script blue
 const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
-function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onStuckLink, busy }) {
+function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onStuckLink, busy, big }) {
   const done = status === 'done'
   const current = status === 'current' || status === 'free'
   const future = status === 'future'
@@ -597,7 +620,7 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onS
         </span>
       )}
       {/* illustration zone */}
-      <div style={{ position: 'relative', height: 108, borderRadius: '17px 17px 0 0', overflow: 'hidden',
+      <div style={{ position: 'relative', height: big ? 158 : 108, borderRadius: '17px 17px 0 0', overflow: 'hidden',
         background: meta.art
           ? `url(${import.meta.env.BASE_URL || '/'}${meta.art}) center 32% / cover no-repeat`
           : 'radial-gradient(ellipse at 75% 20%, rgba(120,90,220,.55) 0%, transparent 55%), linear-gradient(160deg,#251c52,#3d2f80)' }}>
@@ -618,9 +641,9 @@ function TaskCard({ meta, feature, number, status, note, ctaLabel, onAction, onS
       </span>
       {/* content */}
       <div style={{ padding: '10px 16px 14px', display: 'flex', flexDirection: 'column', flex: 1, textAlign: 'center' }}>
-        <div style={{ fontWeight: 800, fontSize: 15.5, letterSpacing: .4, textTransform: 'uppercase', color: '#1c1650', lineHeight: 1.2 }}>{meta.label}</div>
+        <div style={{ fontWeight: 800, fontSize: big ? 17.5 : 15.5, letterSpacing: .4, textTransform: 'uppercase', color: '#1c1650', lineHeight: 1.2 }}>{meta.label}</div>
         <div style={{ fontSize: 13, color: CYAN_TEXT, fontWeight: 800, marginTop: 3 }}>{meta.accent}</div>
-        <p style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, margin: '9px 0 0', fontWeight: 600 }}>{meta.desc}</p>
+        <p style={{ fontSize: big ? 13.5 : 12.5, color: '#41586b', lineHeight: 1.5, margin: '9px 0 0', fontWeight: 600 }}>{meta.desc}</p>
         <div style={{ borderTop: '1px solid var(--line)', margin: '11px 0 10px' }} />
         {/* featured content */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '2px 0' }}>
@@ -1115,6 +1138,8 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
   const [stuckOpen, setStuckOpen] = useState(false)
+  const [heroStyle, setHeroStyle] = useState(() => localStorage.getItem('heroStyle') || 'A')
+  const pickHero = (h) => { localStorage.setItem('heroStyle', h); setHeroStyle(h) }
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -1272,6 +1297,10 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (<>
+      {heroStyle === 'B' && (
+        <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+          background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
+      )}
       {celebrate && (
         <PathCelebration wp={wp} streak={gs?.streakDays ?? 0} onClose={() => setCelebrate(false)} />
       )}
@@ -1285,7 +1314,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       {pathLocked ? (
         /* QUEST — the Launch Sequence */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto' }}>
-          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck}
+          <WritingLaunchpad state={state} me={me} wp={wp} busy={busy} upNext={upNext} onMission={missionStart} onHow={() => setHow(true)} onStuck={imStuck} heroStyle={heroStyle}
             onQuickWrite={onQuickWrite} onFreeWrite={freeWrite} onGames={() => setGamePicker(true)} onBank={onBank} />
           <DailyBanner dc={dc} busy={busy} onGo={peer} locked={challengeLocked} missionsDone={missionsDone} />
         </div>
@@ -1304,7 +1333,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         </div>
       )}
 
-      <DemoWeekStrip wp={wp} onPick={pickDemoDay} />
+      <DemoWeekStrip wp={wp} onPick={pickDemoDay} hero={heroStyle} onHero={pickHero} />
       </>)}
 
       {/* ================= ASSIGNMENTS ================= */}
